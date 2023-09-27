@@ -777,6 +777,8 @@ namespace AKStreamKeeper
 
                 try
                 {
+                    GCommon.Logger.Warn(
+                        $"[{LoggerHead}]->_akStreamKeeperConfig.AkStreamWebRegisterUrl：{_akStreamKeeperConfig.AkStreamWebRegisterUrl}");
                     var httpRet = NetHelper.HttpPostRequest(_akStreamKeeperConfig.AkStreamWebRegisterUrl, null, reqData,
                         "utf-8", _akStreamKeeperConfig.HttpClientTimeoutSec * 1000);
                     _sendDataTick = DateTime.Now;

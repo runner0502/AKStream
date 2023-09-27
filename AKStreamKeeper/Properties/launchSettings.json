@@ -1,16 +1,8 @@
-﻿{
-  "$schema": "http://json.schemastore.org/launchsettings.json",
-  "iisSettings": {
-    "windowsAuthentication": false,
-    "anonymousAuthentication": true,
-    "iisExpress": {
-      "applicationUrl": "http://localhost:4970",
-      "sslPort": 44329
-    }
-  },
+{
   "profiles": {
     "IIS Express": {
       "commandName": "IISExpress",
+      "workingDirectory": "E:\\src\\AKStream\\AKStreamKeeper\\bin\\Debug\\net6.0",
       "launchBrowser": true,
       "launchUrl": "weatherforecast",
       "environmentVariables": {
@@ -19,12 +11,21 @@
     },
     "AKStreamKeeper": {
       "commandName": "Project",
-      "launchBrowser": true,
+      "workingDirectory": "E:\\src\\AKStream\\AKStreamKeeper\\bin\\Debug\\net6.0",
       "launchUrl": "weatherforecast",
-      "applicationUrl": "https://localhost:5001;http://localhost:5000",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
-      }
+      },
+      "applicationUrl": "https://localhost:5001;http://localhost:5000"
+    }
+  },
+  "$schema": "http://json.schemastore.org/launchsettings.json",
+  "iisSettings": {
+    "windowsAuthentication": false,
+    "anonymousAuthentication": true,
+    "iisExpress": {
+      "applicationUrl": "http://localhost:4970",
+      "sslPort": 44329
     }
   }
 }

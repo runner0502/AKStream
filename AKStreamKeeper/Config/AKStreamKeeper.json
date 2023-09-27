@@ -1,13 +1,13 @@
 {
   "IpV4Address": "127.0.0.1",
   "IpV6Address": "fe80::8:807:2143:28a1%5",
-  "Candidate":"127.0.0.1",
+  "Candidate": "127.0.0.1",
   "WebApiPort": 6880,
-  "MediaServerPath": "/Users/qiuzhouwei/Sources/ZLMediaKit/release/darwin/Debug/MediaServer",
+  "MediaServerPath": "E:\\src\\ZLMediaKit\\release\\windows\\Debug\\MediaServer.exe",
   "AkStreamWebRegisterUrl": "http://127.0.0.1:5800/MediaServer/WebHook/MediaServerKeepAlive",
-  "CutMergeFilePath": "/Users/qiuzhouwei/Downloads/CutMergeFile",
+  "CutMergeFilePath": "E:",
   "CustomRecordPathList": [
-    "/Users/qiuzhouwei/Downloads"
+    "E:"
   ],
   "UseSsl": false,
   "MinRtpPort": 10001,
@@ -15,7 +15,7 @@
   "MinSendRtpPort": 20002,
   "MaxSendRtpPort": 20200,
   "RandomPort": false,
-  "FFmpegPath": "/opt/homebrew/bin/ffmpeg",
+  "FFmpegPath": "E:\\ffmpeg-5.1.2-full_build\\bin\\ffmpeg.exe",
   "AccessKey": "047I4WS1-U51UBO6W-1J4BT21P-MF17IT99-92J8WIHU-944Q4KIW",
   "RtpPortCdTime": 3600,
   "HttpClientTimeoutSec": 5,
@@ -23,5 +23,5 @@
   "CheckLinuxDiskMount": false,
   "ZLMediakitSSLFilePath": "./sslfiles/",
   "ListenIp": "127.0.0.1",
-  "EnableRtspAuth": true
+  "EnableRtspAuth": false
 }

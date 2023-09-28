@@ -1602,6 +1602,18 @@ namespace AKStreamWeb.Services
             if (videoChannel.DeviceStreamType == DeviceStreamType.GB28181)
             {
                 var r3 = SipServerService.LiveVideo(videoChannel.DeviceId, videoChannel.ChannelId, out rs);
+
+                //Timer keepTimer = new Timer((a) => {
+                                //    ResponseStruct rs2;
+                                //    ReqPtzCtrl req1 = new ReqPtzCtrl();
+                                //    req1.ChannelId = videoChannel.ChannelId;
+                                //    req1.DeviceId = videoChannel.DeviceId;
+                                //    req1.PtzCommandType = PTZCommandType.Up;
+                
+                                //    SipServerService.PtzCtrl(req1, out rs2);
+                                //});
+                                //keepTimer.Change(1000, 3000);
+
                 if (r3 == null || !rs.Code.Equals(ErrorNumber.None))
                 {
                     GCommon.Logger.Warn(
@@ -2503,7 +2515,7 @@ namespace AKStreamWeb.Services
 
                 reqZlMediaKitOpenRtpPort = new ReqZLMediaKitOpenRtpPort()
                 {
-                    Enable_Tcp = 1,
+                    Enable_Tcp = 0,
                     Port = rtpPortGuess,
                     Stream_Id = stream,
                 };
@@ -2512,7 +2524,7 @@ namespace AKStreamWeb.Services
             {
                 reqZlMediaKitOpenRtpPort = new ReqZLMediaKitOpenRtpPort()
                 {
-                    Enable_Tcp = 1,
+                    Enable_Tcp = 0,
                     Port = 0,
                     Stream_Id = stream,
                 };

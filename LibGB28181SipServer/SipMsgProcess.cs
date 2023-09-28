@@ -357,10 +357,12 @@ namespace LibGB28181SipServer
                                 OnKeepaliveReceived?.Invoke(sipDeviceId, time, tmpSipDevice.KeepAliveLostTime);
                             }); //抛线程出去处理
 
+
                             if (tmpSipDevice.KeepAliveTime != null)//获取设备的实际心跳周期
                             {
                                 tmpSipDevice.KeepAliveTimeSpentMS = (time - tmpSipDevice.KeepAliveTime).TotalMilliseconds;
                             }
+
 
                             tmpSipDevice.KeepAliveTime = time;
                             if (tmpSipDevice.RemoteEndPoint != null &&
@@ -903,7 +905,7 @@ namespace LibGB28181SipServer
 
             SIPRequest req = SIPRequest.GetRequest(SIPMethodsEnum.ACK, sipResponse.Header.To.ToURI,
                 new SIPToHeader(to.ToName, to.ToURI, to.ToTag),
-                new SIPFromHeader("", from.FromURI, from.FromTag));
+                new SIPFromHeader(null, from.FromURI, from.FromTag));
             req.Header.Contact = new List<SIPContactHeader>()
                 { new SIPContactHeader(sipResponse.Header.From.FromName, sipResponse.Header.From.FromURI) };
             req.Header.UserAgent = ConstString.SIP_USERAGENT_STRING;

@@ -1,5 +1,5 @@
 {
-  "SipIpAddress": "0.0.0.0",
+  "SipIpAddress": "172.19.2.165",
   "SipIpV6Address": "fe80::8:807:2143:28a1%5",
   "ServerSipDeviceId": "33020000021180000001",
   "SipPort": 5060,
@@ -8,18 +8,18 @@
   "Authentication": true,
   "SipUsername": "admin",
   "SipPassword": "123#@!qwe",
-  "MsgProtocol": "TCP",
+  "MsgProtocol": "UDP",
   "KeepAliveInterval": 30,
   "KeepAliveLostNumber": 3,
   "IpV6Enable": true,
   "EncodingType": "UTF8",
-  "IsPassive": true,
-  "ListenIp" : "0.0.0.0",
+  //"IsPassive": false,
+  "ListenIp": "172.19.2.165",
   "NoAuthenticationRequireds": [
     {
-      "IpV4Address": "192.168.2.92",
+      "IpV4Address": "172.19.2.165",
       "IpV6Address": "fe80::8:807:2143:28a1%5",
-      "DeviceId": "33020000021180000001"
+      "DeviceId": "33020000021180000006"
     }
   ]
 }

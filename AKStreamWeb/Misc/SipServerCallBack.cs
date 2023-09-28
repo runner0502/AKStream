@@ -22,7 +22,7 @@ namespace AKStreamWeb.Misc
         /// <returns>返回此设备的密钥</returns>
         public static string OnAuthentication(string sipDeviceId)
         {
-            return null;
+            return "123456";
         }
 
         public static void OnRegister(string sipDeviceJson)

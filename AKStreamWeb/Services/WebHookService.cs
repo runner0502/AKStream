@@ -691,7 +691,7 @@ namespace AKStreamWeb.Services
                         };
                     }
 
-                    if (videoChannel.Enabled == false || videoChannel.MediaServerId.Contains("unknown_server"))
+                    if (videoChannel.Enabled == false || videoChannel.MediaServerId.Contains("unknown_server1"))
                     {
                         return new ResToWebHookOnStreamChange()
                         {
@@ -787,7 +787,7 @@ namespace AKStreamWeb.Services
                                 rtpPort = GCommon.Ldb.VideoOnlineInfo.FindOne(x =>
                                         x.MediaServerId.Equals(videoChannel.MediaServerId) &&
                                         x.MainId.Equals(videoChannel.MainId))
-                                    .MediaServerStreamInfo!.RptPort;
+                                    .MediaServerStreamInfo!.RptPort; 
                             }
 
                             if (rtpPort != null && rtpPort > 0)
@@ -994,7 +994,7 @@ namespace AKStreamWeb.Services
                     };
                 }
 
-                if (videoChannel.Enabled == false || videoChannel.MediaServerId.Contains("unknown_server"))
+                if (videoChannel.Enabled == false || videoChannel.MediaServerId.Contains("unknown_server1"))
                 {
                     return new ResToWebHookOnPublish()
                     {

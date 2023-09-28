@@ -590,6 +590,7 @@ namespace SIPSorcery.Net
         /// <returns>A task that when complete contains the SDP offer.</returns>
         public virtual SDP CreateOffer(IPAddress connectionAddress)
         {
+            connectionAddress = IPAddress.Parse("172.19.2.165");
             if (AudioLocalTrack == null && VideoLocalTrack == null)
             {
                 logger.LogWarning("No local media tracks available for create offer.");

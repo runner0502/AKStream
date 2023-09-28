@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using System.Threading;
+using System.Timers;
 using AKStreamWeb.Attributes;
 using AKStreamWeb.Services;
 using LibCommon;
@@ -160,6 +162,8 @@ namespace AKStreamWeb.Controllers
             return ret;
         }
 
+        System.Threading.Timer keepTimer;
+
         /// <summary>
         /// 请求gb28181直播流
         /// </summary>
@@ -174,8 +178,23 @@ namespace AKStreamWeb.Controllers
         public MediaServerStreamInfo LiveVideo(
             [FromHeader(Name = "AccessKey")] string AccessKey, string deviceId, string channelId, ushort? rtpPort = 0)
         {
+
+            //keepTimer = new System.Threading.Timer((a) => {
+            //    ResponseStruct rs2;
+            //    ReqPtzCtrl req1 = new ReqPtzCtrl();
+            //    req1.ChannelId = channelId;
+            //    req1.DeviceId = deviceId;
+            //    req1.PtzCommandType = LibCommon.Enums.PTZCommandType.Up;
+
+            //    SipServerService.PtzCtrl(req1, out rs2);
+            //});
+            //keepTimer.Change(0, 2000);
+
             ResponseStruct rs;
             var ret = SipServerService.LiveVideo(deviceId, channelId, out rs, rtpPort);
+
+
+
             if (!rs.Code.Equals(ErrorNumber.None))
             {
                 throw new AkStreamException(rs);

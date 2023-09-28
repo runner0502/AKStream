@@ -527,6 +527,7 @@ namespace LibGB28181SipServer
             var tmpSipDevice = Common.SipDevices.FindLast(x => x.DeviceId.Equals(sipChannel.ParentId));
             if (tmpSipDevice != null)
             {
+                pushMediaInfo.MediaServerIpAddress = "172.19.2.165";
                 var sdpConn = new SDPConnectionInformation(pushMediaInfo.MediaServerIpAddress);
                 var sdp = new SDP()
                 {
@@ -729,6 +730,8 @@ namespace LibGB28181SipServer
             return cmdStr;
         }
 
+        //int _sn = 18;
+
         public void PtzMove(PtzCtrl ptzCtrl, AutoResetEvent evnt, out ResponseStruct rs, int timeout = 5000)
         {
             rs = new ResponseStruct()
@@ -766,6 +769,7 @@ namespace LibGB28181SipServer
 
             SIPMethodsEnum method = SIPMethodsEnum.MESSAGE;
             string ptzCmdStr = GetPtzCmd(ptzCtrl.PtzCommandType, ptzCtrl.Speed);
+            //ptzCmdStr = "Send";
             PTZControl ptz = null;
             if (ptzCtrl.SipChannel != null)
             {
@@ -787,6 +791,8 @@ namespace LibGB28181SipServer
                     PTZCmd = ptzCmdStr
                 };
             }
+
+            //ptz.SN = _sn++;
 
             try
             {

@@ -45,5 +45,6 @@ namespace LibCommon.Structs.GB28181.XML
         public string DeviceID { get; set; }
 
         [XmlElement("PTZCmd")] public string PTZCmd { get; set; }
+        //[XmlElement("IFameCmd")] public string PTZCmd { get; set; }
     }
 }

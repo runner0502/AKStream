@@ -1,19 +1,22 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
+using System.Threading.Channels;
 using System.Timers;
 using AKStreamWeb.AutoTask;
 using AKStreamWeb.Misc;
 using AKStreamWeb.Services;
 using LibCommon;
 using LibCommon.Structs;
-using LibCommon.Structs.DBModels;
 using LibGB28181SipClient;
 using LibGB28181SipServer;
 using LibSystemInfo;
 using LibZLMediaKitMediaServer;
 using Newtonsoft.Json;
+using XyCallLayer;
+using static XyCallLayer.SPhoneSDK;
 using JsonHelper = LibCommon.JsonHelper;
 
 namespace AKStreamWeb
@@ -246,7 +249,51 @@ namespace AKStreamWeb
             _autoLive = new AutoLive();
             _autoRecord = new AutoRecord();
             _autoTaskOther = new AutoTaskOther();
+
+
+
+            SPhoneSDK.SDKInit("172.19.2.165", 5066, 5, System.AppContext.BaseDirectory +  "pjsip.log");
+            SPhoneSDK.Regist("1.1.1.1", "admin", "admin", false, true);
+            _onIncoming =  OnIncomingCall_WithMsg;
+            SPhoneSDK.SetCallback_IncomingCall_WithMsg(_onIncoming);
+            //SPhoneSDK.SetCallback_IncomingCall(OnIncomingCall);
+            SPhoneSDK.SetDefaultVideoDevice(1);
+
+
         }
+
+        public static void OnIncomingCall_WithMsg(int callid, string number, CallState state, bool isVideo, string idsContent)
+        //public static void OnIncomingCall(int callid, string number, CallState state, bool isVideo)
+        {
+            
+            ResponseStruct rs;
+            var ret = SipServerService.LiveVideo("33020000021180000006", "34020000001320000012", out rs);
+
+
+            if (!rs.Code.Equals(ErrorNumber.None))
+            {
+                throw new AkStreamException(rs);
+            }
+
+            string url = ret.PlayUrl.Find(a => a.StartsWith("rtsp"));
+            if (!string.IsNullOrEmpty(url))
+            {
+                SetupCaptureVideoFile(url);
+
+                SPhoneSDK.VideoDeviceInfo[] VideoDeviceInfos1 = new SPhoneSDK.VideoDeviceInfo[100];
+                int len = 0;
+                SPhoneSDK.GetVideoDevices(VideoDeviceInfos1, out len);
+
+                SPhoneSDK.SetDefaultVideoDevice(len);
+                //System.Threading.Thread.Sleep(1000);
+                Answer(callid, true);
+
+            }
+
+        }
+
+        private static SDK_onIncomingCall_WithMsg _onIncoming;
+
 
         public static string Version // 版本号
         {

@@ -527,7 +527,7 @@ namespace LibGB28181SipServer
             var tmpSipDevice = Common.SipDevices.FindLast(x => x.DeviceId.Equals(sipChannel.ParentId));
             if (tmpSipDevice != null)
             {
-                pushMediaInfo.MediaServerIpAddress = "172.19.2.165";
+                pushMediaInfo.MediaServerIpAddress = "172.19.6.41";
                 var sdpConn = new SDPConnectionInformation(pushMediaInfo.MediaServerIpAddress);
                 var sdp = new SDP()
                 {

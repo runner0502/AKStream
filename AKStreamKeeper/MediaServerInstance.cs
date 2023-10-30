@@ -966,6 +966,9 @@ namespace AKStreamKeeper
                         {
                             _zlmNewConfig.Api.Secret = UtilsHelper.GeneralGuid();
                         }
+                       // _zlmNewConfig.Api.Secret = "035c73f7-bb6b-4889-a715-d9eb2d1925cc";
+                        //_zlmNewConfig.Api.Secret = "";
+
 
                         var ok = _zlmNewConfig.SetConfig(_configPath);
                         var parser = new FileIniDataParser();
@@ -994,6 +997,8 @@ namespace AKStreamKeeper
                             data["ffmpeg_templete"]["ffmpeg2flv"] =
                                 $"%s -re  -i %s -vcodec copy -acodec copy -f flv -y  %s";
                         }
+
+                        //data["api"]["secret"] = "035c73f7-bb6b-4889-a715-d9eb2d1925cc";
 
                         parser.WriteFile(_configPath, data);
 
@@ -1713,7 +1718,9 @@ namespace AKStreamKeeper
                 {
                     ret = _mediaServerProcessHelper.RunProcess(_binPath, $"-c {_configPath}");
                 }
+
             }
+
 
             if (ret != null && !ret.HasExited)
             {

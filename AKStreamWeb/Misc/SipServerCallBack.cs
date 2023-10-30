@@ -7,6 +7,7 @@ using LibCommon.Structs.GB28181.Sys;
 using LibCommon.Structs.GB28181.XML;
 using LibGB28181SipServer;
 using Newtonsoft.Json;
+using Org.BouncyCastle.Ocsp;
 
 namespace AKStreamWeb.Misc
 {
@@ -138,7 +139,7 @@ namespace AKStreamWeb.Misc
                 GCommon.Logger.Error(
                     $"[{Common.LoggerHead}]->设备目录获取失败->{sipDevice.RemoteEndPoint.Address.MapToIPv4().ToString()}-{sipDevice.DeviceId}\r\n{JsonHelper.ToJson(rs, Formatting.Indented)}");
             }
-        }
+        } 
 
         /// <summary>
         /// 收到设备目录时
@@ -166,75 +167,85 @@ namespace AKStreamWeb.Misc
 
                 #endregion
 
+
+                var obj1 = ORMHelper.Db.Select<DeviceNumber>().Where(x =>
+    x.dev.Equals(sipChannel.DeviceId) && x.fatherid.Equals(sipChannel.ParentId)).First();
+                if (obj1 == null)
+                {
+                    var deviceNumber = new DeviceNumber();
+                    deviceNumber.dev = sipChannel.DeviceId;
+                    deviceNumber.fatherid = sipChannel.ParentId;
+                    ;
+                    ORMHelper.Db.Insert(deviceNumber).ExecuteAffrows();
+                }
+
                 var obj = ORMHelper.Db.Select<VideoChannel>().Where(x =>
                     x.ChannelId.Equals(sipChannel.DeviceId) && x.DeviceId.Equals(sipChannel.ParentId) &&
                     x.DeviceStreamType.Equals(DeviceStreamType.GB28181)).First();
-                if (obj != null)
+                if (obj == null)
                 {
-                    return;
-                }
-
-                var videoChannel = new VideoChannel();
-                videoChannel.Enabled = false;
-                videoChannel.AutoRecord = false;
-                videoChannel.AutoVideo = true;
-                videoChannel.ChannelId = sipChannel.DeviceId;
-                if (sipChannel.SipChannelDesc != null && !string.IsNullOrEmpty(sipChannel.SipChannelDesc.Name))
-                {
-                    videoChannel.ChannelName = sipChannel.SipChannelDesc.Name.Trim();
-                }
-                else
-                {
-                    videoChannel.ChannelName = sipChannel.DeviceId;
-                }
-
-                videoChannel.CreateTime = DateTime.Now;
-                videoChannel.App = "rtp";
-                videoChannel.Vhost = "__defaultVhost__";
-                videoChannel.DepartmentId = "";
-                videoChannel.DepartmentName = "";
-                videoChannel.DeviceId = sipChannel.ParentId;
-                videoChannel.HasPtz = false;
-                videoChannel.UpdateTime = DateTime.Now;
-                videoChannel.DeviceNetworkType = DeviceNetworkType.Fixed;
-                videoChannel.DeviceStreamType = DeviceStreamType.GB28181;
-                videoChannel.DefaultRtpPort = false;
-                videoChannel.IpV4Address = sipChannel.RemoteEndPoint.Address.MapToIPv4().ToString();
-                videoChannel.IpV6Address = sipChannel.RemoteEndPoint.Address.MapToIPv6().ToString();
-                videoChannel.MediaServerId = $"unknown_server_{DateTime.Now.Ticks}";
-                videoChannel.NoPlayerBreak = false;
-                videoChannel.PDepartmentId = "";
-                videoChannel.PDepartmentName = "";
-                videoChannel.RtpWithTcp = false;
-                videoChannel.VideoSrcUrl = null;
-                videoChannel.RecordSecs = 0;
-                videoChannel.MethodByGetStream = MethodByGetStream.None;
-                videoChannel.MainId = sipChannel.Stream;
-                videoChannel.VideoDeviceType = VideoDeviceType.UNKNOW;
-                try
-                {
-                    #region debug sql output
-
-                    if (Common.IsDebug)
+                    var videoChannel = new VideoChannel();
+                    videoChannel.Enabled = false;
+                    videoChannel.AutoRecord = false;
+                    videoChannel.AutoVideo = true;
+                    videoChannel.ChannelId = sipChannel.DeviceId;
+                    if (sipChannel.SipChannelDesc != null && !string.IsNullOrEmpty(sipChannel.SipChannelDesc.Name))
                     {
-                        var sql = ORMHelper.Db.Insert(videoChannel).ToSql();
-
-                        GCommon.Logger.Debug(
-                            $"[{Common.LoggerHead}]->OnCatalogReceived->执行SQL:->{sql}");
+                        videoChannel.ChannelName = sipChannel.SipChannelDesc.Name.Trim();
+                    }
+                    else
+                    {
+                        videoChannel.ChannelName = sipChannel.DeviceId;
                     }
 
-                    #endregion
-
-                    var ret = ORMHelper.Db.Insert(videoChannel).ExecuteAffrows();
-                    if (ret > 0)
+                    videoChannel.CreateTime = DateTime.Now;
+                    videoChannel.App = "rtp";
+                    videoChannel.Vhost = "__defaultVhost__";
+                    videoChannel.DepartmentId = "";
+                    videoChannel.DepartmentName = "";
+                    videoChannel.DeviceId = sipChannel.ParentId;
+                    videoChannel.HasPtz = false;
+                    videoChannel.UpdateTime = DateTime.Now;
+                    videoChannel.DeviceNetworkType = DeviceNetworkType.Fixed;
+                    videoChannel.DeviceStreamType = DeviceStreamType.GB28181;
+                    videoChannel.DefaultRtpPort = false;
+                    videoChannel.IpV4Address = sipChannel.RemoteEndPoint.Address.MapToIPv4().ToString();
+                    videoChannel.IpV6Address = sipChannel.RemoteEndPoint.Address.MapToIPv6().ToString();
+                    videoChannel.MediaServerId = $"unknown_server_{DateTime.Now.Ticks}";
+                    videoChannel.NoPlayerBreak = false;
+                    videoChannel.PDepartmentId = "";
+                    videoChannel.PDepartmentName = "";
+                    videoChannel.RtpWithTcp = false;
+                    videoChannel.VideoSrcUrl = null;
+                    videoChannel.RecordSecs = 0;
+                    videoChannel.MethodByGetStream = MethodByGetStream.None;
+                    videoChannel.MainId = sipChannel.Stream;
+                    videoChannel.VideoDeviceType = VideoDeviceType.UNKNOW;
+                    try
                     {
-                        GCommon.Logger.Debug(
-                            $"[{Common.LoggerHead}]->写入一条新的设备目录到数据库，需激活后使用->{sipChannel.RemoteEndPoint.Address.MapToIPv4().ToString()}-{sipChannel.ParentId}:{sipChannel.DeviceId}");
+                        #region debug sql output
+
+                        if (Common.IsDebug)
+                        {
+                            var sql = ORMHelper.Db.Insert(videoChannel).ToSql();
+
+                            GCommon.Logger.Debug(
+                                $"[{Common.LoggerHead}]->OnCatalogReceived->执行SQL:->{sql}");
+                        }
+
+                        #endregion
+
+                        var ret = ORMHelper.Db.Insert(videoChannel).ExecuteAffrows();
+                        if (ret > 0)
+                        {
+                            GCommon.Logger.Debug(
+                                $"[{Common.LoggerHead}]->写入一条新的设备目录到数据库，需激活后使用->{sipChannel.RemoteEndPoint.Address.MapToIPv4().ToString()}-{sipChannel.ParentId}:{sipChannel.DeviceId}");
+                        }
                     }
-                }
-                catch (Exception ex)
-                {
-                    GCommon.Logger.Error($"[{Common.LoggerHead}]->数据库写入异常->{ex.Message}\r\n{ex.StackTrace}");
+                    catch (Exception ex)
+                    {
+                        GCommon.Logger.Error($"[{Common.LoggerHead}]->数据库写入异常->{ex.Message}\r\n{ex.StackTrace}");
+                    }
                 }
             }
         }

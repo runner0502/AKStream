@@ -923,6 +923,7 @@ public class ZLMediaKitConfigNew
             }
 
             #endregion
+            //data["api"]["secret"] = "035c73f7-bb6b-4889-a715-d9eb2d1925cc";
 
             parser.WriteFile(configPath, data, Encoding.UTF8);
             return true;

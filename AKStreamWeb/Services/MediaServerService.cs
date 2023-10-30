@@ -2508,7 +2508,7 @@ namespace AKStreamWeb.Services
                 if (rtpPortGuess <= 0 || !rs.Code.Equals(ErrorNumber.None))
                 {
                     GCommon.Logger.Warn(
-                        $"[{Common.LoggerHead}]->请求开放rtp端口失败->{mediaServerId}->{stream}->{JsonHelper.ToJson(rs, Formatting.Indented)}");
+                        $"[{Common.LoggerHead}]->请求开放rtp端口失败->{mediaServerId}->{stream}->{JsonHelper.ToJson(rs, Formatting.Indented)}->{rs.ExceptMessage}");
 
                     return null;
                 }

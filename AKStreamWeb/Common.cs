@@ -252,7 +252,8 @@ namespace AKStreamWeb
 
 
 
-            SPhoneSDK.SDKInit("172.19.2.165", 5066, 5, System.AppContext.BaseDirectory +  "pjsip.log");
+            SPhoneSDK.SDKInit("172.19.6.41", 5066, 5, System.AppContext.BaseDirectory +  "pjsip.log");
+            //SPhoneSDK.SDKInit("172.19.6.41", 5066, 5, System.AppContext.BaseDirectory +  "pjsip.log");
             SPhoneSDK.Regist("1.1.1.1", "admin", "admin", false, true);
             _onIncoming =  OnIncomingCall_WithMsg;
             SPhoneSDK.SetCallback_IncomingCall_WithMsg(_onIncoming);
@@ -284,7 +285,7 @@ namespace AKStreamWeb
                 int len = 0;
                 SPhoneSDK.GetVideoDevices(VideoDeviceInfos1, out len);
 
-                SPhoneSDK.SetDefaultVideoDevice(len);
+                SPhoneSDK.SetDefaultVideoDevice(len-1);
                 //System.Threading.Thread.Sleep(1000);
                 Answer(callid, true);
 

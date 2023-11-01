@@ -252,7 +252,7 @@ namespace AKStreamWeb
 
 
 
-            SPhoneSDK.SDKInit("172.19.6.41", 5066, 5, System.AppContext.BaseDirectory +  "pjsip.log");
+            SPhoneSDK.SDKInit("0.0.0.0", 5066, 5, System.AppContext.BaseDirectory +  "pjsip.log");
             //SPhoneSDK.SDKInit("172.19.6.41", 5066, 5, System.AppContext.BaseDirectory +  "pjsip.log");
             SPhoneSDK.Regist("1.1.1.1", "admin", "admin", false, true);
             _onIncoming =  OnIncomingCall_WithMsg;

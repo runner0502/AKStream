@@ -70,5 +70,7 @@ namespace LibCommon.Structs.DBModels
         [Column(DbType = "timestamp")]
         public Timestamp modify_time { get => _modify_time; set => _modify_time = value; }
 
+        public int status { get; set; }
+
     }
 }

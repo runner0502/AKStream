@@ -29,6 +29,7 @@ namespace AKStreamWeb.Attributes
                             $@"{info}->Body: {JsonHelper.ToJson(((context.Result as ObjectResult)!).Value)}";
                         GCommon.Logger.Debug(
                             $@"[{Common.LoggerHead}]->HTTP-OUTPUT->{remoteIpAddr}->{context.HttpContext.Request.Method}->{context.HttpContext.Request.Path}->" +
+                     
                             info);
                     }
                 }

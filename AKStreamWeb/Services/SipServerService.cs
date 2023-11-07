@@ -183,18 +183,19 @@ namespace AKStreamWeb.Services
                 }
             }
 
-            if (videoChannel.MediaServerId.Contains("unknown_server"))
-            {
-                rs = new ResponseStruct()
-                {
-                    Code = ErrorNumber.Sys_VideoChannelNotActived,
-                    Message = ErrorMessage.ErrorDic![ErrorNumber.Sys_VideoChannelNotActived],
-                };
-                return false;
-            }
+            //if (videoChannel.MediaServerId.Contains("unknown_server"))
+            //{
+            //    rs = new ResponseStruct()
+            //    {
+            //        Code = ErrorNumber.Sys_VideoChannelNotActived,
+            //        Message = ErrorMessage.ErrorDic![ErrorNumber.Sys_VideoChannelNotActived],
+            //    };
+            //    return false;
+            //}
 
             string tmpId = videoChannel.MediaServerId;
-            mediaServer = Common.MediaServerList.FindLast(x => x.MediaServerId.Equals(tmpId));
+            //mediaServer = Common.MediaServerList.FindLast(x => x.MediaServerId.Equals(tmpId));
+            mediaServer = Common.MediaServerList[0];
             if (mediaServer == null)
             {
                 rs = new ResponseStruct()

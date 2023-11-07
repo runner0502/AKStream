@@ -395,16 +395,16 @@ namespace LibGB28181SipServer
                 return;
             }
 
-            if (sipChannel.SipChannelStatus != null && !sipChannel.SipChannelStatus.Equals(DevStatus.OK) &&
-                !sipChannel.SipChannelStatus.Equals(DevStatus.ON))
-            {
-                rs = new ResponseStruct()
-                {
-                    Code = ErrorNumber.Sip_Channel_StatusExcept,
-                    Message = ErrorMessage.ErrorDic![ErrorNumber.Sip_Channel_StatusExcept],
-                };
-                return;
-            }
+            //if (sipChannel.SipChannelStatus != null && !sipChannel.SipChannelStatus.Equals(DevStatus.OK) &&
+            //    !sipChannel.SipChannelStatus.Equals(DevStatus.ON))
+            //{
+            //    rs = new ResponseStruct()
+            //    {
+            //        Code = ErrorNumber.Sip_Channel_StatusExcept,
+            //        Message = ErrorMessage.ErrorDic![ErrorNumber.Sip_Channel_StatusExcept],
+            //    };
+            //    return;
+            //}
 
             if (!sipChannel.SipChannelType.Equals(SipChannelType.VideoChannel) &&
                 !sipChannel.SipChannelType.Equals(SipChannelType.AudioChannel)) //sip通道类型是否正确

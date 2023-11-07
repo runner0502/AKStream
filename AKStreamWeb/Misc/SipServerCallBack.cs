@@ -1,4 +1,5 @@
 using System;
+using Google.Protobuf.WellKnownTypes;
 using LibCommon;
 using LibCommon.Enums;
 using LibCommon.Structs.DBModels;
@@ -8,6 +9,7 @@ using LibCommon.Structs.GB28181.XML;
 using LibGB28181SipServer;
 using Newtonsoft.Json;
 using Org.BouncyCastle.Ocsp;
+using SIPSorcery.SIP;
 
 namespace AKStreamWeb.Misc
 {
@@ -109,6 +111,26 @@ namespace AKStreamWeb.Misc
             {
                 GCommon.Logger.Debug(
                     $"[{Common.LoggerHead}]->获取设备信息成功->{sipDevice.RemoteEndPoint.Address.MapToIPv4().ToString()}-{sipDevice.DeviceId}\r\n{JsonHelper.ToJson(sipDevice.DeviceInfo, Formatting.Indented)}");
+
+                var obj1 = ORMHelper.Db.Select<Device281Plat>().Where(x =>
+x.platid == sipDevice.DeviceId).First();
+                if (obj1 == null)
+                {
+                    Device281Plat plat = new Device281Plat();
+                    plat.platid = sipDevice.DeviceId;
+                    plat.platname = sipDevice.DeviceInfo.DeviceName;
+                    plat.ipaddr = sipDevice.IpAddress.ToString();
+                    plat.port = sipDevice.Port;
+                    plat.username = sipDevice.Username;
+                    plat.userpwd = sipDevice.Password;
+                    //plat.manufacturer = sipDevice.DeviceInfo.Manufacturer.ToString
+                    //if (sipDevice.DeviceStatus == DeviceStatus.)
+                    //{
+
+                    //}
+                    //plat.registestate = int.Parse(sipDevice.DeviceStatus.Status);
+                    ORMHelper.Db.Insert(plat).ExecuteAffrows();
+                }
             }
             else
             {
@@ -150,8 +172,8 @@ namespace AKStreamWeb.Misc
             GCommon.Logger.Debug(
                 $"[{Common.LoggerHead}]->收到一条设备目录通知->{sipChannel.RemoteEndPoint.Address.MapToIPv4().ToString()}-{sipChannel.ParentId}:{sipChannel.DeviceId}");
 
-            if (sipChannel.SipChannelType.Equals(SipChannelType.VideoChannel) &&
-                sipChannel.SipChannelStatus != DevStatus.OFF) //只有视频设备并且是可用状态的进数据库
+            if (sipChannel.SipChannelType.Equals(SipChannelType.VideoChannel) )
+                //&& sipChannel.SipChannelStatus != DevStatus.OFF) //只有视频设备并且是可用状态的进数据库
             {
                 #region debug sql output
 
@@ -175,6 +197,14 @@ namespace AKStreamWeb.Misc
                     var deviceNumber = new DeviceNumber();
                     deviceNumber.dev = sipChannel.DeviceId;
                     deviceNumber.fatherid = sipChannel.ParentId;
+                    deviceNumber.dev = sipChannel.SipChannelDesc.DeviceID;
+                    deviceNumber.name = sipChannel.SipChannelDesc.Name;
+                    deviceNumber.longitude = sipChannel.SipChannelDesc.LongitudeValue;
+                    deviceNumber.latitude = sipChannel.SipChannelDesc.LatitudeValue;
+                    deviceNumber.domain = sipChannel.SipChannelDesc.IPAddress;
+                    deviceNumber.modify_time = sipChannel.LastUpdateTime.ToUniversalTime().ToTimestamp();
+                    //deviceNumber.status = sipChannel.SipChannelStatus
+                    
                     ;
                     ORMHelper.Db.Insert(deviceNumber).ExecuteAffrows();
                 }
@@ -246,6 +276,23 @@ namespace AKStreamWeb.Misc
                     {
                         GCommon.Logger.Error($"[{Common.LoggerHead}]->数据库写入异常->{ex.Message}\r\n{ex.StackTrace}");
                     }
+                }
+            }
+            else
+            {
+                var obj1 = ORMHelper.Db.Select<organization>().Where(x =>
+   x.id.Equals(sipChannel.DeviceId)).First();
+                if (obj1 == null)
+                {
+                    var deviceNumber = new organization();
+                    deviceNumber.id = sipChannel.DeviceId;
+                    deviceNumber.super_id = sipChannel.ParentId;
+                    deviceNumber.name = sipChannel.SipChannelDesc.Name;
+                    deviceNumber.domain = sipChannel.SipChannelDesc.IPAddress;
+                    //deviceNumber.status = sipChannel.SipChannelStatus
+
+                    ;
+                    ORMHelper.Db.Insert(deviceNumber).ExecuteAffrows();
                 }
             }
         }

@@ -10,6 +10,7 @@ using AKStreamWeb.Misc;
 using AKStreamWeb.Services;
 using LibCommon;
 using LibCommon.Structs;
+using LibCommon.Structs.WebRequest;
 using LibGB28181SipClient;
 using LibGB28181SipServer;
 using LibSystemInfo;
@@ -257,6 +258,8 @@ namespace AKStreamWeb
             SPhoneSDK.Regist("1.1.1.1", "admin", "admin", false, true);
             _onIncoming =  OnIncomingCall_WithMsg;
             SPhoneSDK.SetCallback_IncomingCall_WithMsg(_onIncoming);
+            _onReceiveDtmf = OnReceiveDtmf;
+            SPhoneSDK.SetCallback_ReceiveDtmf(_onReceiveDtmf);
             //SPhoneSDK.SetCallback_IncomingCall(OnIncomingCall);
             SPhoneSDK.SetDefaultVideoDevice(1);
 
@@ -266,15 +269,15 @@ namespace AKStreamWeb
         public static void OnIncomingCall_WithMsg(int callid, string number, CallState state, bool isVideo, string idsContent)
         //public static void OnIncomingCall(int callid, string number, CallState state, bool isVideo)
         {
-            
             ResponseStruct rs;
             var ret = SipServerService.LiveVideo("33020000021180000006", "34020000001320000012", out rs);
-
+            //var ret = SipServerService.LiveVideo("11011200002000000001", "11010000581314000001", out rs);
 
             if (!rs.Code.Equals(ErrorNumber.None))
             {
                 throw new AkStreamException(rs);
             }
+
 
             string url = ret.PlayUrl.Find(a => a.StartsWith("rtsp"));
             if (!string.IsNullOrEmpty(url))
@@ -284,16 +287,73 @@ namespace AKStreamWeb
                 SPhoneSDK.VideoDeviceInfo[] VideoDeviceInfos1 = new SPhoneSDK.VideoDeviceInfo[100];
                 int len = 0;
                 SPhoneSDK.GetVideoDevices(VideoDeviceInfos1, out len);
-
-                SPhoneSDK.SetDefaultVideoDevice(len-1);
-                //System.Threading.Thread.Sleep(1000);
-                Answer(callid, true);
+                if (len > 0)
+                {
+                    var deviceId = VideoDeviceInfos1[len - 1].id;
+                    SPhoneSDK.SetDefaultVideoDevice(deviceId);
+                    //System.Threading.Thread.Sleep(1000);
+                    Answer(callid, true);
+                }
 
             }
 
         }
 
         private static SDK_onIncomingCall_WithMsg _onIncoming;
+        private static SDK_onReceiveDtmf _onReceiveDtmf;
+
+        public static void OnReceiveDtmf(int callid, string dtmf)
+        {
+            GCommon.Logger.Warn("OnReceiveDtmf callid: " + callid + ", dtmf: " + dtmf);
+
+            ResponseStruct rs;
+            ReqPtzCtrl cmd = new ReqPtzCtrl();
+            cmd.ChannelId = "34020000001320000012";
+            cmd.DeviceId = "33020000021180000006";
+            cmd.Speed = 100;
+            switch (dtmf)
+            {
+                case "1":
+                    cmd.PtzCommandType = LibCommon.Enums.PTZCommandType.Zoom1;
+                    break;
+                case "3":
+                    cmd.PtzCommandType = LibCommon.Enums.PTZCommandType.Zoom2;
+                    break;
+                case "7":
+                    cmd.PtzCommandType = LibCommon.Enums.PTZCommandType.Focus2;
+                    break;
+                case "9":
+                    cmd.PtzCommandType = LibCommon.Enums.PTZCommandType.Focus1;
+                    break;
+                case "5":
+                    cmd.PtzCommandType = LibCommon.Enums.PTZCommandType.Stop;
+                    break;
+                case "8":
+                    cmd.PtzCommandType = LibCommon.Enums.PTZCommandType.Up;
+                    break;
+                case "4":
+                    cmd.PtzCommandType = LibCommon.Enums.PTZCommandType.Left;
+                    break;
+                case "6":
+                    cmd.PtzCommandType = LibCommon.Enums.PTZCommandType.Right;
+                    break;
+                case "2":
+                    cmd.PtzCommandType = LibCommon.Enums.PTZCommandType.Down;
+                    break;
+                default:
+                    break;
+            }
+
+            
+            var ret = SipServerService.PtzCtrl(cmd, out rs);
+            if (!rs.Code.Equals(ErrorNumber.None))
+            {
+                throw new AkStreamException(rs);
+            }
+
+           // return ret;
+        }
+
 
 
         public static string Version // 版本号

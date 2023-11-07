@@ -14,7 +14,7 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "applicationUrl": "http://localhost:58800",
-      "nativeDebugging": true
+      "nativeDebugging": false
     }
   },
   "iisSettings": {

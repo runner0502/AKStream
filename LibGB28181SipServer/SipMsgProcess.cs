@@ -327,6 +327,8 @@ namespace LibGB28181SipServer
             SIPEndPoint remoteEndPoint,
             SIPRequest sipRequest)
         {
+            LoadOptions option = new LoadOptions();
+            
             XElement bodyXml = XElement.Parse(sipRequest.Body);
             string cmdType = bodyXml.Element("CmdType")?.Value.ToUpper()!;
             if (!string.IsNullOrEmpty(cmdType))

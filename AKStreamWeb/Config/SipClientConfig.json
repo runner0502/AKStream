@@ -11,6 +11,6 @@
   "KeepAliveLostNumber": 3,
   "SipDeviceId": "33020000021190000002",
   "Expiry": 3600,
-  "EncodingType": "UTF8",
+  "EncodingType": "GB2312",
   "AkstreamWebHttpUrl": "http://127.0.0.1:5800/SipClient"
 }

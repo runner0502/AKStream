@@ -15,7 +15,7 @@ namespace LibCommon.Structs.DBModels
         public string name { get; set; }
         public string super_id { get; set; }
 
-        public string idap { get; set; }
+        public string ldap { get; set; }
         public string domain { get; set; }
         public int order_num { get; set; }
 

@@ -12,7 +12,7 @@
   "KeepAliveInterval": 30,
   "KeepAliveLostNumber": 3,
   "IpV6Enable": true,
-  "EncodingType": "UTF8",
+  "EncodingType": "GB2312",
   //"IsPassive": false,
   "ListenIp": "172.19.2.165",
   "NoAuthenticationRequireds": [

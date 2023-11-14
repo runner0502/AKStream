@@ -17,6 +17,8 @@ namespace LibCommon.Structs.DBModels
         [Column(DbType = "varchar(45)")]
         public string dev { get => _dev; set => _dev = value; }
 
+        public string num { get; set; }
+
         private string _num;
 
         [Column(DbType = "varchar(45)")]
@@ -66,9 +68,9 @@ namespace LibCommon.Structs.DBModels
         [Column(DbType = "int(11)")]
         public int period { get => _period; set => _period = value; }
 
-        private Timestamp _modify_time;
-        [Column(DbType = "timestamp")]
-        public Timestamp modify_time { get => _modify_time; set => _modify_time = value; }
+        private DateTime _modify_time;
+        //[Column(DbType = "timestamp")]
+        public DateTime modify_time { get => _modify_time; set => _modify_time = value; }
 
         public int status { get; set; }
 

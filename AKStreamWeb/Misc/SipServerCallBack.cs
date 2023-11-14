@@ -189,20 +189,33 @@ x.platid == sipDevice.DeviceId).First();
 
                 #endregion
 
-
+                //ORMHelper.Db.Select<Device281Plat>().Where(x =>x.platid == )
+                bool isPlat = true;
+                if (sipChannel.SipChannelDesc.ParentID != sipChannel.ParentId)
+                {
+                    isPlat = false;
+                }
                 var obj1 = ORMHelper.Db.Select<DeviceNumber>().Where(x =>
-    x.dev.Equals(sipChannel.DeviceId) && x.fatherid.Equals(sipChannel.ParentId)).First();
+    x.dev.Equals(sipChannel.DeviceId) ).First();
                 if (obj1 == null)
                 {
                     var deviceNumber = new DeviceNumber();
-                    deviceNumber.dev = sipChannel.DeviceId;
-                    deviceNumber.fatherid = sipChannel.ParentId;
+                    if (isPlat)
+                    {
+                        deviceNumber.fatherid = sipChannel.SipChannelDesc.CivilCode;
+                    }
+                    else
+                    {
+                        deviceNumber.fatherid = sipChannel.ParentId;
+                    }
+                    //deviceNumber.dev = sipChannel.DeviceId;
                     deviceNumber.dev = sipChannel.SipChannelDesc.DeviceID;
+                    deviceNumber.num = sipChannel.SipChannelDesc.DeviceID;
                     deviceNumber.name = sipChannel.SipChannelDesc.Name;
                     deviceNumber.longitude = sipChannel.SipChannelDesc.LongitudeValue;
                     deviceNumber.latitude = sipChannel.SipChannelDesc.LatitudeValue;
                     deviceNumber.domain = sipChannel.SipChannelDesc.IPAddress;
-                    deviceNumber.modify_time = sipChannel.LastUpdateTime.ToUniversalTime().ToTimestamp();
+                    deviceNumber.modify_time = DateTime.Now;
                     //deviceNumber.status = sipChannel.SipChannelStatus
                     
                     ;
@@ -282,7 +295,7 @@ x.platid == sipDevice.DeviceId).First();
             {
                 var obj1 = ORMHelper.Db.Select<organization>().Where(x =>
    x.id.Equals(sipChannel.DeviceId)).First();
-                if (obj1 == null)
+                if (obj1 == null && sipChannel.ParentId != sipChannel.DeviceId)
                 {
                     var deviceNumber = new organization();
                     deviceNumber.id = sipChannel.DeviceId;

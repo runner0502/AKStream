@@ -227,5 +227,6 @@ namespace LibCommon.Structs.GB28181
         {
             Dispose(); //释放非托管资源
         }
+
     }
 }

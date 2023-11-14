@@ -50,6 +50,17 @@ namespace AKStreamWeb
             string channelId = "";
             string findStr = "t: sip:";
             int toIndex = idsContent.IndexOf(findStr);
+            if (toIndex <= 0)
+            {
+                findStr = "To: <sip:";
+                toIndex = idsContent.IndexOf(findStr);
+            }
+            if (toIndex <= 0)
+            {
+                findStr = "t: <sip:";
+                toIndex = idsContent.IndexOf(findStr);
+            }
+            
             if (toIndex > 0)
             {
                 int startIndex = toIndex + findStr.Length;
@@ -59,12 +70,37 @@ namespace AKStreamWeb
                     string to = idsContent.Substring(startIndex, endIndex - startIndex);
                     if (!to.IsNullOrEmpty())
                     {
-                        var strs = to.Split("_");
-                        if (strs != null && strs.Length == 2)
-                        {
-                            deviceId = strs[0];
-                            channelId = strs[1];
-                        }
+                        //var strs = to.Split("_");
+                        //if (strs != null && strs.Length == 2)
+                        //{
+                        //    deviceId = strs[0];
+                        //    channelId = strs[1];
+                        //}
+
+                        channelId = to;
+                    }
+                }
+            }
+
+            //var channel = ORMHelper.Db.Select<DeviceNumber>().Where(x => x.dev.Equals(channelId)).First();
+
+            //if (channel != null)
+            //{
+            //    var plat= ORMHelper.Db.Select<Device281Plat>().Where(x => x.ipaddr.Equals(channel.domain)).First();
+            //    if (plat != null)
+            //    {
+            //        deviceId = plat.platid;
+            //    }
+            //}
+
+            foreach (var device in LibGB28181SipServer.Common.SipDevices)
+            {
+                foreach (var channel in device.SipChannels)
+                {
+                    if (channel.SipChannelDesc.DeviceID == channelId)
+                    {
+                        deviceId = device.DeviceId;
+                        break;
                     }
                 }
             }
@@ -103,6 +139,10 @@ namespace AKStreamWeb
             s_calls.Add(callid, sipChannel);
 
             var ret = SipServerService.LiveVideo(deviceId, channelId, out rs);
+            if (ret == null)
+            {
+                return;
+            }
             //var ret = SipServerService.LiveVideo("11011200002000000001", "11010000581314000001", out rs);
 
             if (!rs.Code.Equals(ErrorNumber.None))
@@ -124,8 +164,22 @@ namespace AKStreamWeb
                     var deviceIdVideo = VideoDeviceInfos1[len - 1].id;
                     SPhoneSDK.SetDefaultVideoDevice(deviceIdVideo);
                     //System.Threading.Thread.Sleep(1000);
-                    Answer(callid, true);
                 }
+
+                //SetupCaptureAudioFile(url);
+
+                //AudioDeviceInfo[] audioDevices = new AudioDeviceInfo[100];
+                //SPhoneSDK.GetAudioDevices(audioDevices, out len);
+                //if (len > 0)
+                //{
+                //    var deviceIdVideo = audioDevices[len - 1].id;
+                //    SPhoneSDK.SetDefaultAudioDevice(deviceIdVideo, deviceIdVideo);
+                //    //System.Threading.Thread.Sleep(1000);
+                //}
+
+
+                Answer(callid, true);
+
 
             }
 
@@ -136,6 +190,7 @@ namespace AKStreamWeb
 
         public static void OnReceiveDtmf(int callid, string dtmf)
         {
+            dtmf = dtmf.Replace("\r", "");
             GCommon.Logger.Warn("OnReceiveDtmf callid: " + callid + ", dtmf: " + dtmf);
             var sipChannel = s_calls[callid];
             if (sipChannel == null) 

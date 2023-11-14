@@ -514,5 +514,7 @@ namespace XyCallLayer
 
         [DllImport(@"DLL\SPhone.dll")]
         public extern static int SetupCaptureVideoFile(string fileName);
+        [DllImport(@"DLL\SPhone.dll")]
+        public extern static int SetupCaptureAudioFile(string fileName);
     }
 }

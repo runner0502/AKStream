@@ -242,6 +242,7 @@ namespace XyCallLayer
         public delegate void SDK_onReceiveMsg(string from, string msg);
         public delegate void SDK_onPTTState(string state);
         public delegate void SDK_onReceiveDtmf(int callid, string dtmf);
+        public delegate void SDK_onReceiveKeyframeRequest(int callid);
 
 
         //来电回调
@@ -270,6 +271,8 @@ namespace XyCallLayer
         public extern static void SetCallback_PTTState(SDK_onPTTState callback);
         [DllImport(@"DLL\SPhone.dll")]
         public extern static void SetCallback_ReceiveDtmf(SDK_onReceiveDtmf callback);
+        [DllImport(@"DLL\SPhone.dll")]
+        public extern static void SetCallback_ReceiveKeyframeRequest(SDK_onReceiveKeyframeRequest callback);
 
         //初始化
         [DllImport(@"DLL\SPhone.dll")]

@@ -216,9 +216,24 @@ x.platid == sipDevice.DeviceId).First();
                     deviceNumber.latitude = sipChannel.SipChannelDesc.LatitudeValue;
                     deviceNumber.domain = sipChannel.SipChannelDesc.IPAddress;
                     deviceNumber.modify_time = DateTime.Now;
-                    //deviceNumber.status = sipChannel.SipChannelStatus
-                    
-                    ;
+
+                    int status = 0;
+                    //deviceNumber.status = sipChannel.SipChannelStatus;
+                    switch (sipChannel.SipChannelStatus)
+                    {
+                        case DevStatus.ON:
+                            status = 1;
+                            break;
+                        case DevStatus.OFF:
+                            status = 0;
+                            break;
+                        case DevStatus.OK:
+                            status= 1;
+                            break;
+                        default:
+                            break;
+                    }
+                    deviceNumber.status = status;
                     ORMHelper.Db.Insert(deviceNumber).ExecuteAffrows();
                 }
 

@@ -1,4 +1,4 @@
-﻿// ============================================================================
+﻿// ===========================================================================
 // FileName: SIPNotifierClient.cs
 //
 // Description:
@@ -44,7 +44,8 @@ namespace SIPSorcery.SIP.App
             MAX_SUBSCRIBE_ATTEMPTS =
                 4; // The maximum number of subscribe attempts that will be made without a failure condition before incurring a temporary failure.
 
-        private static readonly string m_filterTextType = SIPMIMETypes.MWI_TEXT_TYPE;
+        //private static readonly string m_filterTextType = SIPMIMETypes.MWI_TEXT_TYPE;
+        private static readonly string m_filterTextType = "Application/MANSCDP+xml";
 
         private static ILogger logger = Log.Logger;
 
@@ -285,7 +286,8 @@ namespace SIPSorcery.SIP.App
 
                     subscribeRequest.Header.CSeq = m_localCSeq;
                     subscribeRequest.Header.Expires = expiry;
-                    subscribeRequest.Header.Event = SIPEventPackageType.GetEventHeader(sipEventPackage);
+                    //subscribeRequest.Header.Event = SIPEventPackageType.GetEventHeader(sipEventPackage);
+                    subscribeRequest.Header.Event = "Catalog";
                     subscribeRequest.Header.CallId = subscribeCallID;
 
                     if (!m_filter.IsNullOrBlank())

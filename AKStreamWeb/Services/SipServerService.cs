@@ -1139,7 +1139,7 @@ namespace AKStreamWeb.Services
                     {
                         Stream_Id = openRtpPort.Stream,
                     };
-
+                     
                     mediaServer.WebApiHelper.CloseRtpPort(reqZlMediaKitCloseRtpPort, out _); //关掉rtp端口
                     mediaServer.KeeperWebApi.ReleaseRtpPort(
                         openRtpPort.Port,
@@ -1516,6 +1516,77 @@ namespace AKStreamWeb.Services
 
             GCommon.Logger.Info(
                 $"[{Common.LoggerHead}]->PTZ控制成功->{ptzCmd.DeviceId}-{ptzCmd.ChannelId}{JsonHelper.ToJson(ptzCmd)}");
+
+            return true;
+        }
+
+        public static bool ForceKeyframe(string deviceid, string channelid, out ResponseStruct rs)
+        {
+            rs = new ResponseStruct()
+            {
+                Code = ErrorNumber.None,
+                Message = ErrorMessage.ErrorDic![ErrorNumber.None],
+            };
+            if (UtilsHelper.StringIsNullEx(deviceid))
+            {
+                rs = new ResponseStruct()
+                {
+                    Code = ErrorNumber.Sys_ParamsIsNotRight,
+                    Message = ErrorMessage.ErrorDic![ErrorNumber.Sys_ParamsIsNotRight],
+                };
+                GCommon.Logger.Warn(
+                    $"[{Common.LoggerHead}]->强制关键帧失败->{deviceid}-{channelid}->{JsonHelper.ToJson(rs)}");
+
+                return false;
+            }
+
+
+            var tmpSipDevice = LibGB28181SipServer.Common.SipDevices.FindLast(x => x.DeviceId.Equals(deviceid));
+
+            if (tmpSipDevice == null)
+            {
+                rs = new ResponseStruct()
+                {
+                    Code = ErrorNumber.Sip_DeviceNotExists,
+                    Message = ErrorMessage.ErrorDic![ErrorNumber.Sip_DeviceNotExists],
+                };
+                GCommon.Logger.Warn(
+                    $"[{Common.LoggerHead}]->强制关键帧失败->{deviceid}-{channelid}->{JsonHelper.ToJson(rs)}");
+
+                return false;
+            }
+
+            SipChannel tmpSipChannel = null;
+            if (!UtilsHelper.StringIsNullEx(channelid))
+            {
+                tmpSipChannel = tmpSipDevice.SipChannels.FindLast(x => x.DeviceId.Equals(channelid));
+                if (tmpSipChannel == null)
+                {
+                    rs = new ResponseStruct()
+                    {
+                        Code = ErrorNumber.Sip_ChannelNotExists,
+                        Message = ErrorMessage.ErrorDic![ErrorNumber.Sip_ChannelNotExists],
+                    };
+                    GCommon.Logger.Warn(
+                        $"[{Common.LoggerHead}]->强制关键帧失败->{deviceid} - {channelid}->{JsonHelper.ToJson(rs)}");
+
+                    return false;
+                }
+            }
+
+           
+            SipMethodProxy sipMethodProxy = new SipMethodProxy(Common.AkStreamWebConfig.WaitSipRequestTimeOutMSec);
+            var ptz = sipMethodProxy.ForceKeyframe(tmpSipDevice, tmpSipChannel, out rs);
+            if (!rs.Code.Equals(ErrorNumber.None) || ptz == false)
+            {
+                GCommon.Logger.Warn(
+                    $"[{Common.LoggerHead}]->强制关键帧失败->{deviceid}-{channelid}->{JsonHelper.ToJson(rs)}");
+
+                return false;
+            }
+
+            GCommon.Logger.Info(
+                $"[{Common.LoggerHead}]->强制关键帧成功->{deviceid}-{channelid}");
 
             return true;
         }

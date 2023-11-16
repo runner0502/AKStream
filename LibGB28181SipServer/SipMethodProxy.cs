@@ -173,6 +173,28 @@ namespace LibGB28181SipServer
             }
         }
 
+        public bool ForceKeyframe(SipDevice device, SipChannel sipChannel, out ResponseStruct rs)
+        {
+            try
+            {
+                Common.SipServer.ForceKeyframe(device, sipChannel, _autoResetEvent, out rs, _timeout);
+                _commandType = CommandType.DeviceControl;
+                var isTimeout = _autoResetEvent.WaitOne(_timeout);
+                if (!isTimeout || !rs.Code.Equals(ErrorNumber.None))
+                {
+                    string timeoutStr = rs.Code == ErrorNumber.None ? "操作超时(" + _timeout + "ms)" : "未知错误";
+                    GCommon.Logger.Warn($"[{Common.LoggerHead}]->Sip代理生成关键帧失败->{JsonHelper.ToJson(rs)}->{timeoutStr}");
+                    return false;
+                }
+
+                return true;
+            }
+            finally
+            {
+                Dispose();
+            }
+        }
+
 
         /// <summary>
         /// 请求终止回放流

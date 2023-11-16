@@ -34,6 +34,9 @@ namespace AKStreamWeb
             SPhoneSDK.SetCallback_IncomingCall_WithMsg(_onIncoming);
             _onReceiveDtmf = OnReceiveDtmf;
             SPhoneSDK.SetCallback_ReceiveDtmf(_onReceiveDtmf);
+
+            _onReceiveKeyframeRequest = OnReceiveKeyframeRequest;
+            SPhoneSDK.SetCallback_ReceiveKeyframeRequest(_onReceiveKeyframeRequest);
             //SPhoneSDK.SetCallback_IncomingCall(OnIncomingCall);
             SPhoneSDK.SetDefaultVideoDevice(1);
         }
@@ -187,6 +190,7 @@ namespace AKStreamWeb
 
         private static SDK_onIncomingCall_WithMsg _onIncoming;
         private static SDK_onReceiveDtmf _onReceiveDtmf;
+        private static SDK_onReceiveKeyframeRequest _onReceiveKeyframeRequest;
 
         public static void OnReceiveDtmf(int callid, string dtmf)
         {
@@ -249,7 +253,26 @@ namespace AKStreamWeb
             // return ret;
         }
 
+        public static void OnReceiveKeyframeRequest(int callid)
+        {
+            GCommon.Logger.Warn("OnReceiveKeyframeRequest callid: " + callid);
+            var sipChannel = s_calls[callid];
+            if (sipChannel == null)
+            {
+                GCommon.Logger.Warn("OnReceiveKeyframeRequest not find sipchannel callid: " + callid );
+                return;
+            }
+            ResponseStruct rs;
 
+            var ret = SipServerService.ForceKeyframe(sipChannel.ParentId, sipChannel.DeviceId, out rs);
+            if (!rs.Code.Equals(ErrorNumber.None))
+            {
+                throw new AkStreamException(rs);
+            }
+
+            //var device = LibGB28181SipServer.Common.SipDevices.Find(x => x.DeviceId == sipChannel.ParentId);
+            //Common.SipServer.Subscribe(device, sipChannel, SIPSorcery.SIP.SIPMethodsEnum.OPTIONS, "", "", "", LibCommon.Structs.GB28181.XML.CommandType.Catalog, false, null, null, null, 100);
+        }
 
     }
 }

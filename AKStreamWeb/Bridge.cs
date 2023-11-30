@@ -157,17 +157,21 @@ namespace AKStreamWeb
             string url = ret.PlayUrl.Find(a => a.StartsWith("rtsp"));
             if (!string.IsNullOrEmpty(url))
             {
-                SetupCaptureVideoFile(url);
-
-                SPhoneSDK.VideoDeviceInfo[] VideoDeviceInfos1 = new SPhoneSDK.VideoDeviceInfo[100];
-                int len = 0;
-                SPhoneSDK.GetVideoDevices(VideoDeviceInfos1, out len);
-                if (len > 0)
+                int deviceIdVideo = SetupCaptureVideoFile(url);
+                if (deviceIdVideo > 0)
                 {
-                    var deviceIdVideo = VideoDeviceInfos1[len - 1].id;
                     SPhoneSDK.SetDefaultVideoDevice(deviceIdVideo);
-                    //System.Threading.Thread.Sleep(1000);
                 }
+
+                //SPhoneSDK.VideoDeviceInfo[] VideoDeviceInfos1 = new SPhoneSDK.VideoDeviceInfo[100];
+                //int len = 0;
+                //SPhoneSDK.GetVideoDevices(VideoDeviceInfos1, out len);
+                //if (len > 0)
+                //{
+                //    var deviceIdVideo = VideoDeviceInfos1[len - 1].id;
+                //    SPhoneSDK.SetDefaultVideoDevice(deviceIdVideo);
+                //    //System.Threading.Thread.Sleep(1000);
+                //}
 
                 //SetupCaptureAudioFile(url);
 

@@ -821,6 +821,14 @@ namespace LibGB28181SipServer
                 cmdStr += cmdItemStr.ToString("X").PadLeft(2, '0'); //10进制转换为16进制
             }
 
+            if ( ucommand == PTZCommandType.Zoom1)
+            {
+                cmdStr = "A50F4D100000F001";
+            }else if (ucommand == PTZCommandType.Zoom2)
+            {
+                cmdStr = "A50F4D200000F011";
+            }
+
             return cmdStr;
         }
 

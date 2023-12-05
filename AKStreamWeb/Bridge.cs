@@ -9,6 +9,7 @@ using LibCommon.Structs.GB28181;
 using LibZLMediaKitMediaServer;
 using System.Threading.Channels;
 using WebSocketSharp;
+using LibCommon.Structs.GB28181.XML;
 
 namespace AKStreamWeb
 {
@@ -51,7 +52,9 @@ namespace AKStreamWeb
             //string channelId = "34020000001320000012";
             string deviceId = "";
             string channelId = "";
-            string findStr = "t: sip:";
+
+        
+            string findStr = "To: sip:";
             int toIndex = idsContent.IndexOf(findStr);
             if (toIndex <= 0)
             {
@@ -63,7 +66,12 @@ namespace AKStreamWeb
                 findStr = "t: <sip:";
                 toIndex = idsContent.IndexOf(findStr);
             }
-            
+            if (toIndex <= 0)
+            {
+                findStr = "t: sip:";
+                toIndex = idsContent.IndexOf(findStr);
+            }
+
             if (toIndex > 0)
             {
                 int startIndex = toIndex + findStr.Length;

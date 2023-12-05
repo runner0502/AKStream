@@ -61,18 +61,18 @@ namespace AKStreamWeb.AutoTask
                                     if (mediaServer != null && mediaServer.IsKeeperRunning &&
                                         mediaServer.IsMediaServerRunning)
                                     {
-                                        var streamLiveRet = MediaServerService.StreamLive(obj.MediaServerId, obj.MainId,
-                                            out ResponseStruct rs);
-                                        if (!rs.Code.Equals(ErrorNumber.None) || streamLiveRet == null)
-                                        {
-                                            GCommon.Logger.Warn(
-                                                $"[{Common.LoggerHead}]->自动推流失败->{obj.MediaServerId}->{obj.MainId}");
-                                        }
-                                        else
-                                        {
-                                            GCommon.Logger.Info(
-                                                $"[{Common.LoggerHead}]->自动推流成功->{obj.MediaServerId}->{obj.MainId}");
-                                        }
+                                        //var streamLiveRet = MediaServerService.StreamLive(obj.MediaServerId, obj.MainId,
+                                        //    out ResponseStruct rs);
+                                        //if (!rs.Code.Equals(ErrorNumber.None) || streamLiveRet == null)
+                                        //{
+                                        //    GCommon.Logger.Warn(
+                                        //        $"[{Common.LoggerHead}]->自动推流失败->{obj.MediaServerId}->{obj.MainId}");
+                                        //}
+                                        //else
+                                        //{
+                                        //    GCommon.Logger.Info(
+                                        //        $"[{Common.LoggerHead}]->自动推流成功->{obj.MediaServerId}->{obj.MainId}");
+                                        //}
                                     }
                                 }
                             }

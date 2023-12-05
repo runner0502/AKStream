@@ -172,6 +172,7 @@ x.platid == sipDevice.DeviceId).First();
             GCommon.Logger.Debug(
                 $"[{Common.LoggerHead}]->收到一条设备目录通知->{sipChannel.RemoteEndPoint.Address.MapToIPv4().ToString()}-{sipChannel.ParentId}:{sipChannel.DeviceId}");
 
+           
             if (sipChannel.SipChannelType.Equals(SipChannelType.VideoChannel) )
                 //&& sipChannel.SipChannelStatus != DevStatus.OFF) //只有视频设备并且是可用状态的进数据库
             {
@@ -190,24 +191,28 @@ x.platid == sipDevice.DeviceId).First();
                 #endregion
 
                 //ORMHelper.Db.Select<Device281Plat>().Where(x =>x.platid == )
-                bool isPlat = true;
-                if (sipChannel.SipChannelDesc.ParentID != sipChannel.ParentId)
-                {
-                    isPlat = false;
-                }
+          
                 var obj1 = ORMHelper.Db.Select<DeviceNumber>().Where(x =>
     x.dev.Equals(sipChannel.DeviceId) ).First();
                 if (obj1 == null)
                 {
                     var deviceNumber = new DeviceNumber();
-                    if (isPlat)
-                    {
-                        deviceNumber.fatherid = sipChannel.SipChannelDesc.CivilCode;
-                    }
-                    else
+
+                    //bool isPlat = true;
+                    //if (sipChannel.SipChannelDesc.ParentID != sipChannel.ParentId)
+                    //{
+                    //    isPlat = false;
+                    //}
+                    if (string.IsNullOrEmpty(sipChannel.SipChannelDesc.CivilCode))
                     {
                         deviceNumber.fatherid = sipChannel.ParentId;
                     }
+                    else
+                    {
+                        deviceNumber.fatherid = sipChannel.SipChannelDesc.CivilCode;
+                    }
+
+
                     //deviceNumber.dev = sipChannel.DeviceId;
                     deviceNumber.dev = sipChannel.SipChannelDesc.DeviceID;
                     deviceNumber.num = sipChannel.SipChannelDesc.DeviceID;
@@ -243,7 +248,7 @@ x.platid == sipDevice.DeviceId).First();
                 if (obj == null)
                 {
                     var videoChannel = new VideoChannel();
-                    videoChannel.Enabled = false;
+                    videoChannel.Enabled = true;
                     videoChannel.AutoRecord = false;
                     videoChannel.AutoVideo = true;
                     videoChannel.ChannelId = sipChannel.DeviceId;
@@ -269,7 +274,8 @@ x.platid == sipDevice.DeviceId).First();
                     videoChannel.DefaultRtpPort = false;
                     videoChannel.IpV4Address = sipChannel.RemoteEndPoint.Address.MapToIPv4().ToString();
                     videoChannel.IpV6Address = sipChannel.RemoteEndPoint.Address.MapToIPv6().ToString();
-                    videoChannel.MediaServerId = $"unknown_server_{DateTime.Now.Ticks}";
+                    //videoChannel.MediaServerId = $"unknown_server_{DateTime.Now.Ticks}";
+                    videoChannel.MediaServerId = "your_server_id";
                     videoChannel.NoPlayerBreak = false;
                     videoChannel.PDepartmentId = "";
                     videoChannel.PDepartmentName = "";
@@ -312,15 +318,30 @@ x.platid == sipDevice.DeviceId).First();
    x.id.Equals(sipChannel.DeviceId)).First();
                 if (obj1 == null && sipChannel.ParentId != sipChannel.DeviceId)
                 {
-                    var deviceNumber = new organization();
-                    deviceNumber.id = sipChannel.DeviceId;
-                    deviceNumber.super_id = sipChannel.ParentId;
-                    deviceNumber.name = sipChannel.SipChannelDesc.Name;
-                    deviceNumber.domain = sipChannel.SipChannelDesc.IPAddress;
+                    var org = new organization();
+                    org.id = sipChannel.DeviceId;
+                    //if (isPlat)
+                    //{
+                    //    org.super_id = sipChannel.SipChannelDesc.CivilCode;
+                    //}
+                    //else
+                    //{
+                    //    org.super_id = sipChannel.ParentId;
+                    //}
+                    if (string.IsNullOrEmpty( sipChannel.SipChannelDesc.CivilCode))
+                    {
+                        org.super_id = sipChannel.SipChannelDesc.ParentID;
+                    }
+                    else
+                    {
+                        org.super_id = sipChannel.SipChannelDesc.CivilCode;
+                    }
+                    org.name = sipChannel.SipChannelDesc.Name;
+                    org.domain = sipChannel.SipChannelDesc.IPAddress;
                     //deviceNumber.status = sipChannel.SipChannelStatus
 
                     ;
-                    ORMHelper.Db.Insert(deviceNumber).ExecuteAffrows();
+                    ORMHelper.Db.Insert(org).ExecuteAffrows();
                 }
             }
         }

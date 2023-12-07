@@ -9,6 +9,7 @@ using LibCommon.Structs.GB28181.XML;
 using LibGB28181SipServer;
 using Newtonsoft.Json;
 using Org.BouncyCastle.Ocsp;
+using SIPSorcery.Net;
 using SIPSorcery.SIP;
 
 namespace AKStreamWeb.Misc
@@ -77,6 +78,12 @@ namespace AKStreamWeb.Misc
         {
             //设备注销时，要清掉在线流
             var sipDevice = JsonHelper.FromJson<SipDevice>(sipDeviceJson);
+            var obj1 = ORMHelper.Db.Update<Device281Plat>().Where(x =>
+x.platid == sipDevice.DeviceId).Set(x => x.registestate, 0).ExecuteAffrowsAsync();
+
+            ORMHelper.Db.Update<DeviceNumber>().Where(x =>
+x.fatherid == sipDevice.DeviceId).Set(x => x.status, 0).ExecuteAffrowsAsync();
+
             lock (GCommon.Ldb.LiteDBLockObj)
             {
                 GCommon.Ldb.VideoOnlineInfo.DeleteMany(x => x.DeviceId.Equals(sipDevice.DeviceId));
@@ -94,6 +101,17 @@ namespace AKStreamWeb.Misc
         public static void OnDeviceStatusReceived(SipDevice sipDevice, DeviceStatus deviceStatus)
         {
             //获取到设备状态时
+            int state = 0;
+            switch (deviceStatus.Status)
+            {
+                case "OK":
+                    state = 1;
+                    break;
+                default:
+                    break;
+            }
+            var obj1 = ORMHelper.Db.Update<Device281Plat>().Where(x =>
+x.platid == sipDevice.DeviceId).Set(x=>x.registestate,state).ExecuteAffrowsAsync();
         }
 
         public static void OnInviteHistoryVideoFinished(RecordInfo.RecItem record)
@@ -191,7 +209,8 @@ x.platid == sipDevice.DeviceId).First();
                 #endregion
 
                 //ORMHelper.Db.Select<Device281Plat>().Where(x =>x.platid == )
-          
+                ORMHelper.Db.Delete<DeviceNumber>().Where(x =>
+          x.dev.Equals(sipChannel.DeviceId)).ExecuteAffrows();
                 var obj1 = ORMHelper.Db.Select<DeviceNumber>().Where(x =>
     x.dev.Equals(sipChannel.DeviceId) ).First();
                 if (obj1 == null)

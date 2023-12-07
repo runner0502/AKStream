@@ -160,7 +160,7 @@ namespace LibGB28181SipServer
 
                     sipServerConfig.SipIpAddress = ipInfo.IpV4;
                     sipServerConfig.KeepAliveInterval = 5;
-                    sipServerConfig.KeepAliveLostNumber = 3;
+                    sipServerConfig.KeepAliveLostNumber = 2;
                     /*SipDeviceID 20位编码规则
                     *1-2省级 33 浙江省
                     *3-4市级 02 宁波市

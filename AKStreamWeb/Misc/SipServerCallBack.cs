@@ -217,12 +217,12 @@ x.platid == sipDevice.DeviceId).First();
                 {
                     var deviceNumber = new DeviceNumber();
 
-                    //bool isPlat = true;
-                    //if (sipChannel.SipChannelDesc.ParentID != sipChannel.ParentId)
-                    //{
-                    //    isPlat = false;
-                    //}
-                    if (string.IsNullOrEmpty(sipChannel.SipChannelDesc.CivilCode))
+                    bool isPlat = true;
+                    if (sipChannel.SipChannelDesc.ParentID != sipChannel.ParentId)
+                    {
+                        isPlat = false;
+                    }
+                    if (!isPlat || string.IsNullOrEmpty(sipChannel.SipChannelDesc.CivilCode))
                     {
                         deviceNumber.fatherid = sipChannel.ParentId;
                     }

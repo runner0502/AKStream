@@ -194,8 +194,6 @@ namespace AKStreamWeb
 
 
                 Answer(callid, true);
-
-
             }
 
         }

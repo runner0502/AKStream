@@ -8,9 +8,10 @@ using System.Runtime.InteropServices;
 
 namespace XyCallLayer
 
-        //[DllImport(@"/home/tracy/github/pjsipfix/trunk/pjsip-apps/src/SoftPhone/libsphone.so")]
-        //[DllImport(@"DLL\SPhone.dll")]
-        
+//[DllImport(@"/home/tracy/github/pjsipfix/trunk/pjsip-apps/src/SoftPhone/libsphone.so")]
+//[DllImport(@"./nativesip/libsphone.so")]
+//[DllImport(@"DLL\SPhone.dll")]
+
 {
     public static class SPhoneSDK
     {

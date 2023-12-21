@@ -198,6 +198,9 @@ namespace SIPSorcery.SIP.App
                     m_subscribed = false;
                     m_waitForSubscribeResponse.Reset();
 
+                    //SIPURI contactUri = new SIPURI(SIPSchemesEnum.sip, System.Net.IPAddress.Parse("172.19.2.165"), 5060);
+                    //contactUri.User = "33020000021180000001";
+                    //Subscribe(m_resourceURI, m_expiry, m_sipEventPackage, m_subscribeCallID, contactUri);
                     Subscribe(m_resourceURI, m_expiry, m_sipEventPackage, m_subscribeCallID, null);
 
                     m_waitForSubscribeResponse.WaitOne();
@@ -292,6 +295,7 @@ namespace SIPSorcery.SIP.App
 
                     if (!m_filter.IsNullOrBlank())
                     {
+                        //m_filter = m_filter.Replace(" encoding=\"utf-16\"", "");
                         subscribeRequest.Body = m_filter;
                         subscribeRequest.Header.ContentLength = m_filter.Length;
                         subscribeRequest.Header.ContentType = m_filterTextType;

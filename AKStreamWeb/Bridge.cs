@@ -10,6 +10,8 @@ using LibZLMediaKitMediaServer;
 using System.Threading.Channels;
 using WebSocketSharp;
 using LibCommon.Structs.GB28181.XML;
+using System.Threading;
+using SIPSorcery.SIP;
 
 namespace AKStreamWeb
 {
@@ -40,7 +42,24 @@ namespace AKStreamWeb
             SPhoneSDK.SetCallback_ReceiveKeyframeRequest(_onReceiveKeyframeRequest);
             //SPhoneSDK.SetCallback_IncomingCall(OnIncomingCall);
             SPhoneSDK.SetDefaultVideoDevice(1);
+
+            //_timer = new Timer(TestTimerCB, null, 10000, 10000);
+            
+           
         }
+
+        //private Timer _timer;
+
+        //private void TestTimerCB(object obj)
+        //{
+        //    var device = LibGB28181SipServer.Common.SipDevices.Find(x => x.DeviceId == "11011200002000000001");
+        //    if (device == null)
+        //    {
+        //        return;
+        //    }
+        //    var sipChannel = device.SipChannels.Find(x => x.DeviceId == "11010000581314000001");
+        //    Common.SipServer.Subscribe(device, sipChannel, SIPSorcery.SIP.SIPMethodsEnum.OPTIONS, "", "", "", LibCommon.Structs.GB28181.XML.CommandType.Catalog, false, null, null, null, 100);
+        //}
 
         private static Dictionary<int, SipChannel> s_calls = new Dictionary<int, SipChannel>();
 

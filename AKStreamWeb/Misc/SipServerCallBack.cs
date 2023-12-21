@@ -209,16 +209,22 @@ x.platid == sipDevice.DeviceId).First();
                 #endregion
 
                 //ORMHelper.Db.Select<Device281Plat>().Where(x =>x.platid == )
-                ORMHelper.Db.Delete<DeviceNumber>().Where(x =>
-          x.dev.Equals(sipChannel.DeviceId)).ExecuteAffrows();
+          //      ORMHelper.Db.Delete<DeviceNumber>().Where(x =>
+          //x.dev.Equals(sipChannel.DeviceId)).ExecuteAffrows();
                 var obj1 = ORMHelper.Db.Select<DeviceNumber>().Where(x =>
     x.dev.Equals(sipChannel.DeviceId) ).First();
+                if (obj1 != null)
+                {
+                    ORMHelper.Db.Delete<DeviceNumber>().Where(x =>
+    x.dev.Equals(sipChannel.DeviceId)).ExecuteAffrows();
+                    obj1 = null;
+                }
                 if (obj1 == null)
                 {
                     var deviceNumber = new DeviceNumber();
 
                     bool isPlat = true;
-                    if (sipChannel.SipChannelDesc.ParentID != sipChannel.ParentId)
+                    if (!sipChannel.SipChannelDesc.ParentID.Contains(sipChannel.ParentId))
                     {
                         isPlat = false;
                     }
@@ -335,6 +341,12 @@ x.platid == sipDevice.DeviceId).First();
             {
                 var obj1 = ORMHelper.Db.Select<organization>().Where(x =>
    x.id.Equals(sipChannel.DeviceId)).First();
+                if (obj1 != null)
+                {
+                    ORMHelper.Db.Delete<organization>().Where(x =>
+   x.id.Equals(sipChannel.DeviceId)).ExecuteAffrows();
+                    obj1 = null;
+                }
                 if (obj1 == null && sipChannel.ParentId != sipChannel.DeviceId)
                 {
                     var org = new organization();
@@ -349,7 +361,14 @@ x.platid == sipDevice.DeviceId).First();
                     //}
                     if (string.IsNullOrEmpty( sipChannel.SipChannelDesc.CivilCode))
                     {
-                        org.super_id = sipChannel.SipChannelDesc.ParentID;
+                        if (!string.IsNullOrEmpty(sipChannel.SipChannelDesc.ParentID))
+                        {
+                            org.super_id = sipChannel.SipChannelDesc.ParentID;
+                        }
+                        else
+                        {
+                            org.super_id = sipChannel.ParentId;
+                        }
                     }
                     else
                     {

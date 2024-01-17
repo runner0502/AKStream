@@ -10,10 +10,12 @@
     "AKStreamWeb": {
       "commandName": "Project",
       "launchBrowser": true,
+      "launchUrl": "swagger",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
-      "applicationUrl": "http://localhost:58800",
+      //"applicationUrl": "http://localhost:58800",
+      "applicationUrl": "http://localhost:58001",
       "nativeDebugging": false
     }
   },

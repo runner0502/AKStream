@@ -1,4 +1,5 @@
 using LibCommon;
+using LibCommon.Structs.DBModels;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 
@@ -35,6 +36,19 @@ namespace AKStreamWeb
 
             GCommon.InitLogger();
             Common.Init();
+
+            //biz_licence licence = new biz_licence();
+            //licence.max_device_number = 1;
+            //licence.max_transcode_number = 1;
+            //ORMHelper.Db.Insert(licence).ExecuteAffrows();
+
+            //biz_system sys = new biz_system();
+            //sys.thekey = "1";
+            //ORMHelper.Db.Insert(sys).ExecuteAffrows();
+
+            //biz_transcode tr = new biz_transcode();
+            //ORMHelper.Db.Insert(tr).ExecuteAffrows();
+
             CreateHostBuilder(args).Build().Run();
         }
 

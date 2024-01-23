@@ -1,5 +1,6 @@
 using LibCommon;
 using LibCommon.Structs.DBModels;
+using LinCms.Core.Entities;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 
@@ -48,6 +49,10 @@ namespace AKStreamWeb
 
             //biz_transcode tr = new biz_transcode();
             //ORMHelper.Db.Insert(tr).ExecuteAffrows();
+
+            //SysBasicConfig sysBasicConfig = new SysBasicConfig();
+            //ORMHelper.Db.Insert(sysBasicConfig).ExecuteAffrows();
+            //var result = ORMHelper.Db.Select<SysBasicConfig>().ToListAsync();
 
             CreateHostBuilder(args).Build().Run();
         }

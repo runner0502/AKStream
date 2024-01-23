@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace LibCommon.Structs.DBModels
 {
     [Serializable]
-    [Table(Name = "28181Plat")]
+    [Table(Name = "biz_platform")]
     public class Device281Plat
     {
 

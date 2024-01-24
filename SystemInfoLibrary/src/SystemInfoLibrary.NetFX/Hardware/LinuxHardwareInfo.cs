@@ -17,6 +17,7 @@
 */
 
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text.RegularExpressions;
 using SystemInfoLibrary.Hardware.CPU;
@@ -85,5 +86,42 @@ namespace SystemInfoLibrary.Hardware
             _GPUs ?? (_GPUs = new List<GPUInfo> { new LinuxGPUInfo() }); // No idea how to detect multiple GPUs
 
         public override RAMInfo RAM => _RAM ?? (_RAM = new LinuxRAMInfo());
+
+        public override string CPUId => (GetCpuId());
+
+        /// <summary>
+        /// 获取 CPU ID
+        /// </summary>
+        public static string GetCpuId()
+        {
+            return ExecuteCommand("dmidecode -t Processor | grep ID | sort -u | awk -F':' '{print $2}'");
+        }
+
+
+private static string ExecuteCommand(string command)
+        {
+            var escapedArgs = command.Replace("\"", "\\\"");
+            var process = new Process
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = "/bin/bash", // 使用 bash
+                                            // FileName = "/bin/sh", // 使用 sh
+                    Arguments = $"-c \"{escapedArgs}\"",
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                }
+            };
+
+            process.Start();
+            process.WaitForExit();
+
+            var message = process.StandardOutput.ReadToEnd();
+
+            return message;
+        }
+
     }
 }

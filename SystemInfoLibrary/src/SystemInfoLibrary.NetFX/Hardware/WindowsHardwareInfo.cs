@@ -24,7 +24,7 @@ namespace SystemInfoLibrary.Hardware
                     using (var searcher = new ManagementObjectSearcher("SELECT * FROM Win32_Processor"))
                     {
                         _CPUs = (from ManagementBaseObject processor in searcher.Get()
-                            select (CPUInfo)new WindowsCPUInfo(processor)).ToList();
+                                 select (CPUInfo)new WindowsCPUInfo(processor)).ToList();
                     }
                 }
 
@@ -41,7 +41,7 @@ namespace SystemInfoLibrary.Hardware
                     using (var searcher = new ManagementObjectSearcher("SELECT * FROM Win32_VideoController"))
                     {
                         _GPUs = (from ManagementBaseObject videoController in searcher.Get()
-                            select (GPUInfo)new WindowsGPUInfo(videoController)).ToList();
+                                 select (GPUInfo)new WindowsGPUInfo(videoController)).ToList();
                     }
                 }
 
@@ -65,5 +65,7 @@ namespace SystemInfoLibrary.Hardware
                 return _RAM;
             }
         }
+
+        public override string CPUId => ("aaa");
     }
 }

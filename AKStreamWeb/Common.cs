@@ -15,7 +15,11 @@ using LibGB28181SipClient;
 using LibGB28181SipServer;
 using LibSystemInfo;
 using LibZLMediaKitMediaServer;
+using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json;
+using QLicenseCore;
 using XyCallLayer;
 using static XyCallLayer.SPhoneSDK;
 using JsonHelper = LibCommon.JsonHelper;
@@ -45,6 +49,13 @@ namespace AKStreamWeb
             new ConcurrentDictionary<string, WebHookNeedReturnTask>();
 
         public static DateTime StartupDateTime;
+        private static MyLicense _license;
+
+        public static MyLicense License 
+        {
+            get { return _license; }
+            set { _license = value; }
+        }
 
 
         /// <summary>
@@ -86,6 +97,15 @@ namespace AKStreamWeb
 
         static Common()
         {
+            if (!File.Exists("uid"))
+            {
+                var uid = QLicenseCore.LicenseHandler.GenerateUID("281");
+                using (StreamWriter writer = new StreamWriter("uid"))
+                {
+                    writer.Write(uid);
+                }
+            }
+
             if (!string.IsNullOrEmpty(GCommon.OutConfigPath))
             {
                 if (!GCommon.OutConfigPath.Trim().EndsWith('/'))
@@ -249,9 +269,9 @@ namespace AKStreamWeb
                 }
             }
 
-            _autoLive = new AutoLive();
-            _autoRecord = new AutoRecord();
-            _autoTaskOther = new AutoTaskOther();
+            //_autoLive = new AutoLive();
+           // _autoRecord = new AutoRecord();
+           // _autoTaskOther = new AutoTaskOther();
 
 
 
@@ -316,6 +336,45 @@ namespace AKStreamWeb
             lock (_performanceInfoLock)
             {
                 WebPerformanceInfo = _webSystemInfo.GetSystemInfoObject();
+            }
+
+
+            if (License == null)
+            {
+                string _msg = string.Empty;
+                LicenseStatus _status = LicenseStatus.UNDEFINED;
+                try
+                {
+                    var licenseFile = Environment.CurrentDirectory + "/license";
+                    License = (MyLicense)LicenseHandler.ParseLicenseFromBASE64String(
+                                       typeof(MyLicense),
+                                       File.ReadAllText(licenseFile),
+                                       null,
+                                       out _status,
+                                       out _msg);
+                }catch (Exception ex) 
+                {
+                    GCommon.Logger.Error("license fail: "+ex.Message);
+                    //_perFormanceInfoTimer.Stop();
+                    //var life = Program._builder.Services.GetRequiredService<IHostApplicationLifetime>();
+                    //life.StopApplication();
+                    //Program._builder.StopAsync().Wait();
+                    //return;
+                    Environment.Exit(1);
+                }
+            }
+
+            string msg = string.Empty;
+            var result = License.DoExtraValidation(out msg);
+            if (result != LicenseStatus.VALID)
+            {
+                GCommon.Logger.Error("license fail invalid");
+                //Program._builder.StopAsync();
+                Environment.Exit(0);
+            }
+            else
+            {
+                
             }
         }
 
@@ -405,5 +464,8 @@ namespace AKStreamWeb
                 }
             }
         }
+    
+
+    
     }
 }

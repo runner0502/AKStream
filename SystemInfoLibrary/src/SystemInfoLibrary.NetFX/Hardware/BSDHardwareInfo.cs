@@ -35,5 +35,7 @@ namespace SystemInfoLibrary.Hardware
 
         public override IList<GPUInfo> GPUs => new List<GPUInfo>();
         public override RAMInfo RAM => _RAM ?? (_RAM = new BSDRAMInfo());
+
+        public override string CPUId => throw new System.NotImplementedException();
     }
 }

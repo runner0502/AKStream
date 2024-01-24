@@ -36,5 +36,7 @@ namespace SystemInfoLibrary.Hardware
         public abstract IList<GPUInfo> GPUs { get; }
 
         public abstract RAMInfo RAM { get; }
+
+        public abstract string CPUId { get; }
     }
 }

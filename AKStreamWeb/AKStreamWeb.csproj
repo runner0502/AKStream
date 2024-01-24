@@ -12,6 +12,7 @@
       <ProjectReference Include="..\LibGB28181SipServer\LibGB28181SipServer.csproj" />
       <ProjectReference Include="..\LibSystemInfo\LibSystemInfo.csproj" />
       <ProjectReference Include="..\LibZLMediaKitMediaServer\LibZLMediaKitMediaServer.csproj" />
+      <ProjectReference Include="..\QLicenseCore\QLicenseCore.csproj" />
     </ItemGroup>
 
     <ItemGroup>

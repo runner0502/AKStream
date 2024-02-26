@@ -26,7 +26,16 @@ namespace AKStreamWeb.Misc
         /// <returns>返回此设备的密钥</returns>
         public static string OnAuthentication(string sipDeviceId)
         {
-            return "123456";
+            var obj1 = ORMHelper.Db.Select<Device281Plat>().Where(x =>
+x.platid == sipDeviceId).First();
+            if (obj1 != null)
+            {
+                return obj1.userpwd;
+            }
+            else
+            {
+                return "notau";
+            }
         }
 
         public static void OnRegister(string sipDeviceJson)

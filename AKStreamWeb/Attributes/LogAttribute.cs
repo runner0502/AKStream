@@ -23,7 +23,6 @@ namespace AKStreamWeb.Attributes
             {
                 if (context.HttpContext.Response.StatusCode == (int)HttpStatusCode.OK)
                 {
-
                     if (!context.HttpContext.Request.Path.Equals("/WebHook/MediaServerRegister"))
                     {
                         info =

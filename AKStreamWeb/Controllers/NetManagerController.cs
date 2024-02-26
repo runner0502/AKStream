@@ -1,5 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using LibCommon.Structs.GB28181;
+using LibCommon;
+using LibGB28181SipServer;
+using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using XyCallLayer;
+using Newtonsoft.Json;
 
 namespace AKStreamWeb.Controllers
 {
@@ -27,7 +34,17 @@ namespace AKStreamWeb.Controllers
         public List<CallInfo> GetCallsInfo(
             [FromHeader(Name = "AccessKey")] string AccessKey)
         {
-            return null;
+            List<CallInfo> infos = new List<CallInfo>();
+            foreach (var item in Bridge.s_calls)
+            {
+                CallInfo info = new CallInfo();
+                info.CallId = item.Key.ToString();
+                info.OtherNumber = item.Value.DeviceId;
+                info.CameraId = item.Value.DeviceId;
+                info.CameraName = item.Value.SipChannelDesc.Name;
+                infos.Add(info);
+            }
+            return infos;
         }
         /// <summary>
         /// 挂断呼叫
@@ -40,16 +57,63 @@ namespace AKStreamWeb.Controllers
         public bool HangupCall(
             [FromHeader(Name = "AccessKey")] string AccessKey, string callId)
         {
-            return true;
+            var call = Bridge.s_calls[int.Parse(callId)];
+            if (call != null) 
+            {
+                SPhoneSDK.Hangup(int.Parse(callId));
+                return true;
+            }
+            return false;
         }
         /// <summary>
-        /// 开始同步
+        /// 开始同步（号码和ID一致）
         /// </summary>
         /// <param name="deviceId">设备或者网关ID</param>
         /// <returns></returns>
-        [Route("StartSync")]
+        [Route("StarSyncSameId")]
         [HttpPost]
-        public bool StarSync([FromHeader(Name = "AccessKey")] string AccessKey, string deviceId)
+        public bool StarSyncSameId([FromHeader(Name = "AccessKey")] string AccessKey, string deviceId)
+        {
+            SipMethodProxy sipMethodProxy = new SipMethodProxy(Common.AkStreamWebConfig.WaitSipRequestTimeOutMSec);
+            ResponseStruct rs;
+            var sipDevice = LibGB28181SipServer.Common.SipDevices.FindLast(x => x.DeviceInfo!.DeviceID.Equals(deviceId));
+            if (sipDevice == null)
+            {
+                return false;
+            }
+
+            if (sipMethodProxy.DeviceCatalogQuery(sipDevice, out rs))
+            {
+                GCommon.Logger.Debug(
+                $"[{Common.LoggerHead}]->设备目录获取成功(OnRegister)->{sipDevice.IpAddress.ToString()}-{sipDevice.DeviceId}\r\n{JsonHelper.ToJson(sipDevice.SipChannels, Formatting.Indented)}");
+            }
+            else
+            {
+                GCommon.Logger.Error(
+                    $"[{Common.LoggerHead}]->设备目录获取失败(OnRegister)->{sipDevice.IpAddress.ToString()}-{sipDevice.DeviceId}\r\n{JsonHelper.ToJson(rs, Formatting.Indented)}");
+            }
+            return true;
+        }
+        /// <summary>
+        /// 开始同步（保留原号码）
+        /// </summary>
+        /// <param name="deviceId">设备或者网关ID</param>
+        /// <returns></returns>
+        [Route("StarSyncKeepOrg")]
+        [HttpPost]
+        public bool StarSyncKeepOrg([FromHeader(Name = "AccessKey")] string AccessKey, string deviceId)
+        {
+            return true;
+        }
+        /// <summary>
+        /// 开始同步（指定起始号码自增）
+        /// </summary>
+        /// <param name="deviceId">设备或者网关ID</param>
+        /// <param name="startIndexNumber">起始号码</param>
+        /// <returns></returns>
+        [Route("StarSyncIncreanWithIndex")]
+        [HttpPost]
+        public bool StarSyncIncreanWithIndex([FromHeader(Name = "AccessKey")] string AccessKey, string deviceId, int startIndexNumber)
         {
             return true;
         }
@@ -64,6 +128,12 @@ namespace AKStreamWeb.Controllers
         {
             return true;
         }
+        /// <summary>
+        /// 获取同步状态
+        /// </summary>
+        /// <param name="AccessKey"></param>
+        /// <param name="deviceId"> 设备ID</param>
+        /// <returns></returns>
         [Route("GetSyncState")]
         [HttpGet]
         public SyncState GetSyncState([FromHeader(Name = "AccessKey")] string AccessKey, string deviceId)
@@ -99,6 +169,35 @@ namespace AKStreamWeb.Controllers
             /// 是否转码
             /// </summary>
             public bool IsTranscode { get; set; }
+            /// <summary>
+            /// 被叫设备号码
+            /// </summary>
+            public string CalledDeviceNumber { get; set; }
+            /// <summary>
+            /// 被叫设备名称
+            /// </summary>
+            public string CalledDeviceName { get; set; }
+            /// <summary>
+            /// 被叫设备ID
+            /// </summary>
+            public string CalledDeviceId { get; set; }
+            /// <summary>
+            /// 被叫所属平台
+            /// </summary>
+            public string CalledPlat { get; set; }
+            /// <summary>
+            /// 被叫分辨率
+            /// </summary>
+            public string CalledReslution { get; set; }
+            /// <summary>
+            /// 呼叫创建时间
+            /// </summary>
+            public DateTime StartTime { get; set; }
+            /// <summary>
+            /// 主叫IP
+            /// </summary>
+            public string CallerIP { get; set; }
+
         }
         /// <summary>
         /// 同步状态
@@ -121,6 +220,14 @@ namespace AKStreamWeb.Controllers
             /// 同步前设备数量
             /// </summary>
             public int DeviceCountBefore { get; set; }
+            /// <summary>
+            /// 是否正在同步
+            /// </summary>
+            public bool IsProcessing { get; set; }
+            /// <summary>
+            /// 上次同步是否成功
+            /// </summary>
+            public bool LastResult { get; set; }
         }
     }
 

@@ -46,6 +46,10 @@ namespace LibCommon.Structs.DBModels
         /// </summary>
         [Column(DbType = "varchar(30) NOT NULL")]
         public string state{ get; set; }
+        /// <summary>
+        /// 编码格式（0 为H264, 1 为H265）
+        /// </summary>
+        public int EncoderType { get; set; }
 
 
     }

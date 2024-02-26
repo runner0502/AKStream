@@ -12,6 +12,8 @@ namespace LibCommon.Structs.DBModels
     [Table(Name = "DeviceNumber")]
     public class DeviceNumber
     {
+        [Column(IsPrimary = true, IsIdentity =true  )]
+        public int id { get; set; }
         private string _dev;
 
         [Column(DbType = "varchar(45)")]

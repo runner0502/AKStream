@@ -70,17 +70,17 @@ x.platid == sipDeviceId).First();
                     $"[{Common.LoggerHead}]->获取设备状态信息失败(OnRegister)->{sipDevice.IpAddress.ToString()}-{sipDevice.DeviceId}\r\n{JsonHelper.ToJson(rs, Formatting.Indented)}");
             }
 
-            SipMethodProxy sipMethodProxy = new SipMethodProxy(Common.AkStreamWebConfig.WaitSipRequestTimeOutMSec);
-            if (sipMethodProxy.DeviceCatalogQuery(sipDevice, out rs))
-            {
-                GCommon.Logger.Debug(
-                    $"[{Common.LoggerHead}]->设备目录获取成功(OnRegister)->{sipDevice.IpAddress.ToString()}-{sipDevice.DeviceId}\r\n{JsonHelper.ToJson(sipDevice.SipChannels, Formatting.Indented)}");
-            }
-            else
-            {
-                GCommon.Logger.Error(
-                    $"[{Common.LoggerHead}]->设备目录获取失败(OnRegister)->{sipDevice.IpAddress.ToString()}-{sipDevice.DeviceId}\r\n{JsonHelper.ToJson(rs, Formatting.Indented)}");
-            }
+            //SipMethodProxy sipMethodProxy = new SipMethodProxy(Common.AkStreamWebConfig.WaitSipRequestTimeOutMSec);
+            //if (sipMethodProxy.DeviceCatalogQuery(sipDevice, out rs))
+            //{
+            //    GCommon.Logger.Debug(
+            //        $"[{Common.LoggerHead}]->设备目录获取成功(OnRegister)->{sipDevice.IpAddress.ToString()}-{sipDevice.DeviceId}\r\n{JsonHelper.ToJson(sipDevice.SipChannels, Formatting.Indented)}");
+            //}
+            //else
+            //{
+            //    GCommon.Logger.Error(
+            //        $"[{Common.LoggerHead}]->设备目录获取失败(OnRegister)->{sipDevice.IpAddress.ToString()}-{sipDevice.DeviceId}\r\n{JsonHelper.ToJson(rs, Formatting.Indented)}");
+            //}
         }
 
         public static void OnUnRegister(string sipDeviceJson)
@@ -133,37 +133,37 @@ x.platid == sipDevice.DeviceId).Set(x=>x.registestate,state).ExecuteAffrowsAsync
             GCommon.Logger.Debug(
                 $"[{Common.LoggerHead}]->设备就绪->{sipDevice.RemoteEndPoint.Address.MapToIPv4().ToString()}-{sipDevice.DeviceId}");
             ResponseStruct rs;
-            SipMethodProxy sipMethodProxy2 = new SipMethodProxy(Common.AkStreamWebConfig.WaitSipRequestTimeOutMSec);
-            if (sipMethodProxy2.GetSipDeviceInfo(sipDevice, out rs))
-            {
-                GCommon.Logger.Debug(
-                    $"[{Common.LoggerHead}]->获取设备信息成功->{sipDevice.RemoteEndPoint.Address.MapToIPv4().ToString()}-{sipDevice.DeviceId}\r\n{JsonHelper.ToJson(sipDevice.DeviceInfo, Formatting.Indented)}");
+//            SipMethodProxy sipMethodProxy2 = new SipMethodProxy(Common.AkStreamWebConfig.WaitSipRequestTimeOutMSec);
+//            if (sipMethodProxy2.GetSipDeviceInfo(sipDevice, out rs))
+//            {
+//                GCommon.Logger.Debug(
+//                    $"[{Common.LoggerHead}]->获取设备信息成功->{sipDevice.RemoteEndPoint.Address.MapToIPv4().ToString()}-{sipDevice.DeviceId}\r\n{JsonHelper.ToJson(sipDevice.DeviceInfo, Formatting.Indented)}");
 
-                var obj1 = ORMHelper.Db.Select<Device281Plat>().Where(x =>
-x.platid == sipDevice.DeviceId).First();
-                if (obj1 == null)
-                {
-                    Device281Plat plat = new Device281Plat();
-                    plat.platid = sipDevice.DeviceId;
-                    plat.platname = sipDevice.DeviceInfo.DeviceName;
-                    plat.ipaddr = sipDevice.IpAddress.ToString();
-                    plat.port = sipDevice.Port;
-                    plat.username = sipDevice.Username;
-                    plat.userpwd = sipDevice.Password;
-                    //plat.manufacturer = sipDevice.DeviceInfo.Manufacturer.ToString
-                    //if (sipDevice.DeviceStatus == DeviceStatus.)
-                    //{
+//                var obj1 = ORMHelper.Db.Select<Device281Plat>().Where(x =>
+//x.platid == sipDevice.DeviceId).First();
+//                if (obj1 == null)
+//                {
+//                    Device281Plat plat = new Device281Plat();
+//                    plat.platid = sipDevice.DeviceId;
+//                    plat.platname = sipDevice.DeviceInfo.DeviceName;
+//                    plat.ipaddr = sipDevice.IpAddress.ToString();
+//                    plat.port = sipDevice.Port;
+//                    plat.username = sipDevice.Username;
+//                    plat.userpwd = sipDevice.Password;
+//                    //plat.manufacturer = sipDevice.DeviceInfo.Manufacturer.ToString
+//                    //if (sipDevice.DeviceStatus == DeviceStatus.)
+//                    //{
 
-                    //}
-                    //plat.registestate = int.Parse(sipDevice.DeviceStatus.Status);
-                    ORMHelper.Db.Insert(plat).ExecuteAffrows();
-                }
-            }
-            else
-            {
-                GCommon.Logger.Warn(
-                    $"[{Common.LoggerHead}]->获取设备信息失败->{sipDevice.RemoteEndPoint.Address.MapToIPv4().ToString()}-{sipDevice.DeviceId}\r\n{JsonHelper.ToJson(rs, Formatting.Indented)}");
-            }
+//                    //}
+//                    //plat.registestate = int.Parse(sipDevice.DeviceStatus.Status);
+//                    ORMHelper.Db.Insert(plat).ExecuteAffrows();
+//                }
+//            }
+//            else
+//            {
+//                GCommon.Logger.Warn(
+//                    $"[{Common.LoggerHead}]->获取设备信息失败->{sipDevice.RemoteEndPoint.Address.MapToIPv4().ToString()}-{sipDevice.DeviceId}\r\n{JsonHelper.ToJson(rs, Formatting.Indented)}");
+//            }
 
             SipMethodProxy sipMethodProxy3 = new SipMethodProxy(Common.AkStreamWebConfig.WaitSipRequestTimeOutMSec);
             if (sipMethodProxy3.GetSipDeviceStatus(sipDevice, out rs))
@@ -177,17 +177,17 @@ x.platid == sipDevice.DeviceId).First();
                     $"[{Common.LoggerHead}]->获取设备状态信息失败->{sipDevice.RemoteEndPoint.Address.MapToIPv4().ToString()}-{sipDevice.DeviceId}\r\n{JsonHelper.ToJson(rs, Formatting.Indented)}");
             }
 
-            SipMethodProxy sipMethodProxy = new SipMethodProxy(Common.AkStreamWebConfig.WaitSipRequestTimeOutMSec);
-            if (sipMethodProxy.DeviceCatalogQuery(sipDevice, out rs))
-            {
-                GCommon.Logger.Debug(
-                    $"[{Common.LoggerHead}]->设备目录获取成功->{sipDevice.RemoteEndPoint.Address.MapToIPv4().ToString()}-{sipDevice.DeviceId}\r\n{JsonHelper.ToJson(sipDevice.SipChannels, Formatting.Indented)}");
-            }
-            else
-            {
-                GCommon.Logger.Error(
-                    $"[{Common.LoggerHead}]->设备目录获取失败->{sipDevice.RemoteEndPoint.Address.MapToIPv4().ToString()}-{sipDevice.DeviceId}\r\n{JsonHelper.ToJson(rs, Formatting.Indented)}");
-            }
+            //SipMethodProxy sipMethodProxy = new SipMethodProxy(Common.AkStreamWebConfig.WaitSipRequestTimeOutMSec);
+            //if (sipMethodProxy.DeviceCatalogQuery(sipDevice, out rs))
+            //{
+            //    GCommon.Logger.Debug(
+            //        $"[{Common.LoggerHead}]->设备目录获取成功->{sipDevice.RemoteEndPoint.Address.MapToIPv4().ToString()}-{sipDevice.DeviceId}\r\n{JsonHelper.ToJson(sipDevice.SipChannels, Formatting.Indented)}");
+            //}
+            //else
+            //{
+            //    GCommon.Logger.Error(
+            //        $"[{Common.LoggerHead}]->设备目录获取失败->{sipDevice.RemoteEndPoint.Address.MapToIPv4().ToString()}-{sipDevice.DeviceId}\r\n{JsonHelper.ToJson(rs, Formatting.Indented)}");
+            //}
         } 
 
         /// <summary>
@@ -380,7 +380,7 @@ x.platid == sipDevice.DeviceId).First();
                         }
                     }
                     else
-                    {
+                    { 
                         org.super_id = sipChannel.SipChannelDesc.CivilCode;
                     }
                     org.name = sipChannel.SipChannelDesc.Name;
@@ -392,5 +392,6 @@ x.platid == sipDevice.DeviceId).First();
                 }
             }
         }
+
     }
 }

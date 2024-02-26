@@ -312,8 +312,7 @@ namespace AKStreamWeb.Controllers
         [AuthVerify]
         [Route("StopRecord")]
         [HttpGet]
-        public ResZLMediaKitStopRecord StopRecord([FromHeader(Name = "AccessKey")] string AccessKey,
-            string mediaServerId, string mainId)
+        public ResZLMediaKitStopRecord StopRecord([FromHeader(Name = "AccessKey")] string AccessKey,string mediaServerId, string mainId)
         {
             ResponseStruct rs;
             var ret = MediaServerService.StopRecord(mediaServerId, mainId, out rs);

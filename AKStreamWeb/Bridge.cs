@@ -28,7 +28,7 @@ namespace AKStreamWeb
             return s_instance;
         }
 
-        private Bridge() 
+        private Bridge()
         {
             SPhoneSDK.SDKInit("0.0.0.0", 5066, 5, System.AppContext.BaseDirectory + "pjsip.log");
             //SPhoneSDK.SDKInit("172.19.6.41", 5066, 5, System.AppContext.BaseDirectory +  "pjsip.log");
@@ -37,6 +37,8 @@ namespace AKStreamWeb
             SPhoneSDK.SetCallback_IncomingCall_WithMsg(_onIncoming);
             _onReceiveDtmf = OnReceiveDtmf;
             SPhoneSDK.SetCallback_ReceiveDtmf(_onReceiveDtmf);
+            _onCallstatechange = OnCallState;
+            SPhoneSDK.SetCallback_CallState(_onCallstatechange);
 
             _onReceiveKeyframeRequest = OnReceiveKeyframeRequest;
             SPhoneSDK.SetCallback_ReceiveKeyframeRequest(_onReceiveKeyframeRequest);
@@ -44,9 +46,24 @@ namespace AKStreamWeb
             SPhoneSDK.SetDefaultVideoDevice(1);
 
             //_timer = new Timer(TestTimerCB, null, 10000, 10000);
-            
-           
+
+
         }
+
+        public void OnCallState(int callid, string number, CallState state, string stateText, bool isVideo)
+        {
+            switch (state) 
+            {
+                case CallState.STATE_DISCONNECTED:
+                    var call = s_calls[callid];
+                    if (call != null) 
+                    {
+                        s_calls.Remove(callid);
+                    }
+                    break;
+            }
+        }
+
 
         //private Timer _timer;
 
@@ -61,7 +78,7 @@ namespace AKStreamWeb
         //    Common.SipServer.Subscribe(device, sipChannel, SIPSorcery.SIP.SIPMethodsEnum.OPTIONS, "", "", "", LibCommon.Structs.GB28181.XML.CommandType.Catalog, false, null, null, null, 100);
         //}
 
-        private static Dictionary<int, SipChannel> s_calls = new Dictionary<int, SipChannel>();
+        public static Dictionary<int, SipChannel> s_calls = new Dictionary<int, SipChannel>();
 
         public static void OnIncomingCall_WithMsg(int callid, string number, CallState state, bool isVideo, string idsContent)
         //public static void OnIncomingCall(int callid, string number, CallState state, bool isVideo)
@@ -220,6 +237,7 @@ namespace AKStreamWeb
         private static SDK_onIncomingCall_WithMsg _onIncoming;
         private static SDK_onReceiveDtmf _onReceiveDtmf;
         private static SDK_onReceiveKeyframeRequest _onReceiveKeyframeRequest;
+        private static SDK_onCallState _onCallstatechange;
 
         public static void OnReceiveDtmf(int callid, string dtmf)
         {

@@ -11,6 +11,8 @@ namespace LibCommon.Structs.DBModels
     [Table(Name = "biz_platform")]
     public class Device281Plat
     {
+        [Column(IsPrimary = true, IsIdentity = true)]
+        public long id { get; set; }
 
         public string platid { get; set; }
 

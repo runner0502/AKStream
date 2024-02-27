@@ -1,10 +1,10 @@
 {
-  "IpV4Address": "172.19.5.14",
+  "IpV4Address": "172.19.5.253",
   "IpV6Address": "fe80::8:807:2143:28a1%5",
-  "Candidate": "172.19.5.14",
+  "Candidate": "172.19.5.253",
   "WebApiPort": 6880,
   "MediaServerPath": "E:\\src\\ZLMediaKit\\release\\windows\\Debug\\MediaServer.exe",
-  "AkStreamWebRegisterUrl": "http://127.0.0.1:5800/MediaServer/WebHook/MediaServerKeepAlive",
+  "AkStreamWebRegisterUrl": "http://172.19.5.253:5800/MediaServer/WebHook/MediaServerKeepAlive",
   "CutMergeFilePath": "E:",
   "CustomRecordPathList": [
     "E:"
@@ -22,6 +22,6 @@
   "DisableShell": false,
   "CheckLinuxDiskMount": false,
   "ZLMediakitSSLFilePath": "./sslfiles/",
-  "ListenIp": "172.19.5.14",
+  "ListenIp": "172.19.5.253",
   "EnableRtspAuth": false
 }

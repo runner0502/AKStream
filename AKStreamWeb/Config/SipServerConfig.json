@@ -1,5 +1,5 @@
 {
-  "SipIpAddress": "172.19.5.14",
+  "SipIpAddress": "172.19.5.253",
   "SipIpV6Address": "fe80::8:807:2143:28a1%5",
   "ServerSipDeviceId": "33020000021180000001",
   "SipPort": 5060,
@@ -14,7 +14,7 @@
   "IpV6Enable": true,
   "EncodingType": "GB2312",
   //"IsPassive": false,
-  "ListenIp": "172.19.5.14",
+  "ListenIp": "172.19.5.253",
   "NoAuthenticationRequireds": [
     {
       "IpV4Address": "172.19.2.165",

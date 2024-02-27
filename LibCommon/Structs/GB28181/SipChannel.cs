@@ -216,6 +216,10 @@ namespace LibCommon.Structs.GB28181
             set => _lastSipRequest = value ?? throw new ArgumentNullException(nameof(value));
         }
 
+        [JsonIgnore]
+        [BsonIgnore]
+        public int TotalNumber { get; set; }
+
 
         public void Dispose()
         {

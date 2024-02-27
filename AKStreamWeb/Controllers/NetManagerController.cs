@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using XyCallLayer;
 using Newtonsoft.Json;
+using AKStreamWeb.Misc;
+using LibCommon.Structs.DBModels;
 
 namespace AKStreamWeb.Controllers
 {
@@ -65,15 +67,26 @@ namespace AKStreamWeb.Controllers
             }
             return false;
         }
-        /// <summary>
-        /// 开始同步（号码和ID一致）
-        /// </summary>
-        /// <param name="deviceId">设备或者网关ID</param>
-        /// <returns></returns>
-        [Route("StarSyncSameId")]
-        [HttpPost]
-        public bool StarSyncSameId([FromHeader(Name = "AccessKey")] string AccessKey, string deviceId)
+
+        private bool StartSync(string deviceId, SyncMethod method, int startIndex)
         {
+            if (SipServerCallBack.SsyncState == null)
+            {
+                SipServerCallBack.SsyncState = new SyncStateFull();
+            }
+            if (SipServerCallBack.SsyncState.State.IsProcessing)
+            {
+                return false;
+            }
+            SipServerCallBack.SsyncState.PlatId = deviceId;
+            SipServerCallBack.SsyncState.State.IsProcessing = true;
+
+            SipServerCallBack.SsyncState.Method = method;
+            SipServerCallBack.SsyncState.SyncStartIndex = startIndex;
+
+            SipServerCallBack.SsyncState.State.orgCountBefore =  (int)ORMHelper.Db.Select<organization>().Count();
+            SipServerCallBack.SsyncState.State.DeviceCountBefore =  (int)ORMHelper.Db.Select<DeviceNumber>().Count();
+
             SipMethodProxy sipMethodProxy = new SipMethodProxy(Common.AkStreamWebConfig.WaitSipRequestTimeOutMSec);
             ResponseStruct rs;
             var sipDevice = LibGB28181SipServer.Common.SipDevices.FindLast(x => x.DeviceInfo!.DeviceID.Equals(deviceId));
@@ -95,6 +108,17 @@ namespace AKStreamWeb.Controllers
             return true;
         }
         /// <summary>
+        /// 开始同步（号码和ID一致）
+        /// </summary>
+        /// <param name="deviceId">设备或者网关ID</param>
+        /// <returns></returns>
+        [Route("StarSyncSameId")]
+        [HttpPost]
+        public bool StarSyncSameId([FromHeader(Name = "AccessKey")] string AccessKey, string deviceId)
+        {
+            return StartSync(deviceId, SyncMethod.SameAsId, 0);
+        }
+        /// <summary>
         /// 开始同步（保留原号码）
         /// </summary>
         /// <param name="deviceId">设备或者网关ID</param>
@@ -103,7 +127,7 @@ namespace AKStreamWeb.Controllers
         [HttpPost]
         public bool StarSyncKeepOrg([FromHeader(Name = "AccessKey")] string AccessKey, string deviceId)
         {
-            return true;
+            return StartSync(deviceId, SyncMethod.KeepOrg, 0);
         }
         /// <summary>
         /// 开始同步（指定起始号码自增）
@@ -115,7 +139,7 @@ namespace AKStreamWeb.Controllers
         [HttpPost]
         public bool StarSyncIncreanWithIndex([FromHeader(Name = "AccessKey")] string AccessKey, string deviceId, int startIndexNumber)
         {
-            return true;
+            return StartSync(deviceId, SyncMethod.StartFromIndex, startIndexNumber);
         }
         /// <summary>
         /// 结束同步
@@ -126,7 +150,18 @@ namespace AKStreamWeb.Controllers
         [HttpPost]
         public bool StopSync([FromHeader(Name = "AccessKey")] string AccessKey, string deviceId)
         {
-            return true;
+            if (SipServerCallBack.SsyncState != null && SipServerCallBack.SsyncState.State.IsProcessing)
+            {
+                SipServerCallBack.SsyncState.State.IsProcessing = false;
+                SipServerCallBack.SsyncState.PlatId = "";
+                SipServerCallBack.SsyncState.Devices.Clear();
+                SipServerCallBack.SsyncState.Orgs.Clear();
+                SipServerCallBack.SsyncState.State.LastResult = false;
+                SipServerCallBack.SsyncState.State.orgCountBefore = 0;
+                SipServerCallBack.SsyncState.State.DeviceCountBefore = 0;
+                return true;
+            }
+            return false;
         }
         /// <summary>
         /// 获取同步状态
@@ -138,7 +173,14 @@ namespace AKStreamWeb.Controllers
         [HttpGet]
         public SyncState GetSyncState([FromHeader(Name = "AccessKey")] string AccessKey, string deviceId)
         {
-            return null;
+            if (SipServerCallBack.SsyncState == null)
+            {
+                SipServerCallBack.SsyncState = new SyncStateFull();
+            }
+
+            SipServerCallBack.SsyncState.State.orgCount = SipServerCallBack.SsyncState.Orgs.Count;
+            SipServerCallBack.SsyncState.State.DeviceCount= SipServerCallBack.SsyncState.Devices.Count;
+            return SipServerCallBack.SsyncState.State;
         }
         /// <summary>
         /// 呼叫信息

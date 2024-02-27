@@ -13,7 +13,7 @@ namespace LibCommon.Structs.DBModels
     public class DeviceNumber
     {
         [Column(IsPrimary = true, IsIdentity =true  )]
-        public int id { get; set; }
+        public long id { get; set; }
         private string _dev;
 
         [Column(DbType = "varchar(45)")]

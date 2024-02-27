@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Google.Protobuf.WellKnownTypes;
 using LibCommon;
 using LibCommon.Enums;
@@ -10,7 +11,6 @@ using LibGB28181SipServer;
 using Newtonsoft.Json;
 using Org.BouncyCastle.Ocsp;
 using SIPSorcery.Net;
-using SIPSorcery.SIP;
 
 namespace AKStreamWeb.Misc
 {
@@ -188,8 +188,8 @@ x.platid == sipDevice.DeviceId).Set(x=>x.registestate,state).ExecuteAffrowsAsync
             //    GCommon.Logger.Error(
             //        $"[{Common.LoggerHead}]->设备目录获取失败->{sipDevice.RemoteEndPoint.Address.MapToIPv4().ToString()}-{sipDevice.DeviceId}\r\n{JsonHelper.ToJson(rs, Formatting.Indented)}");
             //}
-        } 
-
+        }
+        public static SyncStateFull SsyncState;
         /// <summary>
         /// 收到设备目录时
         /// </summary>
@@ -201,7 +201,7 @@ x.platid == sipDevice.DeviceId).Set(x=>x.registestate,state).ExecuteAffrowsAsync
 
            
             if (sipChannel.SipChannelType.Equals(SipChannelType.VideoChannel) )
-                //&& sipChannel.SipChannelStatus != DevStatus.OFF) //只有视频设备并且是可用状态的进数据库
+            //&& sipChannel.SipChannelStatus != DevStatus.OFF) //只有视频设备并且是可用状态的进数据库
             {
                 #region debug sql output
 
@@ -218,63 +218,10 @@ x.platid == sipDevice.DeviceId).Set(x=>x.registestate,state).ExecuteAffrowsAsync
                 #endregion
 
                 //ORMHelper.Db.Select<Device281Plat>().Where(x =>x.platid == )
-          //      ORMHelper.Db.Delete<DeviceNumber>().Where(x =>
-          //x.dev.Equals(sipChannel.DeviceId)).ExecuteAffrows();
-                var obj1 = ORMHelper.Db.Select<DeviceNumber>().Where(x =>
-    x.dev.Equals(sipChannel.DeviceId) ).First();
-                if (obj1 != null)
-                {
-                    ORMHelper.Db.Delete<DeviceNumber>().Where(x =>
-    x.dev.Equals(sipChannel.DeviceId)).ExecuteAffrows();
-                    obj1 = null;
-                }
-                if (obj1 == null)
-                {
-                    var deviceNumber = new DeviceNumber();
+                //      ORMHelper.Db.Delete<DeviceNumber>().Where(x =>
+                //x.dev.Equals(sipChannel.DeviceId)).ExecuteAffrows();
 
-                    bool isPlat = true;
-                    if (!sipChannel.SipChannelDesc.ParentID.Contains(sipChannel.ParentId))
-                    {
-                        isPlat = false;
-                    }
-                    if (!isPlat || string.IsNullOrEmpty(sipChannel.SipChannelDesc.CivilCode))
-                    {
-                        deviceNumber.fatherid = sipChannel.ParentId;
-                    }
-                    else
-                    {
-                        deviceNumber.fatherid = sipChannel.SipChannelDesc.CivilCode;
-                    }
-
-
-                    //deviceNumber.dev = sipChannel.DeviceId;
-                    deviceNumber.dev = sipChannel.SipChannelDesc.DeviceID;
-                    deviceNumber.num = sipChannel.SipChannelDesc.DeviceID;
-                    deviceNumber.name = sipChannel.SipChannelDesc.Name;
-                    deviceNumber.longitude = sipChannel.SipChannelDesc.LongitudeValue;
-                    deviceNumber.latitude = sipChannel.SipChannelDesc.LatitudeValue;
-                    deviceNumber.domain = sipChannel.SipChannelDesc.IPAddress;
-                    deviceNumber.modify_time = DateTime.Now;
-
-                    int status = 0;
-                    //deviceNumber.status = sipChannel.SipChannelStatus;
-                    switch (sipChannel.SipChannelStatus)
-                    {
-                        case DevStatus.ON:
-                            status = 1;
-                            break;
-                        case DevStatus.OFF:
-                            status = 0;
-                            break;
-                        case DevStatus.OK:
-                            status= 1;
-                            break;
-                        default:
-                            break;
-                    }
-                    deviceNumber.status = status;
-                    ORMHelper.Db.Insert(deviceNumber).ExecuteAffrows();
-                }
+                CreateDevice(sipChannel);
 
                 var obj = ORMHelper.Db.Select<VideoChannel>().Where(x =>
                     x.ChannelId.Equals(sipChannel.DeviceId) && x.DeviceId.Equals(sipChannel.ParentId) &&
@@ -348,50 +295,185 @@ x.platid == sipDevice.DeviceId).Set(x=>x.registestate,state).ExecuteAffrowsAsync
             }
             else
             {
-                var obj1 = ORMHelper.Db.Select<organization>().Where(x =>
-   x.id.Equals(sipChannel.DeviceId)).First();
-                if (obj1 != null)
-                {
-                    ORMHelper.Db.Delete<organization>().Where(x =>
-   x.id.Equals(sipChannel.DeviceId)).ExecuteAffrows();
-                    obj1 = null;
-                }
-                if (obj1 == null && sipChannel.ParentId != sipChannel.DeviceId)
-                {
-                    var org = new organization();
-                    org.id = sipChannel.DeviceId;
-                    //if (isPlat)
-                    //{
-                    //    org.super_id = sipChannel.SipChannelDesc.CivilCode;
-                    //}
-                    //else
-                    //{
-                    //    org.super_id = sipChannel.ParentId;
-                    //}
-                    if (string.IsNullOrEmpty( sipChannel.SipChannelDesc.CivilCode))
-                    {
-                        if (!string.IsNullOrEmpty(sipChannel.SipChannelDesc.ParentID))
-                        {
-                            org.super_id = sipChannel.SipChannelDesc.ParentID;
-                        }
-                        else
-                        {
-                            org.super_id = sipChannel.ParentId;
-                        }
-                    }
-                    else
-                    { 
-                        org.super_id = sipChannel.SipChannelDesc.CivilCode;
-                    }
-                    org.name = sipChannel.SipChannelDesc.Name;
-                    org.domain = sipChannel.SipChannelDesc.IPAddress;
-                    //deviceNumber.status = sipChannel.SipChannelStatus
 
-                    ;
-                    ORMHelper.Db.Insert(org).ExecuteAffrows();
-                }
+                CreateOrg(sipChannel);
+            }
+
+            if (SsyncState.Orgs.Count + SsyncState.Devices.Count == sipChannel.TotalNumber)
+            {
+                UpdateCatelogToDB();
             }
         }
 
+        private static void CreateOrg(SipChannel sipChannel)
+        {
+            if (sipChannel.ParentId != sipChannel.DeviceId)
+            {
+                var org = new organization();
+                org.id = sipChannel.DeviceId;
+                //if (isPlat)
+                //{
+                //    org.super_id = sipChannel.SipChannelDesc.CivilCode;
+                //}
+                //else
+                //{
+                //    org.super_id = sipChannel.ParentId;
+                //}
+                if (string.IsNullOrEmpty(sipChannel.SipChannelDesc.CivilCode))
+                {
+                    if (!string.IsNullOrEmpty(sipChannel.SipChannelDesc.ParentID))
+                    {
+                        org.super_id = sipChannel.SipChannelDesc.ParentID;
+                    }
+                    else
+                    {
+                        org.super_id = sipChannel.ParentId;
+                    }
+                }
+                else
+                {
+                    org.super_id = sipChannel.SipChannelDesc.CivilCode;
+                }
+                org.name = sipChannel.SipChannelDesc.Name;
+                org.domain = sipChannel.SipChannelDesc.IPAddress;
+                //deviceNumber.status = sipChannel.SipChannelStatus;
+                SsyncState.Orgs.Add(org);
+
+            }
+        }
+
+        private static void CreateDevice(SipChannel sipChannel)
+        {
+            var deviceNumber = new DeviceNumber();
+
+            bool isPlat = true;
+            if (!sipChannel.SipChannelDesc.ParentID.Contains(sipChannel.ParentId))
+            {
+                isPlat = false;
+            }
+            if (!isPlat || string.IsNullOrEmpty(sipChannel.SipChannelDesc.CivilCode))
+            {
+                deviceNumber.fatherid = sipChannel.ParentId;
+            }
+            else
+            {
+                deviceNumber.fatherid = sipChannel.SipChannelDesc.CivilCode;
+            }
+
+
+            //deviceNumber.dev = sipChannel.DeviceId;
+            deviceNumber.dev = sipChannel.SipChannelDesc.DeviceID;
+            //deviceNumber.num = sipChannel.SipChannelDesc.DeviceID;
+            deviceNumber.name = sipChannel.SipChannelDesc.Name;
+            deviceNumber.longitude = sipChannel.SipChannelDesc.LongitudeValue;
+            deviceNumber.latitude = sipChannel.SipChannelDesc.LatitudeValue;
+            deviceNumber.domain = sipChannel.SipChannelDesc.IPAddress;
+            deviceNumber.modify_time = DateTime.Now;
+
+            int status = 0;
+            //deviceNumber.status = sipChannel.SipChannelStatus;
+            switch (sipChannel.SipChannelStatus)
+            {
+                case DevStatus.ON:
+                    status = 1;
+                    break;
+                case DevStatus.OFF:
+                    status = 0;
+                    break;
+                case DevStatus.OK:
+                    status = 1;
+                    break;
+                default:
+                    break;
+            }
+            deviceNumber.status = status;
+            SsyncState.Devices.Add(deviceNumber);
+        }
+
+        private static void UpdateCatelogToDB()
+        {
+            foreach (var org in SsyncState.Orgs)
+            {
+                var obj1 = ORMHelper.Db.Select<organization>().Where(x =>
+      x.id.Equals(org.id)).First();
+                if (obj1 != null)
+                {
+                    ORMHelper.Db.Delete<organization>().Where(x =>
+   x.id.Equals(org.id)).ExecuteAffrows();
+                    obj1 = null;
+                }
+                ORMHelper.Db.Insert(org).ExecuteAffrows();
+            }
+
+            foreach (var device in SsyncState.Devices)
+            {
+                var obj1 = ORMHelper.Db.Select<DeviceNumber>().Where(x =>
+x.dev.Equals(device.dev)).First();
+                if (obj1 != null)
+                {
+                    if (SsyncState.Method == SyncMethod.KeepOrg)
+                    {
+                        device.num = obj1.num;
+                    }
+                    ORMHelper.Db.Delete<DeviceNumber>().Where(x =>
+    x.dev.Equals(device.dev)).ExecuteAffrows();
+                    obj1 = null;
+                }
+
+                switch (SsyncState.Method)
+                {
+                    case SyncMethod.SameAsId:
+                        device.num = device.dev;
+                        break;
+                    case SyncMethod.KeepOrg:
+                        break;
+                    case SyncMethod.StartFromIndex:
+                        device.num = SsyncState.SyncStartIndex++.ToString();
+                        break;
+                    default:
+                        break;
+                }
+                ORMHelper.Db.Insert(device).ExecuteAffrows();
+            }
+            SsyncState.State.LastResult = true;
+            SsyncState.State.IsProcessing = false;
+            SsyncState.State.orgCountBefore = 0;
+            SsyncState.State.DeviceCountBefore = 0;
+            SsyncState.State.DeviceCount = 0;
+            SsyncState.State.orgCount = 0;
+
+            SsyncState.Devices.Clear();
+            SsyncState.Orgs.Clear();
+            SsyncState.PlatId = "";
+        }
+    }
+
+    public class SyncStateFull
+    {
+        public Controllers.NetManagerController.SyncState State { get; set; }
+        public string PlatId { get; set; }
+        public int Count { get; set; }
+
+        public List<organization> Orgs { get; set; }
+        public List<DeviceNumber> Devices { get; set; }
+
+        public SyncMethod Method{ get; set; }
+        public int SyncStartIndex { get; set; }
+
+        public SyncStateFull()
+        {
+            State = new Controllers.NetManagerController.SyncState();
+            State.IsProcessing = false;
+            Method = SyncMethod.SameAsId;
+            Devices = new List<DeviceNumber> { };
+            Orgs = new List<organization> { };
+        }
+    }
+
+    public enum SyncMethod
+    {
+        SameAsId,
+        KeepOrg,
+        StartFromIndex
     }
 }

@@ -214,6 +214,7 @@ namespace LibGB28181SipServer
                                         SipChannelDesc = tmpChannelDev,
                                         ParentId = tmpSipDevice.DeviceId,
                                         DeviceId = tmpChannelDev.DeviceID,
+                                        TotalNumber = tatolNum,
                                     };
                                     if (tmpChannelDev.InfList != null)
                                     {
@@ -246,6 +247,10 @@ namespace LibGB28181SipServer
                                     {
                                         sipChannelInList.SipChannelDesc.InfList = tmpChannelDev.InfList;
                                     }
+
+                                    Task.Run(() => { OnCatalogReceived?.Invoke(sipChannelInList); }); //抛线程出去处理
+                                    GCommon.Logger.Info(
+                                        $"[{Common.LoggerHead}]->Sip设备通道信息->{tmpSipDevice.DeviceId}->增加Sip通道成功->({sipChannelInList.SipChannelType.ToString()})->{sipChannelInList.SipChannelDesc.DeviceID}->此设备当前通道数量:{tmpSipDevice.SipChannels.Count}条");
                                 }
                             }
 

@@ -14,6 +14,7 @@ using LibCommon.Structs;
 using LibCommon.Structs.WebRequest;
 using LibCommon.Structs.WebResponse;
 using LibSystemInfo;
+using LinCms.Core.Entities;
 using Newtonsoft.Json;
 using JsonHelper = LibCommon.JsonHelper;
 using Timer = System.Timers.Timer;
@@ -862,6 +863,17 @@ namespace AKStreamKeeper
                     $"[{LoggerHead}]->获取AKStreamKeeper配置文件时异常,系统无法运行->\r\n{JsonHelper.ToJson(rs, Formatting.Indented)}");
                 Environment.Exit(0); //退出程序 
             }
+
+            var config = ORMHelper.Db.Select<SysBasicConfig>().First();
+            if (config != null)
+            {
+                AkStreamKeeperConfig.IpV4Address = config.GatewayIp;
+                AkStreamKeeperConfig.ListenIp = config.GatewayIp;
+                AkStreamKeeperConfig.Candidate = config.GatewayIp;
+                AkStreamKeeperConfig.MinRtpPort = (ushort)config.MediaPortStart;
+                AkStreamKeeperConfig.MaxRtpPort = (ushort)config.MediaPortEnd;
+            }
+
 
             ret = UtilsHelper.CheckFFmpegBin(_akStreamKeeperConfig.FFmpegPath);
             if (!ret)

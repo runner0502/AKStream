@@ -31,8 +31,6 @@ namespace LibCommon.Structs.GB28181
         private Encoding _encoding;
         private bool? _isPassive = true;
         private string? _listenIp = "127.0.0.1";
-        
-
 
         /// <summary>
         /// sip服务器ip地址

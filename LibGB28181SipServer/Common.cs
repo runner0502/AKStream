@@ -325,5 +325,24 @@ namespace LibGB28181SipServer
             };
             return 1;
         }
+
+        public static bool DBConfigToFile()
+        {
+            var config = ORMHelper.Db.Select<LinCms.Core.Entities.SysBasicConfig>().First();
+            if (config == null)
+            {
+                return false;
+            }
+            SipServerConfig.SipIpAddress = config.GatewayIp;
+            SipServerConfig.ListenIp = config.GatewayIp;
+            SipServerConfig.ServerSipDeviceId = config.GatewayCode;
+            SipServerConfig.SipPort = (ushort)config.SignalPort;
+
+            //if (UtilsHelper.WriteJsonConfig(_sipServerConfigPath, _sipServerConfig))
+            //{
+            //    return true;
+            //}
+            return false;
+        }
     }
 }

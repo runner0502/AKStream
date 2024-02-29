@@ -86,7 +86,8 @@ namespace AKStreamWeb.Controllers
 
             SipServerCallBack.SsyncState.State.orgCountBefore =  (int)ORMHelper.Db.Select<organization>().Count();
             SipServerCallBack.SsyncState.State.DeviceCountBefore =  (int)ORMHelper.Db.Select<DeviceNumber>().Count();
-
+            SipServerCallBack.SsyncState.Devices.Clear();
+            SipServerCallBack.SsyncState.Orgs.Clear();
             SipMethodProxy sipMethodProxy = new SipMethodProxy(Common.AkStreamWebConfig.WaitSipRequestTimeOutMSec);
             ResponseStruct rs;
             var sipDevice = LibGB28181SipServer.Common.SipDevices.FindLast(x => x.DeviceInfo!.DeviceID.Equals(deviceId));

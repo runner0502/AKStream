@@ -437,14 +437,14 @@ x.dev.Equals(device.dev)).First();
             }
             SsyncState.State.LastResult = true;
             SsyncState.State.IsProcessing = false;
-            SsyncState.State.orgCountBefore = 0;
-            SsyncState.State.DeviceCountBefore = 0;
-            SsyncState.State.DeviceCount = 0;
-            SsyncState.State.orgCount = 0;
+            //SsyncState.State.orgCountBefore = 0;
+            //SsyncState.State.DeviceCountBefore = 0;
+            //SsyncState.State.DeviceCount = 0;
+            //SsyncState.State.orgCount = 0;
 
-            SsyncState.Devices.Clear();
-            SsyncState.Orgs.Clear();
-            SsyncState.PlatId = "";
+            //SsyncState.Devices.Clear();
+            //SsyncState.Orgs.Clear();
+            //SsyncState.PlatId = "";
         }
     }
 

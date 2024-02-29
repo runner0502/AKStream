@@ -65,6 +65,17 @@ namespace LibGB28181SipServer
                 throw new AkStreamException(rs);
             }
 
+            if (Common.DBConfigToFile()) 
+            {
+                //ret = Common.ReadSipServerConfig(out rs);
+
+                //if (ret < 0 || !rs.Code.Equals(ErrorNumber.None))
+                //{
+                //    GCommon.Logger.Error($"[{Common.LoggerHead}]->加载配置文件失败->{Common.SipServerConfigPath}");
+                //    throw new AkStreamException(rs);
+                //}
+            }
+
             Common.SipServer = this;
             GCommon.Logger.Info($"[{Common.LoggerHead}]->加载配置文件成功->{Common.SipServerConfigPath}");
         }

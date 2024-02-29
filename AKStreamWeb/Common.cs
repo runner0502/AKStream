@@ -15,6 +15,7 @@ using LibGB28181SipClient;
 using LibGB28181SipServer;
 using LibSystemInfo;
 using LibZLMediaKitMediaServer;
+using LinCms.Core.Entities;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -212,6 +213,8 @@ namespace AKStreamWeb
                 Environment.Exit(0); //退出程序
             }
 
+            var config = ORMHelper.Db.Select<SysBasicConfig>().First();
+            Common.AkStreamWebConfig.ListenIp = config.GatewayIp;
 
             string outPath = "";
             if (!string.IsNullOrEmpty(GCommon.OutConfigPath))

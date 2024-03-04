@@ -7,6 +7,10 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <Compile Remove="DBToConfigFile.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
       <ProjectReference Include="..\LibCommon\LibCommon.csproj" />
       <ProjectReference Include="..\LibGB28181SipClient\LibGB28181SipClient.csproj" />
       <ProjectReference Include="..\LibGB28181SipServer\LibGB28181SipServer.csproj" />

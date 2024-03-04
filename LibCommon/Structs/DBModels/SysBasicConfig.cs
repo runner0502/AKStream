@@ -21,18 +21,7 @@ namespace LinCms.Core.Entities {
 		[JsonProperty, Column(Name = "id", StringLength = 20, IsPrimary = true, IsNullable = false)]
 		public string Id { get; set; }
 
-		/// <summary>
-		/// 创建人
-		/// </summary>
-		[JsonProperty, Column(Name = "create_by", DbType = "bigint")]
-		public long? CreateBy { get; set; }
-
-		/// <summary>
-		/// 创建时间
-		/// </summary>
-		[JsonProperty, Column(Name = "create_time", DbType = "datetime")]
-		public DateTime? CreateTime { get; set; }
-
+		
 		/// <summary>
 		/// 网关ID
 		/// </summary>
@@ -51,11 +40,6 @@ namespace LinCms.Core.Entities {
 		[JsonProperty, Column(Name = "gateway_name", IsNullable = false)]
 		public string GatewayName { get; set; }
 
-		/// <summary>
-		/// 是否已删除
-		/// </summary>
-		[JsonProperty, Column(Name = "is_deleted", DbType = "int")]
-		public int IsDeleted { get; set; } = 0;
 
 		/// <summary>
 		/// 媒体端口（结束值）
@@ -86,7 +70,24 @@ namespace LinCms.Core.Entities {
 		/// </summary>
 		[JsonProperty, Column(Name = "update_time", DbType = "datetime")]
 		public DateTime? UpdateTime { get; set; }
+        /// <summary>
+        /// 创建人
+        /// </summary>
+        [JsonProperty, Column(Name = "create_by", DbType = "bigint")]
+        public long? CreateBy { get; set; }
 
-	}
+        /// <summary>
+        /// 创建时间
+        /// </summary>
+        [JsonProperty, Column(Name = "create_time", DbType = "datetime")]
+        public DateTime? CreateTime { get; set; }
+
+        /// <summary>
+        /// 是否已删除
+        /// </summary>
+        [JsonProperty, Column(Name = "is_deleted", DbType = "int")]
+        public int IsDeleted { get; set; } = 0;
+    }
 
 }
+

@@ -55,11 +55,18 @@ namespace AKStreamWeb
             switch (state) 
             {
                 case CallState.STATE_DISCONNECTED:
-                    var call = s_calls[callid];
-                    if (call != null) 
+                    try
                     {
-                        s_calls.Remove(callid);
+                        var call = s_calls[callid];
+                        if (call != null)
+                        {
+                            s_calls.Remove(callid);
+                        }
                     }
+                    catch (System.Exception)
+                    {
+                    }
+                    
                     break;
             }
         }

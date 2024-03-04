@@ -1,5 +1,6 @@
 ﻿using FreeSql.DataAnnotations;
 using Google.Protobuf.WellKnownTypes;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -63,18 +64,48 @@ namespace LibCommon.Structs.DBModels
         public string place { get => _place; set => _place = value; }
 
         private int _ptz_type;
-        [Column(DbType = "int(11)")]
+        [Column(DbType = "int(11)", IsNullable =true)]
         public int ptz_type { get => _ptz_type; set => _ptz_type = value; }
 
         private int _period;
-        [Column(DbType = "int(11)")]
+        [Column(DbType = "int(11)", IsNullable =true) ]
         public int period { get => _period; set => _period = value; }
 
         private DateTime _modify_time;
-        //[Column(DbType = "timestamp")]
+        [Column(IsNullable =true)]
         public DateTime modify_time { get => _modify_time; set => _modify_time = value; }
 
         public int status { get; set; }
+
+
+        /// <summary>
+        /// 修改人
+        /// </summary>
+        [JsonProperty, Column(Name = "update_by", DbType = "bigint")]
+        public long? UpdateBy { get; set; }
+
+        /// <summary>
+        /// 修改时间
+        /// </summary>
+        [JsonProperty, Column(Name = "update_time", DbType = "datetime")]
+        public DateTime? UpdateTime { get; set; }
+        /// <summary>
+        /// 创建人
+        /// </summary>
+        [JsonProperty, Column(Name = "create_by", DbType = "bigint")]
+        public long? CreateBy { get; set; }
+
+        /// <summary>
+        /// 创建时间
+        /// </summary>
+        [JsonProperty, Column(Name = "create_time", DbType = "datetime")]
+        public DateTime? CreateTime { get; set; }
+
+        /// <summary>
+        /// 是否已删除
+        /// </summary>
+        [JsonProperty, Column(Name = "is_deleted", DbType = "int")]
+        public int IsDeleted { get; set; } = 0;
 
     }
 }

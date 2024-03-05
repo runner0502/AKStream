@@ -1,9 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Threading;
 using System.Timers;
 using AKStreamKeeper.AutoTask;
@@ -822,6 +825,14 @@ namespace AKStreamKeeper
                 }
             }
         }
+        private static ORMHelper _ormHelper;
+
+        public static ORMHelper OrmHelper
+        {
+            get => _ormHelper;
+            set => _ormHelper = value;
+        }
+
 
 
         /// <summary>
@@ -863,16 +874,40 @@ namespace AKStreamKeeper
                     $"[{LoggerHead}]->获取AKStreamKeeper配置文件时异常,系统无法运行->\r\n{JsonHelper.ToJson(rs, Formatting.Indented)}");
                 Environment.Exit(0); //退出程序 
             }
+           
 
-            var config = ORMHelper.Db.Select<SysBasicConfig>().First();
-            if (config != null)
+            try
             {
-                AkStreamKeeperConfig.IpV4Address = config.GatewayIp;
-                AkStreamKeeperConfig.ListenIp = config.GatewayIp;
-                AkStreamKeeperConfig.Candidate = config.GatewayIp;
-                AkStreamKeeperConfig.MinRtpPort = (ushort)config.MediaPortStart;
-                AkStreamKeeperConfig.MaxRtpPort = (ushort)config.MediaPortEnd;
+                var textReader = new StreamReader("E:\\back\\AKStream\\AKStreamWeb\\bin\\Debug\\net6.0\\Config\\AKStreamWeb.json");
+                var jsonStr = textReader.ReadToEnd();
+                JsonNode streamWebConfig = JsonObject.Parse(jsonStr);
+                var OrmConnStr = streamWebConfig["OrmConnStr"].AsValue().ToString();
+                var dbType = streamWebConfig["DbType"].AsValue().ToString();
+
+                OrmHelper = new ORMHelper(OrmConnStr, dbType);
+                var config = ORMHelper.Db.Select<SysBasicConfig>().First();
+                if (config != null)
+                {
+                    AkStreamKeeperConfig.IpV4Address = config.GatewayIp;
+                    AkStreamKeeperConfig.ListenIp = config.GatewayIp;
+                    AkStreamKeeperConfig.Candidate = config.GatewayIp;
+                    AkStreamKeeperConfig.MinRtpPort = (ushort)config.MediaPortStart;
+                    AkStreamKeeperConfig.MaxRtpPort = (ushort)config.MediaPortEnd;
+                }
             }
+            catch (Exception ex)
+            {
+                ResponseStruct rsa = new ResponseStruct()
+                {
+                    Code = ErrorNumber.Sys_DataBaseNotReady,
+                    Message = ErrorMessage.ErrorDic![ErrorNumber.Sys_DataBaseNotReady] + ",请检查配置文件中的数据库相关配置信息",
+                };
+                GCommon.Logger.Error(
+                    $"[{LoggerHead}]->数据库连接异常,系统无法运行->\r\n{JsonHelper.ToJson(rsa, Formatting.Indented)}\r\n系统支持以下数据库连接,请根据下表正确设置dBType字段->\r\n");
+                //Environment.Exit(0); //退出程序
+            }
+
+            
 
 
             ret = UtilsHelper.CheckFFmpegBin(_akStreamKeeperConfig.FFmpegPath);

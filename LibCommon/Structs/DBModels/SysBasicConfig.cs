@@ -12,7 +12,7 @@ namespace LinCms.Core.Entities {
 	/// <summary>
 	/// 基础配置表
 	/// </summary>
-	[JsonObject(MemberSerialization.OptIn), Table(Name = "sys_basic_config", DisableSyncStructure = true)]
+	[JsonObject(MemberSerialization.OptIn), Table(Name = "sys_basic_config")]
 	public partial class SysBasicConfig {
 
 		/// <summary>

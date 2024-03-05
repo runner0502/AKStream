@@ -12,7 +12,7 @@ namespace LinCms.Core.Entities {
 	/// <summary>
 	/// 高级配置表
 	/// </summary>
-	[JsonObject(MemberSerialization.OptIn), Table(Name = "sys_advanced_config", DisableSyncStructure = true)]
+	[JsonObject(MemberSerialization.OptIn), Table(Name = "sys_advanced_config")]
 	public partial class SysAdvancedConfig {
 
 		/// <summary>

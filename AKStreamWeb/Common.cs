@@ -10,6 +10,7 @@ using AKStreamWeb.Misc;
 using AKStreamWeb.Services;
 using LibCommon;
 using LibCommon.Structs;
+using LibCommon.Structs.DBModels;
 using LibCommon.Structs.WebRequest;
 using LibGB28181SipClient;
 using LibGB28181SipServer;
@@ -212,9 +213,18 @@ namespace AKStreamWeb
                     $"[{LoggerHead}]->数据库连接异常,系统无法运行->\r\n{JsonHelper.ToJson(rsa, Formatting.Indented)}\r\n系统支持以下数据库连接,请根据下表正确设置dBType字段->\r\n{supportDataBaseList}");
                 Environment.Exit(0); //退出程序
             }
-
+            ORMHelper.Db.Select<SysAdvancedConfig>().Count();
+            ORMHelper.Db.Select<SysBasicConfig>().Count();
+            ORMHelper.Db.Select<Device281Plat>().Count();
+            ORMHelper.Db.Select<biz_licence>().Count();
+            ORMHelper.Db.Select<biz_transcode>().Count();
+            ORMHelper.Db.Select<DeviceNumber>().Count();
+            ORMHelper.Db.Select<organization>().Count();
             var config = ORMHelper.Db.Select<SysBasicConfig>().First();
-            Common.AkStreamWebConfig.ListenIp = config.GatewayIp;
+            if (config != null)
+            {
+                Common.AkStreamWebConfig.ListenIp = config.GatewayIp;
+            }
 
             string outPath = "";
             if (!string.IsNullOrEmpty(GCommon.OutConfigPath))

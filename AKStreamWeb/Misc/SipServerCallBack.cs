@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Threading.Tasks;
 using Google.Protobuf.WellKnownTypes;
 using LibCommon;
 using LibCommon.Enums;
@@ -19,8 +21,7 @@ namespace AKStreamWeb.Misc
     /// </summary>
     public static class SipServerCallBack
     {
-        /// <summary>
-        /// 当设备注册需要鉴权时，用于获取外部的设备密钥
+        /// <summary        /// 当设备注册需要鉴权时，用于获取外部的设备密钥
         /// </summary>
         /// <param name="sipDeviceId"></param>
         /// <returns>返回此设备的密钥</returns>
@@ -170,6 +171,52 @@ x.platid == sipDevice.DeviceId).Set(x=>x.registestate,state).ExecuteAffrowsAsync
             {
                 GCommon.Logger.Debug(
                     $"[{Common.LoggerHead}]->获取设备状态信息成功->{sipDevice.RemoteEndPoint.Address.MapToIPv4().ToString()}-{sipDevice.DeviceId}\r\n{JsonHelper.ToJson(sipDevice.DeviceStatus, Formatting.Indented)}");
+
+
+                lock (sipDevice.SipChannelOptLock) //锁粒度在SipDevice中，不影响其他线程的效率
+                {
+                    var channels = ORMHelper.Db.Select<VideoChannel>().Where<VideoChannel>(a=>a.DeviceId == sipDevice.DeviceId).ToList<VideoChannel>();
+                    foreach (var tmpChannelDev in channels)
+                    {
+
+                        SipChannel sipChannelInList = sipDevice.SipChannels.FindLast(x =>
+                            x.SipChannelDesc.DeviceID.Equals(tmpChannelDev.ChannelId));
+                        if (sipChannelInList == null)
+                        {
+                            
+                            var newSipChannel = new SipChannel()
+                            {
+                                LastUpdateTime = DateTime.Now,
+                                LocalSipEndPoint = sipDevice.LocalSipEndPoint!,
+                                PushStatus = PushStatus.IDLE,
+                                RemoteEndPoint = sipDevice.RemoteEndPoint!,
+                                SipChannelDesc = null,
+                                ParentId = sipDevice.DeviceId,
+                                DeviceId = tmpChannelDev.ChannelId,
+                                TotalNumber = 10,
+                            };
+                            newSipChannel.SipChannelDesc = new Catalog.Item();
+                            newSipChannel.SipChannelDesc.DeviceID = tmpChannelDev.ChannelId;
+                            //if (tmpChannelDev.InfList != null)
+                            //{
+                            //    newSipChannel.SipChannelDesc.InfList = tmpChannelDev.InfList;
+                            //}
+
+                            newSipChannel.SipChannelStatus = DevStatus.ON;
+                            newSipChannel.SipChannelType = LibGB28181SipServer.Common.GetSipChannelType(tmpChannelDev.ChannelId);
+                            if (newSipChannel.SipChannelType == SipChannelType.AudioChannel ||
+                                newSipChannel.SipChannelType == SipChannelType.VideoChannel)
+                            {
+                                var ret = UtilsHelper.GetSSRCInfo(sipDevice.DeviceId,
+                                    newSipChannel.DeviceId);
+                                newSipChannel.SsrcId = ret.Key;
+                                newSipChannel.Stream = ret.Value;
+                            }
+                            sipDevice.SipChannels.Add(newSipChannel);
+
+                        }
+                    }
+                }
             }
             else
             {

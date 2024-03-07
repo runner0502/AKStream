@@ -95,6 +95,7 @@ namespace AKStreamWeb
             //string channelId = "34020000001320000012";
             string deviceId = "";
             string channelId = "";
+            string numberdb = "";
 
         
             string findStr = "To: sip:";
@@ -131,21 +132,29 @@ namespace AKStreamWeb
                         //    channelId = strs[1];
                         //}
 
-                        channelId = to;
+                        numberdb = to;
                     }
                 }
             }
 
-            //var channel = ORMHelper.Db.Select<DeviceNumber>().Where(x => x.dev.Equals(channelId)).First();
+            var channeldb = ORMHelper.Db.Select<DeviceNumber>().Where(x => x.num.Equals(numberdb)).First();
 
-            //if (channel != null)
-            //{
-            //    var plat= ORMHelper.Db.Select<Device281Plat>().Where(x => x.ipaddr.Equals(channel.domain)).First();
-            //    if (plat != null)
-            //    {
-            //        deviceId = plat.platid;
-            //    }
-            //}
+            if (channeldb != null)
+            {
+                //var plat = ORMHelper.Db.Select<Device281Plat>().Where(x => x.ipaddr.Equals(channel.domain)).First();
+                //if (plat != null)
+                //{
+                //    deviceId = plat.platid;
+                //}
+                channelId = channeldb.dev;
+            }
+            if (string.IsNullOrEmpty(channelId))
+            {
+                GCommon.Logger.Warn("没有这个号码：" + numberdb);
+                return;
+            }
+
+
 
             foreach (var device in LibGB28181SipServer.Common.SipDevices)
             {

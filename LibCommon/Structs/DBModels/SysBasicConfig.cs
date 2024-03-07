@@ -59,6 +59,8 @@ namespace LinCms.Core.Entities {
 		[JsonProperty, Column(Name = "signal_port", DbType = "int")]
 		public int SignalPort { get; set; }
 
+
+
 		/// <summary>
 		/// 修改人
 		/// </summary>

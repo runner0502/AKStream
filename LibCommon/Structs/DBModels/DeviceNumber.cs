@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace LibCommon.Structs.DBModels
 {
     [Serializable]
-    [Table(Name = "DeviceNumber")]
+    [Table(Name = "devicenumber")]
     public class DeviceNumber
     {
         [Column(IsPrimary = true, IsIdentity =true  )]

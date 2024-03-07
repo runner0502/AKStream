@@ -10,7 +10,7 @@ namespace LibCommon.Structs.DBModels
     /// 摄像头通道实例
     /// </summary>
     [Serializable]
-    [Table(Name = "VideoChannels")]
+    [Table(Name = "videochannels")]
     [Index("idx_vcs_maid", "MainId", true)]
     [Index("idx_vcs_chnn", "ChannelName", false)]
     [Index("idx_vcs_msid", "MediaServerId", false)]

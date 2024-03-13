@@ -1,7 +1,7 @@
 {
   "MediaServerFirstToRestart": true,
   "DbType": "MySql",
-  "OrmConnStr": "Data Source=172.19.2.168;Port=3306;User ID=root3;Password=Xunyi666!@#; Initial Catalog=AKStream;Charset=utf8; SslMode=none;Min pool size=1;",
+  "OrmConnStr": "Data Source=192.168.31.57;Port=3306;User ID=root3;Password=Xunyi666!@#; Initial Catalog=AKStream;Charset=utf8; SslMode=none;Min pool size=1;",
   "WebApiPort": 5800,
   "AccessKey": "",
   "HttpClientTimeoutSec": 5,
@@ -11,5 +11,5 @@
   "EnableGB28181Server": true,
   "EnableGB28181Client": false,
   "ZlmFlvPrefix" : "live",
-  "ListenIp": "172.19.2.166"
+  "ListenIp": "192.168.31.57"
 }

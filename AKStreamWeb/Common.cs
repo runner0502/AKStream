@@ -44,7 +44,7 @@ namespace AKStreamWeb
         private static AutoRecord _autoRecord;
         private static AutoTaskOther _autoTaskOther;
 
-        private static Bridge bridge = Bridge.GetInstance();
+        private static Bridge bridge;
 
 
         private static ConcurrentDictionary<string, WebHookNeedReturnTask> _webHookNeedReturnTask =
@@ -282,13 +282,15 @@ namespace AKStreamWeb
                 }
             }
 
+            bridge = Bridge.GetInstance();
+
             //_autoLive = new AutoLive();
-           // _autoRecord = new AutoRecord();
-           // _autoTaskOther = new AutoTaskOther();
+            // _autoRecord = new AutoRecord();
+            // _autoTaskOther = new AutoTaskOther();
 
 
 
-          
+
 
 
         }

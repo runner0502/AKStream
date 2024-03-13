@@ -12,6 +12,8 @@ using WebSocketSharp;
 using LibCommon.Structs.GB28181.XML;
 using System.Threading;
 using SIPSorcery.SIP;
+using LinCms.Core.Entities;
+using System.Runtime.InteropServices;
 
 namespace AKStreamWeb
 {
@@ -27,6 +29,8 @@ namespace AKStreamWeb
             }
             return s_instance;
         }
+
+        private static bool _transcode = false;
 
         private Bridge()
         {
@@ -46,6 +50,17 @@ namespace AKStreamWeb
             SPhoneSDK.SetDefaultVideoDevice(1);
 
             //_timer = new Timer(TestTimerCB, null, 10000, 10000);
+
+            var basicConfig = ORMHelper.Db.Select<SysAdvancedConfig>().First();
+            if (basicConfig != null) 
+            {
+                if (basicConfig.TranscodeEnable == 1)
+                {
+                    _transcode = true;
+                   // SPhoneSDK.SetVidHardwareEncoding(false);
+                }
+            }
+
 
 
         }
@@ -217,9 +232,59 @@ namespace AKStreamWeb
             string url = ret.PlayUrl.Find(a => a.StartsWith("rtsp"));
             if (!string.IsNullOrEmpty(url))
             {
+                SetHardEncodeVideo(callid, 1);
+
+                var basicConfig = ORMHelper.Db.Select<SysAdvancedConfig>().First();
+                if (basicConfig != null)
+                {
+                    if (basicConfig.TranscodeEnable == 1)
+                    {
+                        _transcode = true;
+                        //SPhoneSDK.SetVidHardwareEncoding(false);
+                    }
+                }
+                if (_transcode)
+                {
+                    var transcodeConfig = ORMHelper.Db.Select<biz_transcode>().Where(a=>number.StartsWith(a.caller_number)).First();
+                    if (transcodeConfig != null)
+                    {
+                        SetHardEncodeVideo(callid, 0);
+                        if (transcodeConfig.EncoderType == 0)
+                        {
+                            SetVideoCodecPriority("H265/103", 0);
+                        }
+                        else
+                        {
+                            SetVideoCodecPriority("H265/103", 254);
+                        }
+
+                        if (!string.IsNullOrEmpty(transcodeConfig.reslution))
+                        {
+                            var res = transcodeConfig.reslution.Split("*");
+                            if (res != null && res.Length == 2)
+                            {
+                                try
+                                {
+                                    int width = int.Parse(res[0]);
+                                    int height = int.Parse(res[1]);
+                                    if (width > 0  && height > 0)
+                                    {
+                                        SetVideoCodecParam(width, height, 30, 650 * 1024);
+                                    }
+                                }
+                                catch (System.Exception)
+                                {
+                                    GCommon.Logger.Warn("transcode reslution format error");
+                                }
+                            }
+                        }
+                    }
+                }
                 int deviceIdVideo = SetupCaptureVideoFile(url);
                 if (deviceIdVideo > 0)
                 {
+                    //SPhoneSDK.ChangeVideoDevice1(callid, deviceIdVideo);
+                    SPhoneSDK.ChangeVideoDevice1(callid, deviceIdVideo);
                     SPhoneSDK.SetDefaultVideoDevice(deviceIdVideo);
                 }
 

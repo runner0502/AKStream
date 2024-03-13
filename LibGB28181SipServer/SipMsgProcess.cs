@@ -243,6 +243,7 @@ namespace LibGB28181SipServer
                                     sipChannelInList.LastUpdateTime = DateTime.Now; //如果sip通道已经存在，则更新相关字段
                                     sipChannelInList.SipChannelStatus = tmpChannelDev.Status;
                                     sipChannelInList.SipChannelDesc = tmpChannelDev;
+                                    sipChannelInList.TotalNumber = tatolNum;
                                     if (tmpChannelDev.InfList != null)
                                     {
                                         sipChannelInList.SipChannelDesc.InfList = tmpChannelDev.InfList;

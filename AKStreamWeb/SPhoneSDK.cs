@@ -313,6 +313,8 @@ namespace XyCallLayer
         //切换视频设备
         [DllImport(@"DLL\SPhone.dll")]
         public extern static bool ChangeVideoDevice(int callid, int deviceIndex);
+        [DllImport(@"DLL\SPhone.dll")]
+        public extern static bool ChangeVideoDevice1(int callid, int deviceIndex);
         //切换音频输入设备
         [DllImport(@"DLL\SPhone.dll")]
         public extern static bool ChangeAudCaptureDevice(int callid, int deviceIndex);
@@ -520,5 +522,11 @@ namespace XyCallLayer
         public extern static int SetupCaptureVideoFile(string fileName);
         [DllImport(@"DLL\SPhone.dll")]
         public extern static int SetupCaptureAudioFile(string fileName);
+        [DllImport(@"DLL\SPhone.dll")]
+        public extern static void SetVidHardwareEncoding(bool value);
+        [DllImport(@"DLL\SPhone.dll")]
+        public extern static void SetHardEncodeVideo(int callid, int enable);
+
+
     }
 }

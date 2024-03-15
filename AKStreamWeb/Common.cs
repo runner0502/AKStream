@@ -381,15 +381,30 @@ namespace AKStreamWeb
 
             string msg = string.Empty;
             var result = License.DoExtraValidation(out msg);
-            if (result != LicenseStatus.VALID)
+            if (result == LicenseStatus.VALID)
+            {
+                var licenceInDB = ORMHelper.Db.Select<biz_licence>().First();
+                var newLicence = new biz_licence();
+                newLicence.expire = License.ExpireDateTime;
+                newLicence.max_device_number = License.MaxDeviceCount;
+                newLicence.max_transcode_number = License.MaxRunCount;
+                if (licenceInDB != null)
+                {
+                    ORMHelper.Db.Update<biz_licence>(newLicence).ExecuteAffrows();
+                }
+                else
+                {
+                   
+                    ORMHelper.Db.Insert<biz_licence>(newLicence).ExecuteAffrows();
+                }
+               
+                
+            }
+            else
             {
                 GCommon.Logger.Error("license fail invalid");
                 //Program._builder.StopAsync();
                 Environment.Exit(0);
-            }
-            else
-            {
-                
             }
         }
 

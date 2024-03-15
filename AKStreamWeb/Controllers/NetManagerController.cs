@@ -15,16 +15,24 @@ namespace AKStreamWeb.Controllers
     public class NetManagerController
     {
         /// <summary>
-        /// 获取服务运行状态， 运行状态正常返回true, 否则返回false
+        /// 获取服务运行状态
         /// </summary>
         /// <param name="AccessKey"></param>
-        /// <returns>运行状态正常返回true, 否则返回false</returns>
+        /// <returns>运行状态 （0：错误状态， 1： 正常状态，2： 未授权状态）</returns>
         [Route("GetServerStatus")]
         [HttpGet]
-        public bool GetServerStatus(
+        public int GetServerStatus(
             [FromHeader(Name = "AccessKey")] string AccessKey)
         {
-            return true;
+            if (Common.License == null || Common.License.ExpireDateTime < DateTime.Now)
+            {
+                return 2;
+            }
+            else
+            {
+                return 1;
+            }
+            return 1;
         }
         /// <summary>
         /// 获取呼叫列表
@@ -272,6 +280,7 @@ namespace AKStreamWeb.Controllers
             /// </summary>
             public bool LastResult { get; set; }
         }
+
     }
 
 }

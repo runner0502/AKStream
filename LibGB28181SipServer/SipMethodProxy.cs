@@ -195,6 +195,26 @@ namespace LibGB28181SipServer
             }
         }
 
+        public bool BroadcastRequest(string deviceId, string channelId)
+        {
+            try
+            {
+                Common.SipServer.BroadcastRequest(deviceId, channelId, _autoResetEvent, _timeout);
+                _commandType = CommandType.Broadcast;
+                var isTimeout = _autoResetEvent.WaitOne(_timeout);
+                if (!isTimeout)
+                {
+                    Console.WriteLine($"[{Common.LoggerHead}]->Sip代理语音广播失败");
+                    return false;
+                }
+                return true;
+            }
+            finally
+            {
+                Dispose();
+            }
+        }
+
 
         /// <summary>
         /// 请求终止回放流

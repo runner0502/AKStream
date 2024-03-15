@@ -176,6 +176,7 @@ namespace LibCommon
         /// </summary>
         /// <param name="sipDeviceId"></param>
         public delegate string DeviceAuthentication(string sipDeviceId);
+        public delegate void ReceiveInviteDelegate(ShareInviteInfo info, SIPRequest req);
 
         /// <summary>
         /// Sip客户端收到Sip服务端的消息时

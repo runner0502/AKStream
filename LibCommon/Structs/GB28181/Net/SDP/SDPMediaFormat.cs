@@ -61,6 +61,10 @@ namespace LibCommon.Structs.GB28181.Net.SDP
             Name = format.ToString();
             IsStandardAttribute = true;
             ClockRate = DEFAULT_CLOCK_RATE;
+            if (format == SDPMediaFormatsEnum.PCMA)
+            {
+                ClockRate = 8000;
+            }
         }
 
         public string FormatAttribute { get; private set; }

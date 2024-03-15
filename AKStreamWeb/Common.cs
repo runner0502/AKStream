@@ -243,6 +243,7 @@ namespace AKStreamWeb
                 SipMsgProcess.OnInviteHistoryVideoFinished += SipServerCallBack.OnInviteHistoryVideoFinished;
                 SipMsgProcess.OnCatalogReceived += SipServerCallBack.OnCatalogReceived;
                 SipMsgProcess.OnDeviceAuthentication += SipServerCallBack.OnAuthentication;
+                 
             }
 
             GCommon.Logger.Info($"[{LoggerHead}]->配置情况->是否启用Sip服务端->{AkStreamWebConfig.EnableGB28181Server}");
@@ -295,8 +296,15 @@ namespace AKStreamWeb
 
         }
 
-        
+        private static void SipMsgProcess_OnReceiveInvite1(ShareInviteInfo info, SIPSorcery.SIP.SIPRequest req)
+        {
+            throw new NotImplementedException();
+        }
 
+        private static void SipMsgProcess_OnReceiveInvite(ShareInviteInfo info, SIPSorcery.SIP.SIPRequest req)
+        {
+            throw new NotImplementedException();
+        }
 
         public static string Version // 版本号
         {

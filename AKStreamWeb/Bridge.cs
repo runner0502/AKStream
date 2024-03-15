@@ -14,6 +14,8 @@ using System.Threading;
 using SIPSorcery.SIP;
 using LinCms.Core.Entities;
 using System.Runtime.InteropServices;
+using LibGB28181SipServer;
+using System.Linq;
 
 namespace AKStreamWeb
 {
@@ -31,6 +33,7 @@ namespace AKStreamWeb
         }
 
         private static bool _transcode = false;
+        private static bool _enableVoice = false;
 
         private Bridge()
         {
@@ -59,10 +62,26 @@ namespace AKStreamWeb
                     _transcode = true;
                    // SPhoneSDK.SetVidHardwareEncoding(false);
                 }
+                if (basicConfig.IntercomEnable == 1)
+                {
+                    _enableVoice = true;
+                }
             }
 
+            SipMsgProcess.OnReceiveInvite += SipMsgProcess_OnReceiveInvite;
 
+        }
 
+        static int s_LocalPort = 7000;
+
+        private void SipMsgProcess_OnReceiveInvite(LibCommon.Structs.ShareInviteInfo info, SIPRequest req)
+        {
+            if (s_calls.Count > 0)
+            {
+                StartAudioSendStream(s_LocalPort, info.RemoteIpAddress, info.RemotePort, s_calls.Keys.Last());
+                info.LocalRtpPort = (ushort)s_LocalPort;
+                Common.SipServer.SendInviteOK(req, info);
+            }
         }
 
         public void OnCallState(int callid, string number, CallState state, string stateText, bool isVideo)
@@ -311,6 +330,12 @@ namespace AKStreamWeb
 
 
                 Answer(callid, true);
+                if (_enableVoice)
+                {
+                    SipMethodProxy sipMethodProxy = new SipMethodProxy(Common.AkStreamWebConfig.WaitSipRequestTimeOutMSec);
+                    var result = sipMethodProxy.BroadcastRequest(deviceId, channelId);
+                }
+
             }
 
         }

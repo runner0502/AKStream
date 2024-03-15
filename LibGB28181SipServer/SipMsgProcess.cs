@@ -8,6 +8,7 @@ using LibCommon;
 using LibCommon.Enums;
 using LibCommon.Structs;
 using LibCommon.Structs.GB28181;
+using LibCommon.Structs.GB28181.Net.SDP;
 using LibCommon.Structs.GB28181.Net.SIP;
 using LibCommon.Structs.GB28181.XML;
 using Newtonsoft.Json;
@@ -307,6 +308,265 @@ namespace LibGB28181SipServer
             await Common.SipServer.SipTransport.SendResponseAsync(okResponse);
         }
 
+        private static async Task Send100try(SIPRequest sipRequest)
+        {
+            SIPResponseStatusCodesEnum keepAliveResponse = SIPResponseStatusCodesEnum.Trying;
+            SIPResponse okResponse = SIPResponse.GetResponse(sipRequest, keepAliveResponse, null);
+            await Common.SipServer.SipTransport.SendResponseAsync(okResponse);
+        }
+
+        /// <summary>
+        /// 获取流共享信息
+        /// </summary>
+        /// <param name="req"></param>
+        /// <returns></returns>
+        private static bool GetShareInfo(SIPRequest req, out ShareInviteInfo info)
+        {
+            info = null;
+            var sdpBody = req.Body;
+
+            try
+            {
+                string mediaip = "";
+                ushort mediaport = 0;
+                string ssrc = "";
+                string channelid =
+                    req.Header.Subject.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries)[
+                        0];
+                channelid = channelid.Substring(0, channelid.IndexOf(':'));
+                Console.WriteLine(channelid);
+
+                string[] sdpBodys = sdpBody.Split("\r\n", StringSplitOptions.RemoveEmptyEntries);
+                if (sdpBodys.Length == 0)
+                {
+                    sdpBodys = sdpBody.Split("\n", StringSplitOptions.RemoveEmptyEntries);
+                }
+
+                if (sdpBodys.Length == 0)
+                {
+                    sdpBodys = sdpBody.Split("\r", StringSplitOptions.RemoveEmptyEntries);
+                }
+
+                foreach (var line in sdpBodys)
+                {
+                    if (line.Trim().ToLower().StartsWith("o="))
+                    {
+                        var tmp = line.ToLower().Split("ip4", StringSplitOptions.RemoveEmptyEntries);
+                        if (tmp.Length == 2)
+                        {
+                            mediaip = tmp[1];
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                    }
+
+                    if (line.Trim().ToLower().StartsWith("m=audio"))
+                    {
+                        mediaport = ushort.Parse(UtilsHelper.GetValue(line.ToLower(), "m\\=audio", "rtp").Trim());
+                    }
+
+                    if (line.Trim().ToLower().StartsWith("y="))
+                    {
+                        var tmp2 = line.Split("=", StringSplitOptions.RemoveEmptyEntries);
+                        if (tmp2.Length == 2)
+                        {
+                            ssrc = tmp2[1];
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                    }
+                }
+
+                ResponseStruct rs;
+               //var shareList = WebApiHelper.GetShareChannelList(out rs);
+                //if (rs.Code.Equals(ErrorNumber.None) && shareList != null)
+                {
+                    //var obj = shareList.FindLast(x =>
+                    //    x.ShareDeviceId.Equals(channelid));
+                    //if (obj != null)
+                    {
+                        info = new ShareInviteInfo()
+                        {
+                            ChannelId = channelid.Trim(),
+                            RemoteIpAddress = mediaip.Trim(),
+                            RemotePort = mediaport,
+                            Ssrc = ssrc.Trim(),
+                            CallId = req.Header.CallId.Trim(),
+                            Cseq = req.Header.CSeq,
+                            FromTag = req.Header.From.FromTag,
+                            ToTag = req.Header.To.ToTag,
+                            //MediaServerId = obj.MediaServerId.Trim(),
+                            //Stream = obj.MainId.Trim(),
+                            //App = obj.App.Trim(),
+                            //Vhost = obj.Vhost.Trim(),
+                            Is_Udp = true,
+                        };
+
+                        GCommon.Logger.Debug(
+                            $"[{Common.LoggerHead}]->获取sdp协商信息成功->{JsonHelper.ToJson(info)}");
+                        return true;
+                    }
+                }
+               
+            }
+            catch
+            {
+                return false;
+            }
+
+            return false;
+        }
+
+        static int _localPort = 7000;
+
+        private static bool CreateSdp(SIPRequest reqold, ref ShareInviteInfo info, out string sdpout)
+        {
+            sdpout = "";
+            var from = reqold.Header.From;
+            var to = reqold.Header.To;
+            string callId = reqold.Header.CallId;
+            SIPRequest req = SIPRequest.GetRequest(SIPMethodsEnum.INVITE, reqold.Header.To.ToURI,
+                new SIPToHeader(to.ToName, to.ToURI, to.ToTag),
+                new SIPFromHeader("", from.FromURI, from.FromTag));
+            req.Header.Contact = new List<SIPContactHeader>()
+                { new SIPContactHeader(reqold.Header.From.FromName, reqold.Header.From.FromURI) };
+            req.Header.UserAgent = ConstString.SIP_USERAGENT_STRING;
+            req.Header.Allow = null;
+            req.Header.Vias = reqold.Header.Vias;
+            req.Header.CallId = callId;
+            req.Header.CSeq = reqold.Header.CSeq;
+            var sdpConn = new SDPConnectionInformation(Common.SipServerConfig.SipIpAddress);
+            var sdp = new SDP()
+            {
+                Version = 0,
+                SessionId = "0",
+                Username = Common.SipServerConfig.ServerSipDeviceId,
+                SessionName = "Talk",
+                Connection = sdpConn,
+                Timing = "0 0",
+                Address = Common.SipServerConfig.SipIpAddress,
+            };
+
+            //var psFormat = new SDPMediaFormat(SDPMediaFormatsEnum.PS)
+            //{
+            //    IsStandardAttribute = false,
+            //};
+            var h264Format = new SDPMediaFormat(SDPMediaFormatsEnum.PCMA)
+            {
+                IsStandardAttribute = false,
+            };
+
+            ResponseStruct rs;
+            if ( info.LocalRtpPort > 0)
+            {
+                var media = new SDPMediaAnnouncement()
+                {
+                    Media = SDPMediaTypesEnum.audio,
+                    Port = info.LocalRtpPort,
+                };
+                //info.LocalRtpPort = rtpPort;
+                //media.MediaFormats.Add(psFormat);
+                media.MediaFormats.Add(h264Format);
+                media.AddExtra("a=sendonly");
+                media.Transport = "RTP/AVP";
+                //media.AddFormatParameterAttribute(psFormat.FormatID, psFormat.Name);
+                media.AddFormatParameterAttribute(h264Format.FormatID, h264Format.Name);
+                
+                //media.AddExtra($"a=username:{Common.SipServerConfig.SipUsername}");
+                //media.AddExtra($"a=password:{Common.SipServerConfig.SipPassword}");
+                media.AddExtra($"y={info.Ssrc}");
+                media.AddExtra("f=");
+                sdp.Media.Add(media);
+                sdpout = sdp.ToString();
+                return true;
+            }
+
+            GCommon.Logger.Warn(
+                $"[{Common.LoggerHead}]->申请rtp(发送)端口失败->");
+            return false;
+        }
+
+
+        /// <summary>
+        /// 创建invite协商结果
+        /// </summary>
+        /// <param name="oldreq"></param>
+        /// <param name="sdp"></param>
+        /// <returns></returns>
+        private static SIPResponse CreateInviteResponse(SIPRequest oldreq, string sdp)
+        {
+            var res = SIPResponse.GetResponse(oldreq, SIPResponseStatusCodesEnum.Ok, null);
+            //res.Header.UserAgent = Common.SipUserAgent;
+            res.Header.ContentType = "Application/sdp";
+            res.Header.CallId = oldreq.Header.CallId;
+            res.Header.To.ToTag = UtilsHelper.CreateNewCSeq().ToString();
+           // _catalogCallId = res.Header.CallId;
+            res.Header.CSeq = oldreq.Header.CSeq;
+            res.Header.CSeqMethod = SIPMethodsEnum.INVITE;
+            res.Body = sdp;
+
+            return res;
+        }
+
+        private static async Task ProcessInvite(SIPRequest sipRequest)
+        {
+            //SIPResponseStatusCodesEnum keepAliveResponse = SIPResponseStatusCodesEnum.Ok;
+            //SIPResponse okResponse = SIPResponse.GetResponse(sipRequest, keepAliveResponse, null);
+            //await Common.SipServer.SipTransport.SendResponseAsync(okResponse);
+
+            ShareInviteInfo shareinfo = null;
+            var shareinfook = GetShareInfo(sipRequest, out shareinfo);
+            if (OnReceiveInvite != null)
+            {
+                OnReceiveInvite(shareinfo, sipRequest);
+            }
+        }
+
+          public static  void SendInviteOk(SIPRequest sipRequest, ShareInviteInfo shareinfo)
+        {
+            //SIPResponseStatusCodesEnum keepAliveResponse = SIPResponseStatusCodesEnum.Ok;
+            //SIPResponse okResponse = SIPResponse.GetResponse(sipRequest, keepAliveResponse, null);
+            //await Common.SipServer.SipTransport.SendResponseAsync(okResponse);
+
+
+            if (shareinfo != null)
+            {
+                string sdp = "";
+                var sdpok = CreateSdp(sipRequest, ref shareinfo, out sdp);
+                if (sdpok && !string.IsNullOrEmpty(sdp))
+                {
+                    var response = CreateInviteResponse(sipRequest, sdp);
+                    shareinfo.ToTag = response.Header.To.ToTag;
+                     Common.SipServer.SipTransport.SendResponseAsync(response);
+                    //retok = OnInviteChannel?.Invoke(shareinfo, out rs);
+                    //if (retok == true && rs.Code.Equals(ErrorNumber.None))
+                    //{
+                    //    GCommon.Logger.Info(
+                    //        $"[{Common.LoggerHead}]->共享推流成功->{sipRequest.RemoteSIPEndPoint}->{JsonHelper.ToJson(shareinfo)}");
+                    //}
+                    //else
+                    //{
+                    //    GCommon.Logger.Warn(
+                    //        $"[{Common.LoggerHead}]->共享推流失败->{sipRequest.RemoteSIPEndPoint}->{JsonHelper.ToJson(shareinfo)}->{JsonHelper.ToJson(rs)}");
+                    //}
+                }
+                else
+                {
+                    GCommon.Logger.Warn(
+                        $"[{Common.LoggerHead}]->共享推流失败->{sipRequest.RemoteSIPEndPoint}->{JsonHelper.ToJson(shareinfo)}");
+                }
+            }
+            else
+            {
+                GCommon.Logger.Warn(
+                    $"[{Common.LoggerHead}]->共享推流失败->{sipRequest.RemoteSIPEndPoint}->{JsonHelper.ToJson(shareinfo)}");
+            }
+        }
+
         /// <summary>
         /// 当收到心跳数据而Sip设备处于未注册状态，发送心跳异常给设备，让设备重新注册
         /// </summary>
@@ -510,6 +770,9 @@ namespace LibGB28181SipServer
                             }
                         }
 
+                        break;
+                    case "BROADCAST":
+                        await SendOkMessage(sipRequest);
                         break;
                 }
             }
@@ -836,6 +1099,10 @@ namespace LibGB28181SipServer
                     break;
                 case SIPMethodsEnum.MESSAGE: //心跳、目录查询、设备信息、设备状态等消息的内容处理
                     await MessageProcess(localSipChannel, localSipEndPoint, remoteEndPoint, sipRequest);
+                    break;
+                case SIPMethodsEnum.INVITE:
+                    await Send100try(sipRequest);
+                    await ProcessInvite(sipRequest);
                     break;
             }
         }
@@ -1238,6 +1505,7 @@ namespace LibGB28181SipServer
         /// 当设备发生注册鉴权时，需要返回值为此设备的鉴权密钥
         /// </summary>
         public static event GCommon.DeviceAuthentication OnDeviceAuthentication = null!;
+        public static event GCommon.ReceiveInviteDelegate OnReceiveInvite = null!;
 
         #endregion
     }

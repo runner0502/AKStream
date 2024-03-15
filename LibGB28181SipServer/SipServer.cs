@@ -2197,5 +2197,64 @@ namespace LibGB28181SipServer
                 throw new AkStreamException(rs);
             }
         }
+
+        public void BroadcastRequest(string deviceId, string channelId, AutoResetEvent evnt, int timeout = 5000)
+        {
+            var tmpSipDevice = Common.SipDevices.FindLast(x => x.DeviceId.Equals(deviceId));
+            if (tmpSipDevice == null) //设备是否在列表中存在
+            {
+                try
+                {
+                    evnt.Set();
+                }
+                catch (Exception ex)
+                {
+                    //throw new UserFriendlyException("BroadcastRequest-->AutoResetEvent.Set异常", ErrorNumber.Sys_AutoResetEventExcept.ToString(), details: ex.Message, ex);
+                }
+                return;
+            }
+            SIPMethodsEnum method = SIPMethodsEnum.MESSAGE;
+            VoiceBroadcastNotify voiceBroadcast = new VoiceBroadcastNotify()
+            {
+                CmdType = CommandType.Broadcast,
+                SourceID = Common.SipServerConfig.ServerSipDeviceId,//deviceId,
+                TargetID = channelId,//"34020000001370000001",//"34020000001320000068",//channelId,//"34020000001370000001",
+                SN = new Random().Next(1, ushort.MaxValue),
+            };
+
+
+            try
+            {
+                string xmlBody = VoiceBroadcastNotify.Instance.Save<VoiceBroadcastNotify>(voiceBroadcast);
+                string subject =
+                       $"{Common.SipServerConfig.ServerSipDeviceId}:{0},{deviceId}:{new Random().Next(100, ushort.MaxValue)}";
+                Func<SipDevice, SIPMethodsEnum, string, string, string, CommandType, bool, AutoResetEvent,
+                            AutoResetEvent, object, int, Task
+                        >
+                request =
+                            SendRequestViaSipDevice;
+                request(tmpSipDevice, method, ConstString.Application_MANSCDP, subject, xmlBody,
+                    voiceBroadcast.CmdType, true, evnt, null, null, timeout);
+
+
+            }
+            catch (AkStreamException ex)
+            {
+                try
+                {
+                    evnt.Set();
+                }
+                catch (Exception e)
+                {
+                    //throw new UserFriendlyException("BroadcastRequest-->AutoResetEvent.Set异常", ErrorNumber.Sys_AutoResetEventExcept.ToString(), details: e.Message, e);
+                }
+            }
+        }
+
+        public void SendInviteOK(SIPRequest req, ShareInviteInfo info)
+        {
+            SipMsgProcess.SendInviteOk(req, info);
+        }
+    
     }
 }

@@ -213,25 +213,12 @@ namespace AKStreamWeb
                     $"[{LoggerHead}]->数据库连接异常,系统无法运行->\r\n{JsonHelper.ToJson(rsa, Formatting.Indented)}\r\n系统支持以下数据库连接,请根据下表正确设置dBType字段->\r\n{supportDataBaseList}");
                 Environment.Exit(0); //退出程序
             }
-            ORMHelper.Db.Select<SysAdvancedConfig>().Count();
-            ORMHelper.Db.Select<SysBasicConfig>().Count();
-            ORMHelper.Db.Select<Device281Plat>().Count();
-            ORMHelper.Db.Select<biz_licence>().Count();
-            ORMHelper.Db.Select<biz_transcode>().Count();
-            ORMHelper.Db.Select<DeviceNumber>().Count();
-            ORMHelper.Db.Select<organization>().Count();
-            var config = ORMHelper.Db.Select<SysBasicConfig>().First();
-            if (config != null)
-            {
-                Common.AkStreamWebConfig.ListenIp = config.GatewayIp;
-            }
 
             string outPath = "";
             if (!string.IsNullOrEmpty(GCommon.OutConfigPath))
             {
                 outPath = GCommon.OutConfigPath;
             }
-
             if (AkStreamWebConfig.EnableGB28181Server == null || AkStreamWebConfig.EnableGB28181Server == true)
             {
                 SipServer = new SipServer(outPath);
@@ -243,10 +230,56 @@ namespace AKStreamWeb
                 SipMsgProcess.OnInviteHistoryVideoFinished += SipServerCallBack.OnInviteHistoryVideoFinished;
                 SipMsgProcess.OnCatalogReceived += SipServerCallBack.OnCatalogReceived;
                 SipMsgProcess.OnDeviceAuthentication += SipServerCallBack.OnAuthentication;
-                 
+
             }
 
             GCommon.Logger.Info($"[{LoggerHead}]->配置情况->是否启用Sip服务端->{AkStreamWebConfig.EnableGB28181Server}");
+            if (ORMHelper.Db.Select<SysAdvancedConfig>().Count() == 0)
+            {
+                SysAdvancedConfig advancedConfig = new SysAdvancedConfig();
+                advancedConfig.TranscodeEnable = 1;
+                advancedConfig.AuthEnable = 1;
+                advancedConfig.GpsEnable = 1;
+                advancedConfig.Id = "0";
+                advancedConfig.IntercomEnable = 1;
+                advancedConfig.IsDeleted = 0;
+                advancedConfig.CreateTime = DateTime.Now;
+                advancedConfig.UpdateTime = DateTime.Now;
+                ORMHelper.Db.Insert(advancedConfig).ExecuteAffrows();
+            }
+            var basicConfigCount = ORMHelper.Db.Select<SysBasicConfig>().Count();
+            if (basicConfigCount == 0)
+            {
+                SysBasicConfig basicconfig = new SysBasicConfig();
+                basicconfig.Id = "0";
+                basicconfig.SignalPort = LibGB28181SipServer.Common.SipServerConfig.SipPort;
+                
+                basicconfig.GatewayCode = LibGB28181SipServer.Common.SipServerConfig.ServerSipDeviceId;
+                basicconfig.GatewayIp = LibGB28181SipServer.Common.SipServerConfig.SipIpAddress;
+                basicconfig.GatewayName = "视频监控网关系统";
+                basicconfig.MediaPortStart = 20000;
+                basicconfig.MediaPortEnd = 25000;
+                basicconfig.IsDeleted = 0;
+                basicconfig.CreateTime = DateTime.Now;
+                basicconfig.UpdateTime = DateTime.Now;
+                ORMHelper.Db.Insert(basicconfig).ExecuteAffrows();
+            }
+            ORMHelper.Db.Select<Device281Plat>().Count();
+            ORMHelper.Db.Select<biz_licence>().Count();
+            ORMHelper.Db.Select<biz_transcode>().Count();
+            ORMHelper.Db.Select<DeviceNumber>().Count();
+            ORMHelper.Db.Select<organization>().Count();
+
+
+            //var config = ORMHelper.Db.Select<SysBasicConfig>().First();
+            //if (config != null)
+            //{
+            //    Common.AkStreamWebConfig.ListenIp = config.GatewayIp;
+            //}
+
+            
+
+
             if (AkStreamWebConfig.EnableGB28181Client)
             {
                 outPath = "";
@@ -294,16 +327,6 @@ namespace AKStreamWeb
 
 
 
-        }
-
-        private static void SipMsgProcess_OnReceiveInvite1(ShareInviteInfo info, SIPSorcery.SIP.SIPRequest req)
-        {
-            throw new NotImplementedException();
-        }
-
-        private static void SipMsgProcess_OnReceiveInvite(ShareInviteInfo info, SIPSorcery.SIP.SIPRequest req)
-        {
-            throw new NotImplementedException();
         }
 
         public static string Version // 版本号

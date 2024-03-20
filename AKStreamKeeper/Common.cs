@@ -878,7 +878,7 @@ namespace AKStreamKeeper
 
             try
             {
-                var textReader = new StreamReader("E:\\back\\AKStream\\AKStreamWeb\\bin\\Debug\\net6.0\\Config\\AKStreamWeb.json");
+                var textReader = new StreamReader("E:\\src\\AKStream\\AKStreamWeb\\bin\\Debug\\net6.0\\Config\\AKStreamWeb.json");
                 var jsonStr = textReader.ReadToEnd();
                 JsonNode streamWebConfig = JsonObject.Parse(jsonStr);
                 var OrmConnStr = streamWebConfig["OrmConnStr"].AsValue().ToString();

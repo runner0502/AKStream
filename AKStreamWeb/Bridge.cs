@@ -184,7 +184,7 @@ namespace AKStreamWeb
             }
             if (string.IsNullOrEmpty(channelId))
             {
-                GCommon.Logger.Warn("没有这个号码：" + numberdb);
+                GCommon.Logger.Warn("sipincoming 没有这个号码：" + numberdb);
                 return;
             }
 
@@ -205,7 +205,7 @@ namespace AKStreamWeb
             if (deviceId.IsNullOrEmpty() || channelId.IsNullOrEmpty())
             {
                 GCommon.Logger.Warn(
-         $"[{Common.LoggerHead}]->SIP来电号码信息错误->{deviceId}-{channelId}");
+         $"[{Common.LoggerHead}]->SIP来电号码信息错误sipincoming->{deviceId}-{channelId}");
 
                 return;
             }
@@ -223,7 +223,7 @@ namespace AKStreamWeb
             if (sipChannel == null)
             {
                 GCommon.Logger.Warn(
-                    $"[{Common.LoggerHead}]->获取通道失败->{deviceId}-{channelId}->{JsonHelper.ToJson(rs)}");
+                    $"[{Common.LoggerHead}]->获取通道失败 sipincoming->{deviceId}-{channelId}->{JsonHelper.ToJson(rs)}");
 
                 return ;
             }
@@ -238,14 +238,15 @@ namespace AKStreamWeb
             var ret = SipServerService.LiveVideo(deviceId, channelId, out rs);
             if (ret == null)
             {
+                GCommon.Logger.Warn("sipincoming livevideo fail：" + numberdb);
                 return;
             }
             //var ret = SipServerService.LiveVideo("11011200002000000001", "11010000581314000001", out rs);
 
-            if (!rs.Code.Equals(ErrorNumber.None))
-            {
-                throw new AkStreamException(rs);
-            }
+            //if (!rs.Code.Equals(ErrorNumber.None))
+            //{
+            //    throw new AkStreamException(rs);
+            //}
 
 
             string url = ret.PlayUrl.Find(a => a.StartsWith("rtsp"));
@@ -328,6 +329,7 @@ namespace AKStreamWeb
                 //    //System.Threading.Thread.Sleep(1000);
                 //}
 
+                GCommon.Logger.Warn("sipincoming answer：" + numberdb);
 
                 Answer(callid, true);
                 if (_enableVoice)

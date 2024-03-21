@@ -27,6 +27,7 @@ namespace AKStreamWeb.Misc
         /// <returns>返回此设备的密钥</returns>
         public static string OnAuthentication(string sipDeviceId)
         {
+
             var obj1 = ORMHelper.Db.Select<Device281Plat>().Where(x =>
 x.platid == sipDeviceId).First();
             if (obj1 != null)
@@ -178,7 +179,11 @@ x.platid == sipDevice.DeviceId).Set(x=>x.registestate,state).ExecuteAffrowsAsync
                     var channels = ORMHelper.Db.Select<VideoChannel>().Where<VideoChannel>(a=>a.DeviceId == sipDevice.DeviceId).ToList<VideoChannel>();
                     foreach (var tmpChannelDev in channels)
                     {
-
+                        if (SipDevice.s_count > Common.License.MaxDeviceCount)
+                        {
+                            GCommon.Logger.Warn("超过最大授权设备个数");
+                            break;
+                        }
                         SipChannel sipChannelInList = sipDevice.SipChannels.FindLast(x =>
                             x.SipChannelDesc.DeviceID.Equals(tmpChannelDev.ChannelId));
                         if (sipChannelInList == null)
@@ -213,6 +218,7 @@ x.platid == sipDevice.DeviceId).Set(x=>x.registestate,state).ExecuteAffrowsAsync
                                 newSipChannel.Stream = ret.Value;
                             }
                             sipDevice.SipChannels.Add(newSipChannel);
+                            SipDevice.s_count++;
 
                         }
                     }

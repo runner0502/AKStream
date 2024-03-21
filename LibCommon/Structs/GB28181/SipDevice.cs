@@ -34,6 +34,8 @@ namespace LibCommon.Structs.GB28181
         private string? _username;
         private double? _keepAliveTimeSpentMS;
 
+        public static int s_count = 0;
+
 
         /// <summary>
         /// 对sip通道操作时的锁

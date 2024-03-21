@@ -18,7 +18,10 @@ using LibCommon.Structs.WebRequest;
 using LibCommon.Structs.WebResponse;
 using LibSystemInfo;
 using LinCms.Core.Entities;
+using Microsoft.AspNetCore.Hosting.Server;
 using Newtonsoft.Json;
+using static Org.BouncyCastle.Math.EC.ECCurve;
+using static System.Net.Mime.MediaTypeNames;
 using JsonHelper = LibCommon.JsonHelper;
 using Timer = System.Timers.Timer;
 
@@ -878,7 +881,9 @@ namespace AKStreamKeeper
 
             try
             {
-                var textReader = new StreamReader("E:\\src\\AKStream\\AKStreamWeb\\bin\\Debug\\net6.0\\Config\\AKStreamWeb.json");
+                //var textReader = new StreamReader("E:\\src\\AKStream\\AKStreamWeb\\bin\\Debug\\net6.0\\Config\\AKStreamWeb.json");
+                var textReader = new StreamReader("/home/install/test/package/server/Config/AKStreamWeb.json");
+                
                 var jsonStr = textReader.ReadToEnd();
                 JsonNode streamWebConfig = JsonObject.Parse(jsonStr);
                 var OrmConnStr = streamWebConfig["OrmConnStr"].AsValue().ToString();

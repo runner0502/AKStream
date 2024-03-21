@@ -24,7 +24,7 @@ namespace AKStreamWeb.Controllers
         public int GetServerStatus(
             [FromHeader(Name = "AccessKey")] string AccessKey)
         {
-            if (Common.License == null || Common.License.ExpireDateTime < DateTime.Now)
+            if (!Common.s_licenceVaid)
             {
                 return 2;
             }
@@ -32,7 +32,6 @@ namespace AKStreamWeb.Controllers
             {
                 return 1;
             }
-            return 1;
         }
         /// <summary>
         /// 获取呼叫列表

@@ -18,7 +18,7 @@ namespace AKStreamWeb.Controllers
         /// 获取服务运行状态
         /// </summary>
         /// <param name="AccessKey"></param>
-        /// <returns>运行状态 （0：错误状态， 1： 正常状态，2： 未授权状态）</returns>
+        /// <returns>运行状态 （ 1： 正常状态，2： 未授权状态）</returns>
         [Route("GetServerStatus")]
         [HttpGet]
         public int GetServerStatus(
@@ -48,9 +48,20 @@ namespace AKStreamWeb.Controllers
             {
                 CallInfo info = new CallInfo();
                 info.CallId = item.Key.ToString();
-                info.OtherNumber = item.Value.DeviceId;
-                info.CameraId = item.Value.DeviceId;
-                info.CameraName = item.Value.SipChannelDesc.Name;
+                //info.OtherNumber = item.Value.SipChannel.DeviceId;
+                info.CameraId = item.Value.SipChannel.DeviceId;
+                info.CameraName = item.Value.SipChannel.SipChannelDesc.Name;
+                info.IsTranscode = item.Value.IsTranscode;
+                info.CalledReslution = item.Value.Reslution;
+                info.StartTime = item.Value.CreateTime;
+                info.Caller = item.Value.caller;
+                info.OtherNumber = item.Value.called;
+                info.CalledPlat = item.Value.SipChannel.ParentId;
+                info.CallerIP = item.Value.CallerIP;
+                info.CalledDeviceId = item.Value.SipChannel.DeviceId;
+                info.CalledDeviceName = item.Value.CameraName;
+
+
                 infos.Add(info);
             }
             return infos;

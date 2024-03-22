@@ -16,6 +16,7 @@ using LinCms.Core.Entities;
 using System.Runtime.InteropServices;
 using LibGB28181SipServer;
 using System.Linq;
+using System;
 
 namespace AKStreamWeb
 {
@@ -119,7 +120,7 @@ namespace AKStreamWeb
         //    Common.SipServer.Subscribe(device, sipChannel, SIPSorcery.SIP.SIPMethodsEnum.OPTIONS, "", "", "", LibCommon.Structs.GB28181.XML.CommandType.Catalog, false, null, null, null, 100);
         //}
 
-        public static Dictionary<int, SipChannel> s_calls = new Dictionary<int, SipChannel>();
+        public static Dictionary<int, CallInfoInternal> s_calls = new Dictionary<int, CallInfoInternal>();
 
         public static void OnIncomingCall_WithMsg(int callid, string number, CallState state, bool isVideo, string idsContent)
         //public static void OnIncomingCall(int callid, string number, CallState state, bool isVideo)
@@ -228,12 +229,7 @@ namespace AKStreamWeb
                 return ;
             }
 
-            if (s_calls.ContainsKey(callid))
-            {
-                s_calls.Remove(callid);
-            }
 
-            s_calls.Add(callid, sipChannel);
 
             var ret = SipServerService.LiveVideo(deviceId, channelId, out rs);
             if (ret == null)
@@ -263,12 +259,32 @@ namespace AKStreamWeb
                         //SPhoneSDK.SetVidHardwareEncoding(false);
                     }
                 }
+
+                var callinfo = new CallInfoInternal();
+                callinfo.SipChannel = sipChannel;
+                callinfo.IsTranscode = false;
+                callinfo.called = numberdb;
+                callinfo.caller = number;
+                callinfo.CameraName = channeldb.name;
+                callinfo.CreateTime = DateTime.Now;
+                callinfo.Reslution = "640*480";
+                try
+                {
+                    string findStrip = "SIP/2.0/UDP ";
+                    int ipindex = idsContent.IndexOf(findStrip);
+                    int startIndex = ipindex + findStrip.Length;
+                    int ipendIndex = idsContent.IndexOf(":", ipindex);
+                    callinfo.CallerIP = idsContent.Substring(startIndex, ipendIndex - startIndex);
+                }
+                catch (Exception ex) { }
+
                 if (_transcode)
                 {
-                    var transcodeConfig = ORMHelper.Db.Select<biz_transcode>().Where(a=>number.StartsWith(a.caller_number)).First();
+                    var transcodeConfig = ORMHelper.Db.Select<biz_transcode>().Where(a=>number.StartsWith(a.caller_number)&& a.IsDeleted == 0).First();
                     if (transcodeConfig != null && transcodeConfig.state == "1")
                     {
                         SetHardEncodeVideo(callid, 0);
+                        callinfo.IsTranscode = true;
                         if (transcodeConfig.EncoderType == 0)
                         {
                             SetVideoCodecPriority("H265/103", 0);
@@ -290,6 +306,7 @@ namespace AKStreamWeb
                                     if (width > 0  && height > 0)
                                     {
                                         SetVideoCodecParam(width, height, 30, 650 * 1024);
+                                        callinfo.Reslution = width + "*" + height;
                                     }
                                 }
                                 catch (System.Exception)
@@ -330,7 +347,13 @@ namespace AKStreamWeb
                 //}
 
                 GCommon.Logger.Warn("sipincoming answer：" + numberdb);
+                if (s_calls.ContainsKey(callid))
+                {
+                    s_calls.Remove(callid);
+                }
+     
 
+                s_calls.Add(callid, callinfo);
                 Answer(callid, true);
                 if (_enableVoice)
                 {
@@ -351,7 +374,7 @@ namespace AKStreamWeb
         {
             dtmf = dtmf.Replace("\r", "");
             GCommon.Logger.Warn("OnReceiveDtmf callid: " + callid + ", dtmf: " + dtmf);
-            var sipChannel = s_calls[callid];
+            var sipChannel = s_calls[callid].SipChannel;
             if (sipChannel == null) 
             {
                 GCommon.Logger.Warn("OnReceiveDtmf not find sipchannel callid: " + callid + ", dtmf: " + dtmf);
@@ -411,7 +434,7 @@ namespace AKStreamWeb
         public static void OnReceiveKeyframeRequest(int callid)
         {
             GCommon.Logger.Warn("OnReceiveKeyframeRequest callid: " + callid);
-            var sipChannel = s_calls[callid];
+            var sipChannel = s_calls[callid].SipChannel;
             if (sipChannel == null)
             {
                 GCommon.Logger.Warn("OnReceiveKeyframeRequest not find sipchannel callid: " + callid );
@@ -429,5 +452,18 @@ namespace AKStreamWeb
             //Common.SipServer.Subscribe(device, sipChannel, SIPSorcery.SIP.SIPMethodsEnum.OPTIONS, "", "", "", LibCommon.Structs.GB28181.XML.CommandType.Catalog, false, null, null, null, 100);
         }
 
+    }
+
+    public class CallInfoInternal
+    {
+        public SipChannel SipChannel { get; set; }
+        public bool IsTranscode { get; set; }
+
+        public string caller { get; set; }
+        public string called { get; set; }
+        public string CameraName { get; set; }
+        public DateTime CreateTime { get; set; }
+        public string Reslution { get; set; }
+        public string CallerIP { get; set; }
     }
 }

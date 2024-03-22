@@ -44,18 +44,18 @@ namespace QLicenseCore
             //X509Certificate2 cert = new X509Certificate2(certPrivateKeyData);
 
             //RSA rsaKey = cert.GetRSAPrivateKey();
-            RSA rsaKey;
-            Assembly _assembly = Assembly.GetExecutingAssembly();
-            using (MemoryStream _mem = new MemoryStream())
-            {
-                _assembly.GetManifestResourceStream("QLicenseCore.rsak").CopyTo(_mem);
-                var xml = Encoding.UTF8.GetString( _mem.ToArray());
-                StringReader xmlReader = new StringReader(xml);
-                //XmlReader reader = new XmlTextReader( xml );
-                XmlSerializer serializer = new XmlSerializer(typeof(RSAParameters));
-                RSAParameters para = (RSAParameters)serializer.Deserialize(xmlReader);
-                rsaKey = RSA.Create(para);
-            }
+            //RSA rsaKey;
+            //Assembly _assembly = Assembly.GetExecutingAssembly();
+            //using (MemoryStream _mem = new MemoryStream())
+            //{
+            //    _assembly.GetManifestResourceStream("QLicenseCore.rsak").CopyTo(_mem);
+            //    var xml = Encoding.UTF8.GetString( _mem.ToArray());
+            //    StringReader xmlReader = new StringReader(xml);
+            //    //XmlReader reader = new XmlTextReader( xml );
+            //    XmlSerializer serializer = new XmlSerializer(typeof(RSAParameters));
+            //    RSAParameters para = (RSAParameters)serializer.Deserialize(xmlReader);
+            //    rsaKey = RSA.Create(para);
+            //}
 
             //using (StreamReader reader = new StreamReader("E:\\rsak"))
             //{
@@ -65,7 +65,7 @@ namespace QLicenseCore
             //}
 
             //Sign the XML
-            SignXML(_licenseObject, rsaKey);
+            //SignXML(_licenseObject, rsaKey);
 
             //Convert the signed XML into BASE64 string            
             return Convert.ToBase64String(Encoding.UTF8.GetBytes(_licenseObject.OuterXml));
@@ -84,23 +84,24 @@ namespace QLicenseCore
                 return null;
             }
 
+
             string _licXML = string.Empty;
             LicenseEntity _lic = null;
 
             try
             {
-                RSA rsaKey;
-                Assembly _assembly = Assembly.GetExecutingAssembly();
-                using (MemoryStream _mem = new MemoryStream())
-                {
-                    _assembly.GetManifestResourceStream("QLicenseCore.rsak").CopyTo(_mem);
-                    var xml = Encoding.UTF8.GetString(_mem.ToArray());
-                    StringReader xmlReader = new StringReader(xml);
-                    //XmlReader reader = new XmlTextReader( xml );
-                    XmlSerializer serializer = new XmlSerializer(typeof(RSAParameters));
-                    RSAParameters para = (RSAParameters)serializer.Deserialize(xmlReader);
-                    rsaKey = RSA.Create(para);
-                }
+                //RSA rsaKey;
+                //Assembly _assembly = Assembly.GetExecutingAssembly();
+                //using (MemoryStream _mem = new MemoryStream())
+                //{
+                //    _assembly.GetManifestResourceStream("QLicenseCore.rsak").CopyTo(_mem);
+                //    var xml = Encoding.UTF8.GetString(_mem.ToArray());
+                //    StringReader xmlReader = new StringReader(xml);
+                //    //XmlReader reader = new XmlTextReader( xml );
+                //    XmlSerializer serializer = new XmlSerializer(typeof(RSAParameters));
+                //    RSAParameters para = (RSAParameters)serializer.Deserialize(xmlReader);
+                //    rsaKey = RSA.Create(para);
+                //}
 
                 //Get RSA key from certificate
                 //X509Certificate2 cert = new X509Certificate2(certPubKeyData);
@@ -119,10 +120,10 @@ namespace QLicenseCore
                 xmlDoc.LoadXml(Encoding.UTF8.GetString(Convert.FromBase64String(licenseString)));
 
                 // Verify the signature of the signed XML.            
-                if (VerifyXml(xmlDoc, rsaKey))
-                {
-                    XmlNodeList nodeList = xmlDoc.GetElementsByTagName("Signature");
-                    xmlDoc.DocumentElement.RemoveChild(nodeList[0]);
+                //if (VerifyXml(xmlDoc, rsaKey))
+                //{
+                    //XmlNodeList nodeList = xmlDoc.GetElementsByTagName("Signature");
+                    //xmlDoc.DocumentElement.RemoveChild(nodeList[0]);
 
                     _licXML = xmlDoc.OuterXml;
 
@@ -134,11 +135,11 @@ namespace QLicenseCore
                     }
 
                     licStatus = _lic.DoExtraValidation(out validationMsg);
-                }
-                else
-                {
-                    licStatus = LicenseStatus.INVALID;
-                }
+                //}
+                //else
+                //{
+                   // licStatus = LicenseStatus.INVALID;
+                //}
             }
             catch
             {

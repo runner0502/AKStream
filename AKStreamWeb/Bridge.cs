@@ -266,7 +266,7 @@ namespace AKStreamWeb
                 if (_transcode)
                 {
                     var transcodeConfig = ORMHelper.Db.Select<biz_transcode>().Where(a=>number.StartsWith(a.caller_number)).First();
-                    if (transcodeConfig != null)
+                    if (transcodeConfig != null && transcodeConfig.state == "1")
                     {
                         SetHardEncodeVideo(callid, 0);
                         if (transcodeConfig.EncoderType == 0)
@@ -420,10 +420,10 @@ namespace AKStreamWeb
             ResponseStruct rs;
 
             var ret = SipServerService.ForceKeyframe(sipChannel.ParentId, sipChannel.DeviceId, out rs);
-            if (!rs.Code.Equals(ErrorNumber.None))
-            {
-                throw new AkStreamException(rs);
-            }
+            //if (!rs.Code.Equals(ErrorNumber.None))
+            //{
+            //    throw new AkStreamException(rs);
+            //}
 
             //var device = LibGB28181SipServer.Common.SipDevices.Find(x => x.DeviceId == sipChannel.ParentId);
             //Common.SipServer.Subscribe(device, sipChannel, SIPSorcery.SIP.SIPMethodsEnum.OPTIONS, "", "", "", LibCommon.Structs.GB28181.XML.CommandType.Catalog, false, null, null, null, 100);

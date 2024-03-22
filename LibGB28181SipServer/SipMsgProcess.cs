@@ -12,8 +12,10 @@ using LibCommon.Structs.GB28181.Net.SDP;
 using LibCommon.Structs.GB28181.Net.SIP;
 using LibCommon.Structs.GB28181.XML;
 using Newtonsoft.Json;
+using Org.BouncyCastle.Ocsp;
 using SIPSorcery.SIP;
 using SIPSorcery.SIP.App;
+using Ubiety.Dns.Core.Records;
 
 namespace LibGB28181SipServer
 {
@@ -508,7 +510,8 @@ namespace LibGB28181SipServer
             res.Header.CSeq = oldreq.Header.CSeq;
             res.Header.CSeqMethod = SIPMethodsEnum.INVITE;
             res.Body = sdp;
-
+            res.Header.Contact = new List<SIPContactHeader>()
+            { new SIPContactHeader(oldreq.Header.To.ToName, oldreq.Header.To.ToURI) };
             return res;
         }
 

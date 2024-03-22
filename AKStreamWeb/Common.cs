@@ -422,7 +422,7 @@ namespace AKStreamWeb
                 }
                 catch (Exception ex) 
                 {
-                    GCommon.Logger.Warn("license fail");
+                    GCommon.Logger.Warn("license fail:" +ex.Message);
                     s_licenceVaid = false;
                     //_perFormanceInfoTimer.Stop();
                     //var life = Program._builder.Services.GetRequiredService<IHostApplicationLifetime>();

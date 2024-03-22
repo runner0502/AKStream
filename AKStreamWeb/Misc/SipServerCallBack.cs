@@ -72,18 +72,21 @@ x.platid == sipDeviceId).First();
                     $"[{Common.LoggerHead}]->获取设备状态信息失败(OnRegister)->{sipDevice.IpAddress.ToString()}-{sipDevice.DeviceId}\r\n{JsonHelper.ToJson(rs, Formatting.Indented)}");
             }
 
-            //SipMethodProxy sipMethodProxy = new SipMethodProxy(Common.AkStreamWebConfig.WaitSipRequestTimeOutMSec);
-            //if (sipMethodProxy.DeviceCatalogQuery(sipDevice, out rs))
-            //{
-            //    GCommon.Logger.Debug(
-            //        $"[{Common.LoggerHead}]->设备目录获取成功(OnRegister)->{sipDevice.IpAddress.ToString()}-{sipDevice.DeviceId}\r\n{JsonHelper.ToJson(sipDevice.SipChannels, Formatting.Indented)}");
-            //}
-            //else
-            //{
-            //    GCommon.Logger.Error(
-            //        $"[{Common.LoggerHead}]->设备目录获取失败(OnRegister)->{sipDevice.IpAddress.ToString()}-{sipDevice.DeviceId}\r\n{JsonHelper.ToJson(rs, Formatting.Indented)}");
-            //}
-        }
+            var obj1 = ORMHelper.Db.Update<Device281Plat>().Where(x =>
+            x.platid == sipDevice.DeviceId).Set(x => x.registestate, 1).ExecuteAffrowsAsync();
+
+        //SipMethodProxy sipMethodProxy = new SipMethodProxy(Common.AkStreamWebConfig.WaitSipRequestTimeOutMSec);
+        //if (sipMethodProxy.DeviceCatalogQuery(sipDevice, out rs))
+        //{
+        //    GCommon.Logger.Debug(
+        //        $"[{Common.LoggerHead}]->设备目录获取成功(OnRegister)->{sipDevice.IpAddress.ToString()}-{sipDevice.DeviceId}\r\n{JsonHelper.ToJson(sipDevice.SipChannels, Formatting.Indented)}");
+        //}
+        //else
+        //{
+        //    GCommon.Logger.Error(
+        //        $"[{Common.LoggerHead}]->设备目录获取失败(OnRegister)->{sipDevice.IpAddress.ToString()}-{sipDevice.DeviceId}\r\n{JsonHelper.ToJson(rs, Formatting.Indented)}");
+        //}
+    }
 
         public static void OnUnRegister(string sipDeviceJson)
         {
@@ -179,9 +182,14 @@ x.platid == sipDevice.DeviceId).Set(x=>x.registestate,state).ExecuteAffrowsAsync
                     var channels = ORMHelper.Db.Select<VideoChannel>().Where<VideoChannel>(a=>a.DeviceId == sipDevice.DeviceId).ToList<VideoChannel>();
                     foreach (var tmpChannelDev in channels)
                     {
+                        if (!Common.s_licenceVaid)
+                        {
+                            GCommon.Logger.Warn("license fail 未授权");
+                            break;    
+                        }
                         if (SipDevice.s_count > Common.License.MaxDeviceCount)
                         {
-                            GCommon.Logger.Warn("超过最大授权设备个数");
+                            GCommon.Logger.Warn("license fail 超过最大授权设备个数");
                             break;
                         }
                         SipChannel sipChannelInList = sipDevice.SipChannels.FindLast(x =>

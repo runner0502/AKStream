@@ -273,13 +273,13 @@ namespace AKStreamWeb
             ORMHelper.Db.Select<organization>().Count();
 
 
-            //var config = ORMHelper.Db.Select<SysBasicConfig>().First();
-            //if (config != null)
-            //{
-            //    Common.AkStreamWebConfig.ListenIp = config.GatewayIp;
-            //}
+            var config = ORMHelper.Db.Select<SysBasicConfig>().First();
+            if (config != null)
+            {
+                Common.AkStreamWebConfig.ListenIp = config.GatewayIp;
+            }
 
-            
+
 
 
             if (AkStreamWebConfig.EnableGB28181Client)
@@ -373,7 +373,7 @@ namespace AKStreamWeb
             {
                 GCommon.Logger.Warn("start license timer1 ");
 
-                _perFormanceInfoTimer = new Timer(10000);
+                _perFormanceInfoTimer = new Timer(2000);
                 _perFormanceInfoTimer.Enabled = true; //启动Elapsed事件触发
                 _perFormanceInfoTimer.Elapsed += OnTimedEvent; //添加触发事件的函数
                 _perFormanceInfoTimer.AutoReset = true; //需要自动reset

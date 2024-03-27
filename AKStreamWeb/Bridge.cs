@@ -125,6 +125,7 @@ namespace AKStreamWeb
         public static void OnIncomingCall_WithMsg(int callid, string number, CallState state, bool isVideo, string idsContent)
         //public static void OnIncomingCall(int callid, string number, CallState state, bool isVideo)
         {
+            GCommon.Logger.Warn("sipincoming start：" + number);
             ResponseStruct rs;
             //string deviceId = "33020000021180000006";
             //string channelId = "34020000001320000012";
@@ -268,6 +269,7 @@ namespace AKStreamWeb
                 callinfo.CameraName = channeldb.name;
                 callinfo.CreateTime = DateTime.Now;
                 callinfo.Reslution = "640*480";
+                callinfo.calledDeviceNumber = numberdb;
                 try
                 {
                     string findStrip = "SIP/2.0/UDP ";
@@ -280,7 +282,7 @@ namespace AKStreamWeb
 
                 if (_transcode)
                 {
-                    var transcodeConfig = ORMHelper.Db.Select<biz_transcode>().Where(a=>number.StartsWith(a.caller_number)&& a.IsDeleted == 0).First();
+                    var transcodeConfig = ORMHelper.Db.Select<biz_transcode>().Where(a=>number.StartsWith(a.caller_number)).First();
                     if (transcodeConfig != null && transcodeConfig.state == "1")
                     {
                         SetHardEncodeVideo(callid, 0);
@@ -361,6 +363,10 @@ namespace AKStreamWeb
                     var result = sipMethodProxy.BroadcastRequest(deviceId, channelId);
                 }
 
+            }
+            else
+            {
+                GCommon.Logger.Warn("sipincoming fail： mediaserver url is null");
             }
 
         }
@@ -465,5 +471,8 @@ namespace AKStreamWeb
         public DateTime CreateTime { get; set; }
         public string Reslution { get; set; }
         public string CallerIP { get; set; }
+        public string calledDeviceNumber { get; set; }
+        
+
     }
 }

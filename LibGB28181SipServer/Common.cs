@@ -328,15 +328,23 @@ namespace LibGB28181SipServer
 
         public static bool DBConfigToFile()
         {
-            var config = ORMHelper.Db.Select<LinCms.Core.Entities.SysBasicConfig>().First();
-            if (config == null)
+            try
             {
-                return false;
+                var config = ORMHelper.Db.Select<LinCms.Core.Entities.SysBasicConfig>().First();
+                if (config == null)
+                {
+                    return false;
+                }
+                SipServerConfig.SipIpAddress = config.GatewayIp;
+                SipServerConfig.ListenIp = config.GatewayIp;
+                SipServerConfig.ServerSipDeviceId = config.GatewayCode;
+                SipServerConfig.SipPort = (ushort)config.SignalPort;
             }
-            SipServerConfig.SipIpAddress = config.GatewayIp;
-            SipServerConfig.ListenIp = config.GatewayIp;
-            SipServerConfig.ServerSipDeviceId = config.GatewayCode;
-            SipServerConfig.SipPort = (ushort)config.SignalPort;
+            catch (Exception ex)
+            {
+                GCommon.Logger.Warn("dbconfigtofile fail: " +ex.Message);
+            }
+            
 
             //if (UtilsHelper.WriteJsonConfig(_sipServerConfigPath, _sipServerConfig))
             //{

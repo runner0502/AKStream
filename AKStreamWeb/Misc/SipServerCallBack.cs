@@ -360,7 +360,19 @@ x.platid == sipDevice.DeviceId).Set(x=>x.registestate,state).ExecuteAffrowsAsync
                 CreateOrg(sipChannel);
             }
 
-            if (SsyncState.Orgs.Count + SsyncState.Devices.Count == sipChannel.TotalNumber)
+            int platType = 0;
+            var deviceDB= ORMHelper.Db.Select<Device281Plat>().Where(a => a.platid == sipChannel.ParentId).First();
+            if (deviceDB != null) 
+            {
+                platType = deviceDB.plat_type;
+            }
+            int currentGetNumber = SsyncState.Orgs.Count + SsyncState.Devices.Count;
+            if (platType == 0) 
+            {
+                currentGetNumber++;
+            }
+
+            if (currentGetNumber == sipChannel.TotalNumber)
             {
                 UpdateCatelogToDB();
             }

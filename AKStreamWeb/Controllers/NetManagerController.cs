@@ -60,7 +60,7 @@ namespace AKStreamWeb.Controllers
                 info.CallerIP = item.Value.CallerIP;
                 info.CalledDeviceId = item.Value.SipChannel.DeviceId;
                 info.CalledDeviceName = item.Value.CameraName;
-
+                info.CalledDeviceNumber = item.Value.calledDeviceNumber;
 
                 infos.Add(info);
             }
@@ -102,8 +102,8 @@ namespace AKStreamWeb.Controllers
             SipServerCallBack.SsyncState.Method = method;
             SipServerCallBack.SsyncState.SyncStartIndex = startIndex;
 
-            SipServerCallBack.SsyncState.State.orgCountBefore =  (int)ORMHelper.Db.Select<organization>().Count();
-            SipServerCallBack.SsyncState.State.DeviceCountBefore =  (int)ORMHelper.Db.Select<DeviceNumber>().Count();
+            SipServerCallBack.SsyncState.State.orgCountBefore =  (int)ORMHelper.Db.Select<organization>().Where(a=> a.super_id == deviceId).Count();
+            SipServerCallBack.SsyncState.State.DeviceCountBefore =  (int)ORMHelper.Db.Select<DeviceNumber>().Where(a=> a.fatherid == deviceId).Count();
             SipServerCallBack.SsyncState.Devices.Clear();
             SipServerCallBack.SsyncState.Orgs.Clear();
             SipMethodProxy sipMethodProxy = new SipMethodProxy(Common.AkStreamWebConfig.WaitSipRequestTimeOutMSec);

@@ -51,11 +51,11 @@ namespace LinCms.Core.Entities {
 		[JsonProperty, Column(Name = "intercom_enable", DbType = "int")]
 		public int IntercomEnable { get; set; } = 1;
 
-		/// <summary>
-		/// 是否已删除
-		/// </summary>
-		[JsonProperty, Column(Name = "is_deleted", DbType = "int")]
-		public int IsDeleted { get; set; } = 0;
+        /// <summary>
+        /// 是否已删除
+        /// </summary>
+        [JsonProperty, Column(Name = "is_deleted", DbType = "int", IsNullable = true)]
+        public int IsDeleted { get; set; } = 0;
 
 		/// <summary>
 		/// 是否启用转码功能：0否 1是

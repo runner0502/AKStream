@@ -71,7 +71,7 @@ namespace LibCommon.Structs.DBModels
         /// <summary>
         /// 是否已删除
         /// </summary>
-        [JsonProperty, Column(Name = "is_deleted", DbType = "int")]
+        [JsonProperty, Column(Name = "is_deleted", DbType = "int", IsNullable = true)]
         public int IsDeleted { get; set; } = 0;
 
     }

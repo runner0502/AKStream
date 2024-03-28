@@ -125,7 +125,7 @@ namespace AKStreamWeb
         public static void OnIncomingCall_WithMsg(int callid, string number, CallState state, bool isVideo, string idsContent)
         //public static void OnIncomingCall(int callid, string number, CallState state, bool isVideo)
         {
-            GCommon.Logger.Warn("sipincoming start：" + number);
+            GCommon.Logger.Warn("sipincoming start：" + callid);
             ResponseStruct rs;
             //string deviceId = "33020000021180000006";
             //string channelId = "34020000001320000012";
@@ -231,8 +231,10 @@ namespace AKStreamWeb
             }
 
 
-
+            GCommon.Logger.Warn("sipincoming before livevideo " + callid);
             var ret = SipServerService.LiveVideo(deviceId, channelId, out rs);
+            GCommon.Logger.Warn("sipincoming end livevideo " + callid);
+
             if (ret == null)
             {
                 GCommon.Logger.Warn("sipincoming livevideo fail：" + numberdb);
@@ -279,12 +281,13 @@ namespace AKStreamWeb
                     callinfo.CallerIP = idsContent.Substring(startIndex, ipendIndex - startIndex);
                 }
                 catch (Exception ex) { }
-
+                bool isTranscode = false;
                 if (_transcode)
                 {
                     var transcodeConfig = ORMHelper.Db.Select<biz_transcode>().Where(a=>number.StartsWith(a.caller_number)).First();
                     if (transcodeConfig != null && transcodeConfig.state == "1")
                     {
+                        isTranscode = true;
                         SetHardEncodeVideo(callid, 0);
                         callinfo.IsTranscode = true;
                         if (transcodeConfig.EncoderType == 0)
@@ -319,9 +322,19 @@ namespace AKStreamWeb
                         }
                     }
                 }
+
+                GCommon.Logger.Warn("sipincoming before videocapture " + callid);
                 int deviceIdVideo = SetupCaptureVideoFile(url);
+                GCommon.Logger.Warn("sipincoming end videocapture " + callid);
+
                 if (deviceIdVideo > 0)
                 {
+                    if (!isTranscode)
+                    {
+                        int width = GetVideoDeviceWidth(deviceIdVideo);
+                        int height = GetVideoDeviceHeight(deviceIdVideo);
+                        callinfo.Reslution = width + "*" + height;
+                    }
                     //SPhoneSDK.ChangeVideoDevice1(callid, deviceIdVideo);
                     SPhoneSDK.ChangeVideoDevice1(callid, deviceIdVideo);
                     SPhoneSDK.SetDefaultVideoDevice(deviceIdVideo);
@@ -369,6 +382,7 @@ namespace AKStreamWeb
                 GCommon.Logger.Warn("sipincoming fail： mediaserver url is null");
             }
 
+            GCommon.Logger.Warn("sipincoming end：" + callid);
         }
 
         private static SDK_onIncomingCall_WithMsg _onIncoming;
@@ -440,15 +454,22 @@ namespace AKStreamWeb
         public static void OnReceiveKeyframeRequest(int callid)
         {
             GCommon.Logger.Warn("OnReceiveKeyframeRequest callid: " + callid);
-            var sipChannel = s_calls[callid].SipChannel;
-            if (sipChannel == null)
+            try
             {
-                GCommon.Logger.Warn("OnReceiveKeyframeRequest not find sipchannel callid: " + callid );
-                return;
-            }
-            ResponseStruct rs;
+                var sipChannel = s_calls[callid].SipChannel;
+                if (sipChannel == null)
+                {
+                    GCommon.Logger.Warn("OnReceiveKeyframeRequest not find sipchannel callid: " + callid);
+                    return;
+                }
+                ResponseStruct rs;
 
-            var ret = SipServerService.ForceKeyframe(sipChannel.ParentId, sipChannel.DeviceId, out rs);
+                var ret = SipServerService.ForceKeyframe(sipChannel.ParentId, sipChannel.DeviceId, out rs);
+            }
+            catch (Exception ex)
+            {
+                GCommon.Logger.Warn("OnReceiveKeyframeRequest callid: " + callid + ", fail :" +ex.Message);
+            }
             //if (!rs.Code.Equals(ErrorNumber.None))
             //{
             //    throw new AkStreamException(rs);

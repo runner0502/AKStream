@@ -465,7 +465,7 @@ namespace AKStreamWeb
                 {
                     GCommon.Logger.Warn("license timer4 ");
                     //ORMHelper.Db.Update<biz_licence>(newLicence).Where(a=>a.id == newLicence.id).ExecuteAffrows();
-                    ORMHelper.Db.Delete<biz_licence>(licenceInDB).ExecuteAffrows();
+                    ORMHelper.Db.Delete<biz_licence>().Where(a=>a.id.Equals("0")).ExecuteAffrows();
                     GCommon.Logger.Warn("license timer 5");
                 }
                    

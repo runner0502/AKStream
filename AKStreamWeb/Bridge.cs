@@ -36,6 +36,8 @@ namespace AKStreamWeb
         private static bool _transcode = false;
         private static bool _enableVoice = false;
 
+        private static object _lock = new object();
+
         private Bridge()
         {
             SPhoneSDK.SDKInit("0.0.0.0", 5066, 5, System.AppContext.BaseDirectory + "pjsip.log");
@@ -48,8 +50,8 @@ namespace AKStreamWeb
             _onCallstatechange = OnCallState;
             SPhoneSDK.SetCallback_CallState(_onCallstatechange);
 
-            _onReceiveKeyframeRequest = OnReceiveKeyframeRequest;
-            SPhoneSDK.SetCallback_ReceiveKeyframeRequest(_onReceiveKeyframeRequest);
+            //_onReceiveKeyframeRequest = OnReceiveKeyframeRequest;
+            //SPhoneSDK.SetCallback_ReceiveKeyframeRequest(_onReceiveKeyframeRequest);
             //SPhoneSDK.SetCallback_IncomingCall(OnIncomingCall);
             SPhoneSDK.SetDefaultVideoDevice(1);
 
@@ -79,9 +81,10 @@ namespace AKStreamWeb
         {
             if (s_calls.Count > 0)
             {
-                StartAudioSendStream(s_LocalPort, info.RemoteIpAddress, info.RemotePort, s_calls.Keys.Last());
+                StartAudioSendStream(s_LocalPort, info.RemoteIpAddress, info.RemotePort, s_callidIntercom);
                 info.LocalRtpPort = (ushort)s_LocalPort;
                 Common.SipServer.SendInviteOK(req, info);
+                s_LocalPort += 1;
             }
         }
 
@@ -92,10 +95,13 @@ namespace AKStreamWeb
                 case CallState.STATE_DISCONNECTED:
                     try
                     {
-                        var call = s_calls[callid];
-                        if (call != null)
+                        lock (_lock)
                         {
-                            s_calls.Remove(callid);
+                            var call = s_calls[callid];
+                            if (call != null)
+                            {
+                                s_calls.Remove(callid);
+                            }
                         }
                     }
                     catch (System.Exception)
@@ -121,6 +127,8 @@ namespace AKStreamWeb
         //}
 
         public static Dictionary<int, CallInfoInternal> s_calls = new Dictionary<int, CallInfoInternal>();
+
+        public static int s_callidIntercom = 0;
 
         public static void OnIncomingCall_WithMsg(int callid, string number, CallState state, bool isVideo, string idsContent)
         //public static void OnIncomingCall(int callid, string number, CallState state, bool isVideo)
@@ -284,8 +292,8 @@ namespace AKStreamWeb
                 bool isTranscode = false;
                 if (_transcode)
                 {
-                    var transcodeConfig = ORMHelper.Db.Select<biz_transcode>().Where(a=>number.StartsWith(a.caller_number)).First();
-                    if (transcodeConfig != null && transcodeConfig.state == "1")
+                    var transcodeConfig = ORMHelper.Db.Select<biz_transcode>().Where(a=>number.StartsWith(a.caller_number)).Where(a=>a.state == "1").First();
+                    if (transcodeConfig != null )
                     {
                         isTranscode = true;
                         SetHardEncodeVideo(callid, 0);
@@ -351,30 +359,37 @@ namespace AKStreamWeb
                 //}
 
                 //SetupCaptureAudioFile(url);
-
+                //int len = 0;
                 //AudioDeviceInfo[] audioDevices = new AudioDeviceInfo[100];
                 //SPhoneSDK.GetAudioDevices(audioDevices, out len);
                 //if (len > 0)
                 //{
-                //    var deviceIdVideo = audioDevices[len - 1].id;
-                //    SPhoneSDK.SetDefaultAudioDevice(deviceIdVideo, deviceIdVideo);
+                //    var deviceIdAudio = audioDevices[len - 1].id;
+                //    SPhoneSDK.SetDefaultAudioDevice(deviceIdAudio, deviceIdAudio);
                 //    //System.Threading.Thread.Sleep(1000);
                 //}
 
                 GCommon.Logger.Warn("sipincoming answer：" + numberdb);
+                lock (_lock)
+                {
                 if (s_calls.ContainsKey(callid))
                 {
                     s_calls.Remove(callid);
                 }
-     
-
-                s_calls.Add(callid, callinfo);
-                Answer(callid, true);
-                if (_enableVoice)
-                {
-                    SipMethodProxy sipMethodProxy = new SipMethodProxy(Common.AkStreamWebConfig.WaitSipRequestTimeOutMSec);
-                    var result = sipMethodProxy.BroadcastRequest(deviceId, channelId);
                 }
+
+
+                lock (_lock)
+                {
+                    s_calls.Add(callid, callinfo);
+                }
+                Answer(callid, true);
+                //if (_enableVoice)
+                //{
+                //    s_callidIntercom = callid;
+                //    SipMethodProxy sipMethodProxy = new SipMethodProxy(Common.AkStreamWebConfig.WaitSipRequestTimeOutMSec);
+                //    var result = sipMethodProxy.BroadcastRequest(deviceId, channelId);
+                //}
 
             }
             else
@@ -394,7 +409,16 @@ namespace AKStreamWeb
         {
             dtmf = dtmf.Replace("\r", "");
             GCommon.Logger.Warn("OnReceiveDtmf callid: " + callid + ", dtmf: " + dtmf);
-            var sipChannel = s_calls[callid].SipChannel;
+
+            SipChannel sipChannel = null;
+            lock (_lock)
+            {
+                var info = s_calls[callid];
+                if (info != null)
+                {
+                    sipChannel = s_calls[callid].SipChannel;
+                }
+            }
             if (sipChannel == null) 
             {
                 GCommon.Logger.Warn("OnReceiveDtmf not find sipchannel callid: " + callid + ", dtmf: " + dtmf);
@@ -456,15 +480,26 @@ namespace AKStreamWeb
             GCommon.Logger.Warn("OnReceiveKeyframeRequest callid: " + callid);
             try
             {
-                var sipChannel = s_calls[callid].SipChannel;
-                if (sipChannel == null)
+                SipChannel sipChannel = null;
+                lock (_lock)
                 {
-                    GCommon.Logger.Warn("OnReceiveKeyframeRequest not find sipchannel callid: " + callid);
-                    return;
+                    if (s_calls != null && s_calls.Count > 0)
+                    {
+                        var info = s_calls[callid];
+                        if (info != null)
+                        {
+                            sipChannel = info.SipChannel;
+                        }
+                    }
                 }
-                ResponseStruct rs;
+                    if (sipChannel == null)
+                    {
+                        GCommon.Logger.Warn("OnReceiveKeyframeRequest not find sipchannel callid: " + callid);
+                        return;
+                    }
+                    ResponseStruct rs;
 
-                var ret = SipServerService.ForceKeyframe(sipChannel.ParentId, sipChannel.DeviceId, out rs);
+                    var ret = SipServerService.ForceKeyframe(sipChannel.ParentId, sipChannel.DeviceId, out rs);
             }
             catch (Exception ex)
             {

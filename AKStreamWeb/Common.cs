@@ -381,6 +381,8 @@ namespace AKStreamWeb
             }
         }
 
+        private static bool _vailLicense = true;
+        private static DateTime _lastGCtime = DateTime.Now;
 
         private static void OnTimedEvent(object source, ElapsedEventArgs e)
         {
@@ -388,7 +390,18 @@ namespace AKStreamWeb
             //{
             //    WebPerformanceInfo = _webSystemInfo.GetSystemInfoObject();
             //}
+            if (!_vailLicense)
+            {
+                if (DateTime.Now.Subtract(_lastGCtime).TotalMinutes > 1)
+                {
+                    GC.Collect();
+                    _lastGCtime = DateTime.Now;
+                    GCommon.Logger.Warn("license gccollcet ");
+                }
+                return;
+            }
 
+            _vailLicense = false;
             GCommon.Logger.Warn("license timer ");
 
             if (License == null)
@@ -481,6 +494,8 @@ namespace AKStreamWeb
                 //Program._builder.StopAsync();
                 //Environment.Exit(0);
             }
+
+           // _perFormanceInfoTimer.Enabled = false;
         }
 
 

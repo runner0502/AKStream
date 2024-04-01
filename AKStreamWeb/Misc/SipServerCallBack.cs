@@ -187,11 +187,11 @@ x.platid == sipDevice.DeviceId).Set(x=>x.registestate,state).ExecuteAffrowsAsync
                             GCommon.Logger.Warn("license fail 未授权");
                             break;    
                         }
-                        if (SipDevice.s_count > Common.License.MaxDeviceCount)
-                        {
-                            GCommon.Logger.Warn("license fail 超过最大授权设备个数");
-                            break;
-                        }
+                        //if (SipDevice.s_count > Common.License.MaxDeviceCount)
+                        //{
+                        //    GCommon.Logger.Warn("license fail 超过最大授权设备个数");
+                        //    break;
+                        //}
                         SipChannel sipChannelInList = sipDevice.SipChannels.FindLast(x =>
                             x.SipChannelDesc.DeviceID.Equals(tmpChannelDev.ChannelId));
                         if (sipChannelInList == null)

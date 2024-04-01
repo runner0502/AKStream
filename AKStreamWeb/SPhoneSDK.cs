@@ -528,6 +528,10 @@ namespace XyCallLayer
         public extern static void SetHardEncodeVideo(int callid, int enable);
         [DllImport(@"DLL\SPhone.dll")]
         public extern static int StartAudioSendStream(int localPort, string remoteIP, int remotePort, int callid);
+        [DllImport(@"DLL\SPhone.dll")]
+        public extern static int GetVideoDeviceWidth(int id);
+        [DllImport(@"DLL\SPhone.dll")]
+        public extern static int GetVideoDeviceHeight(int id);
 
 
 

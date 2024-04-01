@@ -86,6 +86,20 @@ namespace AKStreamWeb.Controllers
             return false;
         }
 
+        public void CountOrgDevice(string deviceid, SyncStateFull state)
+        {
+            state.State.DeviceCountBefore += (int)ORMHelper.Db.Select<DeviceNumber>().Where(a => a.fatherid == deviceid).Count();
+            var orgs = ORMHelper.Db.Select<organization>().Where(a => a.super_id == deviceid).ToList();
+            if (orgs  != null && orgs.Count > 0)
+            {
+                state.State.orgCountBefore += orgs.Count;
+                foreach (var item in orgs)
+                {
+                    CountOrgDevice(item.id, state);
+                }
+            }
+        }
+
         private bool StartSync(string deviceId, SyncMethod method, int startIndex)
         {
             if (SipServerCallBack.SsyncState == null)
@@ -102,8 +116,9 @@ namespace AKStreamWeb.Controllers
             SipServerCallBack.SsyncState.Method = method;
             SipServerCallBack.SsyncState.SyncStartIndex = startIndex;
 
-            SipServerCallBack.SsyncState.State.orgCountBefore =  (int)ORMHelper.Db.Select<organization>().Where(a=> a.super_id == deviceId).Count();
-            SipServerCallBack.SsyncState.State.DeviceCountBefore =  (int)ORMHelper.Db.Select<DeviceNumber>().Where(a=> a.fatherid == deviceId).Count();
+            CountOrgDevice(deviceId, SipServerCallBack.SsyncState);
+            //SipServerCallBack.SsyncState.State.orgCountBefore =  (int)ORMHelper.Db.Select<organization>().Where(a=> a.super_id == deviceId).Count();
+            //SipServerCallBack.SsyncState.State.DeviceCountBefore =  (int)ORMHelper.Db.Select<DeviceNumber>().Where(a=> a.fatherid == deviceId).Count();
             SipServerCallBack.SsyncState.Devices.Clear();
             SipServerCallBack.SsyncState.Orgs.Clear();
             SipMethodProxy sipMethodProxy = new SipMethodProxy(Common.AkStreamWebConfig.WaitSipRequestTimeOutMSec);

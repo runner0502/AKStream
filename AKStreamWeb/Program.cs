@@ -10,8 +10,6 @@ namespace AKStreamWeb
     {
         public static void Main(string[] args)
         {
-            Main(args);
-            return;
             var tmpRet = UtilsHelper.GetMainParams(args);
             if (tmpRet != null && tmpRet.Count > 0)
             {

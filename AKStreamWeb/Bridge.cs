@@ -343,7 +343,6 @@ namespace AKStreamWeb
                         int height = GetVideoDeviceHeight(deviceIdVideo);
                         callinfo.Reslution = width + "*" + height;
                     }
-                    //SPhoneSDK.ChangeVideoDevice1(callid, deviceIdVideo);
                     SPhoneSDK.ChangeVideoDevice1(callid, deviceIdVideo);
                     SPhoneSDK.SetDefaultVideoDevice(deviceIdVideo);
                 }

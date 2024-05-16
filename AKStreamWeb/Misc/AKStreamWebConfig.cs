@@ -138,5 +138,8 @@ namespace AKStreamWeb.Misc
             get => _listenIP;
             set => _listenIP = value;
         }
+
+        public string SipIp { get; set; }
+        public int SipPort { get; set; }
     }
 }

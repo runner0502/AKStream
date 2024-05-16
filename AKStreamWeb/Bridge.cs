@@ -40,7 +40,7 @@ namespace AKStreamWeb
 
         private Bridge()
         {
-            SPhoneSDK.SDKInit("0.0.0.0", 5066, 5, System.AppContext.BaseDirectory + "pjsip.log");
+            SPhoneSDK.SDKInit( Common.AkStreamWebConfig.SipIp, Common.AkStreamWebConfig.SipPort, 5, System.AppContext.BaseDirectory + "pjsip.log");
             //SPhoneSDK.SDKInit("172.19.6.41", 5066, 5, System.AppContext.BaseDirectory +  "pjsip.log");
             SPhoneSDK.Regist("1.1.1.1", "admin", "admin", false, true);
             _onIncoming = OnIncomingCall_WithMsg;
@@ -50,8 +50,8 @@ namespace AKStreamWeb
             _onCallstatechange = OnCallState;
             SPhoneSDK.SetCallback_CallState(_onCallstatechange);
 
-            //_onReceiveKeyframeRequest = OnReceiveKeyframeRequest;
-            //SPhoneSDK.SetCallback_ReceiveKeyframeRequest(_onReceiveKeyframeRequest);
+            _onReceiveKeyframeRequest = OnReceiveKeyframeRequest;
+            SPhoneSDK.SetCallback_ReceiveKeyframeRequest(_onReceiveKeyframeRequest);
             //SPhoneSDK.SetCallback_IncomingCall(OnIncomingCall);
             SPhoneSDK.SetDefaultVideoDevice(1);
 

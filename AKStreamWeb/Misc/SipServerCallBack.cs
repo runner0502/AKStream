@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Numerics;
 using System.Threading.Tasks;
 using Google.Protobuf.WellKnownTypes;
 using LibCommon;
@@ -10,6 +11,7 @@ using LibCommon.Structs.GB28181;
 using LibCommon.Structs.GB28181.Sys;
 using LibCommon.Structs.GB28181.XML;
 using LibGB28181SipServer;
+using NetTaste;
 using Newtonsoft.Json;
 using Org.BouncyCastle.Ocsp;
 using SIPSorcery.Net;
@@ -465,18 +467,26 @@ x.platid == sipDevice.DeviceId).Set(x=>x.registestate,state).ExecuteAffrowsAsync
 
         private static void UpdateCatelogToDB()
         {
+            ORMHelper.Db.Delete<organization>().Where(x =>
+x.plat_id.Equals(SsyncState.PlatId)).ExecuteAffrows();
             foreach (var org in SsyncState.Orgs)
             {
-                var obj1 = ORMHelper.Db.Select<organization>().Where(x =>
-      x.id.Equals(org.id)).First();
-                if (obj1 != null)
-                {
-                    ORMHelper.Db.Delete<organization>().Where(x =>
-   x.id.Equals(org.id)).ExecuteAffrows();
-                    obj1 = null;
-                }
+                org.plat_id = SsyncState.PlatId;
                 ORMHelper.Db.Insert(org).ExecuteAffrows();
             }
+
+            //foreach (var org in SsyncState.Orgs)
+            //            {
+            //    var obj1 = ORMHelper.Db.Select<organization>().Where(x =>
+            //    x.id.Equals(org.id)).First();
+            //                    if (obj1 != null)
+            //                        {
+            //        ORMHelper.Db.Delete<organization>().Where(x =>
+            //        x.id.Equals(org.id)).ExecuteAffrows();
+            //        obj1 = null;
+            //                        }
+            //    ORMHelper.Db.Insert(org).ExecuteAffrows();
+            //                }
 
             foreach (var device in SsyncState.Devices)
             {
@@ -531,7 +541,7 @@ x.dev.Equals(device.dev)).First();
         public List<DeviceNumber> Devices { get; set; }
 
         public SyncMethod Method{ get; set; }
-        public int SyncStartIndex { get; set; }
+        public BigInteger SyncStartIndex { get; set; }
 
         public SyncStateFull()
         {

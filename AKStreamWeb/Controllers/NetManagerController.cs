@@ -9,6 +9,7 @@ using XyCallLayer;
 using Newtonsoft.Json;
 using AKStreamWeb.Misc;
 using LibCommon.Structs.DBModels;
+using System.Numerics;
 
 namespace AKStreamWeb.Controllers
 {
@@ -100,7 +101,7 @@ namespace AKStreamWeb.Controllers
             }
         }
 
-        private bool StartSync(string deviceId, SyncMethod method, int startIndex)
+        private bool StartSync(string deviceId, SyncMethod method, BigInteger startIndex)
         {
             if (SipServerCallBack.SsyncState == null)
             {
@@ -171,9 +172,10 @@ namespace AKStreamWeb.Controllers
         /// <returns></returns>
         [Route("StarSyncIncreanWithIndex")]
         [HttpPost]
-        public bool StarSyncIncreanWithIndex([FromHeader(Name = "AccessKey")] string AccessKey, string deviceId, int startIndexNumber)
+        public bool StarSyncIncreanWithIndex([FromHeader(Name = "AccessKey")] string AccessKey, string deviceId, string startIndexNumber)
         {
-            return StartSync(deviceId, SyncMethod.StartFromIndex, startIndexNumber);
+            var startIndex = BigInteger.Parse(startIndexNumber);
+            return StartSync(deviceId, SyncMethod.StartFromIndex, startIndex);
         }
         /// <summary>
         /// 结束同步

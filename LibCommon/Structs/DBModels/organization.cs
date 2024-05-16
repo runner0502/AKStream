@@ -19,6 +19,7 @@ namespace LibCommon.Structs.DBModels
         public string ldap { get; set; }
         public string domain { get; set; }
         public int order_num { get; set; }
+        public string plat_id { get; set; }
 
         /// <summary>
         /// 修改人

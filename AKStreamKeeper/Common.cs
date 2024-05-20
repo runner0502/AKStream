@@ -24,6 +24,7 @@ using static Org.BouncyCastle.Math.EC.ECCurve;
 using static System.Net.Mime.MediaTypeNames;
 using JsonHelper = LibCommon.JsonHelper;
 using Timer = System.Timers.Timer;
+using Org.BouncyCastle.Crypto.Agreement.Kdf;
 
 namespace AKStreamKeeper
 {
@@ -830,7 +831,7 @@ namespace AKStreamKeeper
         }
         private static ORMHelper _ormHelper;
 
-        public static ORMHelper OrmHelper
+        public static ORMHelper OrmHelper1
         {
             get => _ormHelper;
             set => _ormHelper = value;
@@ -882,14 +883,15 @@ namespace AKStreamKeeper
             try
             {
                 //var textReader = new StreamReader("E:\\src\\AKStream\\AKStreamWeb\\bin\\Debug\\net6.0\\Config\\AKStreamWeb.json");
-                var textReader = new StreamReader("/home/install/test/package/server/Config/AKStreamWeb.json");
+                var textReader = new StreamReader("/usr/local/server/Config/AKStreamWeb.json");
                 
                 var jsonStr = textReader.ReadToEnd();
+                GCommon.Logger.Info("webjsonstr: " + jsonStr);
                 JsonNode streamWebConfig = JsonObject.Parse(jsonStr);
                 var OrmConnStr = streamWebConfig["OrmConnStr"].AsValue().ToString();
                 var dbType = streamWebConfig["DbType"].AsValue().ToString();
-
-                OrmHelper = new ORMHelper(OrmConnStr, dbType);
+                GCommon.Logger.Info("dbinfo: " + OrmConnStr + ", " + dbType);
+                OrmHelper1 = new ORMHelper(OrmConnStr, dbType);
                 var config = ORMHelper.Db.Select<SysBasicConfig>().First();
                 if (config != null)
                 {
@@ -898,6 +900,10 @@ namespace AKStreamKeeper
                     AkStreamKeeperConfig.Candidate = config.GatewayIp;
                     AkStreamKeeperConfig.MinRtpPort = (ushort)config.MediaPortStart;
                     AkStreamKeeperConfig.MaxRtpPort = (ushort)config.MediaPortEnd;
+                    Uri AKStreamWebUri = new Uri(AkStreamKeeperConfig.AkStreamWebRegisterUrl);
+                    string h = AKStreamWebUri.Host.Trim();
+                    var newurl = AkStreamKeeperConfig.AkStreamWebRegisterUrl.Replace(h, config.GatewayIp);
+                    AkStreamKeeperConfig.AkStreamWebRegisterUrl = newurl;
                 }
             }
             catch (Exception ex)
@@ -908,7 +914,7 @@ namespace AKStreamKeeper
                     Message = ErrorMessage.ErrorDic![ErrorNumber.Sys_DataBaseNotReady] + ",请检查配置文件中的数据库相关配置信息",
                 };
                 GCommon.Logger.Error(
-                    $"[{LoggerHead}]->数据库连接异常,系统无法运行->\r\n{JsonHelper.ToJson(rsa, Formatting.Indented)}\r\n系统支持以下数据库连接,请根据下表正确设置dBType字段->\r\n");
+                    $"[{LoggerHead}]->数据库连接异常,系统无法运行->\r\n{JsonHelper.ToJson(rsa, Formatting.Indented)}\r\n系统支持以下数据库连接,请根据下表正确设置dBType字段->\r\n" + ex.ToString());
                 //Environment.Exit(0); //退出程序
             }
 

@@ -490,6 +490,13 @@ x.plat_id.Equals(SsyncState.PlatId)).ExecuteAffrows();
 
             foreach (var device in SsyncState.Devices)
             {
+                long count = ORMHelper.Db.Select<DeviceNumber>().Count();
+                if (count >= Common.License.MaxDeviceCount) 
+                {
+                    GCommon.Logger.Warn("license fail too many device");
+                    SsyncState.State.LastResult = false;
+                    break;
+                }
                 var obj1 = ORMHelper.Db.Select<DeviceNumber>().Where(x =>
 x.dev.Equals(device.dev)).First();
                 if (obj1 != null)
@@ -517,8 +524,8 @@ x.dev.Equals(device.dev)).First();
                         break;
                 }
                 ORMHelper.Db.Insert(device).ExecuteAffrows();
+                SsyncState.State.LastResult = true;
             }
-            SsyncState.State.LastResult = true;
             SsyncState.State.IsProcessing = false;
             //SsyncState.State.orgCountBefore = 0;
             //SsyncState.State.DeviceCountBefore = 0;

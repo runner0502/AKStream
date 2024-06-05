@@ -17,6 +17,7 @@ using System.Runtime.InteropServices;
 using LibGB28181SipServer;
 using System.Linq;
 using System;
+using System.ComponentModel;
 
 namespace AKStreamWeb
 {
@@ -295,36 +296,51 @@ namespace AKStreamWeb
                     var transcodeConfig = ORMHelper.Db.Select<biz_transcode>().Where(a=>number.StartsWith(a.caller_number)).Where(a=>a.state == "1").First();
                     if (transcodeConfig != null )
                     {
-                        isTranscode = true;
-                        SetHardEncodeVideo(callid, 0);
-                        callinfo.IsTranscode = true;
-                        if (transcodeConfig.EncoderType == 0)
+                        int currentTranscodeCount = 0;
+                        foreach (var item in s_calls)
                         {
-                            SetVideoCodecPriority("H265/103", 0);
+                            if (item.Value.IsTranscode)
+                            {
+                                currentTranscodeCount++;
+                            }
+                        }
+                        if (currentTranscodeCount >= Common.License.MaxRunCount)
+                        {
+                            GCommon.Logger.Warn("sipincoming license fail transcode too many");
                         }
                         else
                         {
-                            SetVideoCodecPriority("H265/103", 254);
-                        }
-
-                        if (!string.IsNullOrEmpty(transcodeConfig.reslution))
-                        {
-                            var res = transcodeConfig.reslution.Split("*");
-                            if (res != null && res.Length == 2)
+                            isTranscode = true;
+                            SetHardEncodeVideo(callid, 0);
+                            callinfo.IsTranscode = true;
+                            if (transcodeConfig.EncoderType == 0)
                             {
-                                try
+                                SetVideoCodecPriority("H265/103", 0);
+                            }
+                            else
+                            {
+                                SetVideoCodecPriority("H265/103", 254);
+                            }
+
+                            if (!string.IsNullOrEmpty(transcodeConfig.reslution))
+                            {
+                                var res = transcodeConfig.reslution.Split("*");
+                                if (res != null && res.Length == 2)
                                 {
-                                    int width = int.Parse(res[0]);
-                                    int height = int.Parse(res[1]);
-                                    if (width > 0  && height > 0)
+                                    try
                                     {
-                                        SetVideoCodecParam(width, height, 30, 650 * 1024);
-                                        callinfo.Reslution = width + "*" + height;
+                                        int width = int.Parse(res[0]);
+                                        int height = int.Parse(res[1]);
+                                        if (width > 0 && height > 0)
+                                        {
+                                            SetVideoCodecParam(width, height, 30, 650 * 1024);
+                                            callinfo.Reslution = width + "*" + height;
+                                        }
                                     }
-                                }
-                                catch (System.Exception)
-                                {
-                                    GCommon.Logger.Warn("transcode reslution format error");
+                                    catch (System.Exception)
+                                    {
+                                        GCommon.Logger.Warn("transcode reslution format error");
+                                    }
                                 }
                             }
                         }

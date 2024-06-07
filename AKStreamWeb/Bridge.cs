@@ -135,6 +135,12 @@ namespace AKStreamWeb
         //public static void OnIncomingCall(int callid, string number, CallState state, bool isVideo)
         {
             GCommon.Logger.Warn("sipincoming start：" + callid);
+            string msg;
+            if (Common.License.DoExtraValidation(out msg) != QLicenseCore.LicenseStatus.VALID)
+            {
+                GCommon.Logger.Warn("sipincoming license fail: " + msg);
+                return;
+            }
             ResponseStruct rs;
             //string deviceId = "33020000021180000006";
             //string channelId = "34020000001320000012";
@@ -373,16 +379,16 @@ namespace AKStreamWeb
                 //    //System.Threading.Thread.Sleep(1000);
                 //}
 
-                //SetupCaptureAudioFile(url);
-                //int len = 0;
-                //AudioDeviceInfo[] audioDevices = new AudioDeviceInfo[100];
-                //SPhoneSDK.GetAudioDevices(audioDevices, out len);
-                //if (len > 0)
-                //{
-                //    var deviceIdAudio = audioDevices[len - 1].id;
-                //    SPhoneSDK.SetDefaultAudioDevice(deviceIdAudio, deviceIdAudio);
-                //    //System.Threading.Thread.Sleep(1000);
-                //}
+                SetupCaptureAudioFile(url);
+                int len = 0;
+                AudioDeviceInfo[] audioDevices = new AudioDeviceInfo[100];
+                SPhoneSDK.GetAudioDevices(audioDevices, out len);
+                if (len > 0)
+                {
+                    var deviceIdAudio = audioDevices[len - 1].id;
+                    SPhoneSDK.SetDefaultAudioDevice(deviceIdAudio, deviceIdAudio);
+                    //System.Threading.Thread.Sleep(1000);
+                }
 
                 GCommon.Logger.Warn("sipincoming answer：" + numberdb);
                 lock (_lock)
@@ -399,12 +405,12 @@ namespace AKStreamWeb
                     s_calls.Add(callid, callinfo);
                 }
                 Answer(callid, true);
-                //if (_enableVoice)
-                //{
-                //    s_callidIntercom = callid;
-                //    SipMethodProxy sipMethodProxy = new SipMethodProxy(Common.AkStreamWebConfig.WaitSipRequestTimeOutMSec);
-                //    var result = sipMethodProxy.BroadcastRequest(deviceId, channelId);
-                //}
+                if (_enableVoice)
+                {
+                    s_callidIntercom = callid;
+                    SipMethodProxy sipMethodProxy = new SipMethodProxy(Common.AkStreamWebConfig.WaitSipRequestTimeOutMSec);
+                    var result = sipMethodProxy.BroadcastRequest(deviceId, channelId);
+                }
 
             }
             else

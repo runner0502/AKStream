@@ -339,6 +339,19 @@ namespace LibGB28181SipServer
                 SipServerConfig.ListenIp = config.GatewayIp;
                 SipServerConfig.ServerSipDeviceId = config.GatewayCode;
                 SipServerConfig.SipPort = (ushort)config.SignalPort;
+                var advconfig = ORMHelper.Db.Select<LinCms.Core.Entities.SysAdvancedConfig>().First();
+                if (advconfig != null)
+                {
+                    if (advconfig.AuthEnable == 0)
+                    {
+                        SipServerConfig.Authentication = false;
+                    }
+                    else
+                    {
+                        SipServerConfig.Authentication = true;
+                    }
+
+                }
             }
             catch (Exception ex)
             {

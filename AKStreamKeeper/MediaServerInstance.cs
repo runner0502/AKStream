@@ -954,12 +954,11 @@ namespace AKStreamKeeper
                             _zlmNewConfig.Shell.Port = 9000;
                         }
 
-                        _zlmNewConfig.Hook.On_Publish = "";
-                        _zlmNewConfig.Hook.On_Stream_Changed = "";
-                        _zlmNewConfig.Hook.On_Stream_None_Reader = "";
-                        _zlmNewConfig.Hook.On_Play = "";
-                        _zlmNewConfig.Hook.On_Flow_Report = "";
-                        _zlmNewConfig.Hook.On_Publish = "";
+                        //_zlmNewConfig.Hook.On_Publish = "";
+                        //_zlmNewConfig.Hook.On_Stream_Changed = "";
+                        //_zlmNewConfig.Hook.On_Stream_None_Reader = "";
+                        //_zlmNewConfig.Hook.On_Play = "";
+                        //_zlmNewConfig.Hook.On_Flow_Report = "";
 
                         if (Common.AkStreamKeeperConfig.RecordSec != null && Common.AkStreamKeeperConfig.RecordSec > 0)
                         {

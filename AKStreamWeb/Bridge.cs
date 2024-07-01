@@ -80,13 +80,13 @@ namespace AKStreamWeb
 
         private void SipMsgProcess_OnReceiveInvite(LibCommon.Structs.ShareInviteInfo info, SIPRequest req)
         {
-            if (s_calls.Count > 0)
-            {
-                StartAudioSendStream(s_LocalPort, info.RemoteIpAddress, info.RemotePort, s_callidIntercom);
-                info.LocalRtpPort = (ushort)s_LocalPort;
-                Common.SipServer.SendInviteOK(req, info);
-                s_LocalPort += 1;
-            }
+            //if (s_calls.Count > 0)
+            //{
+            //    StartAudioSendStream(s_LocalPort, info.RemoteIpAddress, info.RemotePort, s_callidIntercom);
+            //    info.LocalRtpPort = (ushort)s_LocalPort;
+            //    Common.SipServer.SendInviteOK(req, info);
+            //    s_LocalPort += 1;
+            //}
         }
 
         public void OnCallState(int callid, string number, CallState state, string stateText, bool isVideo)
@@ -379,16 +379,16 @@ namespace AKStreamWeb
                 //    //System.Threading.Thread.Sleep(1000);
                 //}
 
-                SetupCaptureAudioFile(url);
-                int len = 0;
-                AudioDeviceInfo[] audioDevices = new AudioDeviceInfo[100];
-                SPhoneSDK.GetAudioDevices(audioDevices, out len);
-                if (len > 0)
-                {
-                    var deviceIdAudio = audioDevices[len - 1].id;
-                    SPhoneSDK.SetDefaultAudioDevice(deviceIdAudio, deviceIdAudio);
-                    //System.Threading.Thread.Sleep(1000);
-                }
+                //SetupCaptureAudioFile(url);
+                //int len = 0;
+                //AudioDeviceInfo[] audioDevices = new AudioDeviceInfo[100];
+                //SPhoneSDK.GetAudioDevices(audioDevices, out len);
+                //if (len > 0)
+                //{
+                //    var deviceIdAudio = audioDevices[len - 1].id;
+                //    SPhoneSDK.SetDefaultAudioDevice(deviceIdAudio, deviceIdAudio);
+                //    //System.Threading.Thread.Sleep(1000);
+                //}
 
                 GCommon.Logger.Warn("sipincoming answer：" + numberdb);
                 lock (_lock)
@@ -405,12 +405,13 @@ namespace AKStreamWeb
                     s_calls.Add(callid, callinfo);
                 }
                 Answer(callid, true);
-                if (_enableVoice)
-                {
-                    s_callidIntercom = callid;
-                    SipMethodProxy sipMethodProxy = new SipMethodProxy(Common.AkStreamWebConfig.WaitSipRequestTimeOutMSec);
-                    var result = sipMethodProxy.BroadcastRequest(deviceId, channelId);
-                }
+
+                //if (_enableVoice)
+                //{
+                //    s_callidIntercom = callid;
+                //    SipMethodProxy sipMethodProxy = new SipMethodProxy(Common.AkStreamWebConfig.WaitSipRequestTimeOutMSec);
+                //    var result = sipMethodProxy.BroadcastRequest(deviceId, channelId);
+                //}
 
             }
             else

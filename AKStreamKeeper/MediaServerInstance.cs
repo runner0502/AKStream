@@ -914,7 +914,9 @@ namespace AKStreamKeeper
                         _zlmNewConfig.Hook.On_Flow_Report = $"http://{h}:{p}/MediaServer/WebHook/OnFlowReport"; //流量统计
                         _zlmNewConfig.Hook.On_Http_Access = "";
                         _zlmNewConfig.Hook.On_Play = $"http://{h}:{p}/MediaServer/WebHook/OnPlay"; //有流被客户端播放时
+                        //_zlmNewConfig.Hook.On_Play = "";
                         _zlmNewConfig.Hook.On_Publish = $"http://{h}:{p}/MediaServer/WebHook/OnPublish"; //有流发布时
+                        //_zlmNewConfig.Hook.On_Publish = "";
                         _zlmNewConfig.Hook.On_Record_Mp4 =
                             $"http://{h}:{p}/MediaServer/WebHook/OnRecordMp4"; //当录制mp4完成时
                         _zlmNewConfig.Hook.On_Record_Ts = $"http://{h}:{p}/MediaServer/WebHook/OnRecordTs"; //当录制ts完成时
@@ -935,8 +937,11 @@ namespace AKStreamKeeper
                             $"http://{h}:{p}/MediaServer/WebHook/OnShellLogin"; //shell鉴权
                         _zlmNewConfig.Hook.On_Stream_Changed =
                             $"http://{h}:{p}/MediaServer/WebHook/OnStreamChanged"; //流注册或注销时
+                        //_zlmNewConfig.Hook.On_Stream_Changed = "";
+
                         _zlmNewConfig.Hook.On_Stream_None_Reader =
                             $"http://{h}:{p}/MediaServer/WebHook/OnStreamNoneReader"; //流无人观看时
+                        //_zlmNewConfig.Hook.On_Stream_None_Reader = "";
                         _zlmNewConfig.Hook.On_Stream_Not_Found = "";
                         _zlmNewConfig.Hook.On_Server_Started = "";
                         _zlmNewConfig.Hook.TimeoutSec = 20;

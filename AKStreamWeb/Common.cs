@@ -271,6 +271,7 @@ namespace AKStreamWeb
             ORMHelper.Db.Select<biz_transcode>().Count();
             ORMHelper.Db.Select<DeviceNumber>().Count();
             ORMHelper.Db.Select<organization>().Count();
+            ORMHelper.Db.Select<MediaStream>().Count();
 
 
             var config = ORMHelper.Db.Select<SysBasicConfig>().First();

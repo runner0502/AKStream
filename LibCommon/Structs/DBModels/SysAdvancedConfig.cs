@@ -75,6 +75,31 @@ namespace LinCms.Core.Entities {
 		[JsonProperty, Column(Name = "update_time", DbType = "datetime")]
 		public DateTime? UpdateTime { get; set; }
 
-	}
+        /// <summary>
+        /// 是否启用推送GIS信息功能：0否 1是
+        /// </summary>
+        [JsonProperty, Column(Name = "push_gis_enable", DbType = "int")]
+        public int PushGisEnable { get; set; } = 1;
+        /// <summary>
+        /// 推送地址
+        /// </summary>
+        [JsonProperty, Column(Name = "push_gis_url", StringLength = 1024)]
+        public string PushGisUrl { get; set; }
+		/// <summary>
+		/// 推送类型 （0：rabbitmq, 1: rocketmq）
+		/// </summary>
+        [JsonProperty, Column(Name = "push_gis_type", DbType = "int")]
+        public string PushGisType { get; set; }
+		/// <summary>
+		/// 位置信息 topic
+		/// </summary>
+        [JsonProperty, Column(Name = "push_position_topic", StringLength = 1024)]
+        public string PushPositionTopic { get; set; }
+		/// <summary>
+		/// 注册状态topic
+		/// </summary>
+        [JsonProperty, Column(Name = "push_regist_state_topic", StringLength = 1024)]
+        public string PushRegistStateTopic { get; set; }
+    }
 
 }

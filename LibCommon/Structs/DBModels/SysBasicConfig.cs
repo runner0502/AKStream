@@ -29,15 +29,30 @@ namespace LinCms.Core.Entities {
 		public string GatewayCode { get; set; }
 
 		/// <summary>
-		/// 公网ip地址
+		/// 281侧内网ip地址
 		/// </summary>
 		[JsonProperty, Column(Name = "gateway_ip", StringLength = 50)]
 		public string GatewayIp { get; set; }
+        /// <summary>
+        ///  调度机侧内网ip地址
+        /// </summary>
+        [JsonProperty, Column(Name = "sip_ip", StringLength = 50)]
+        public string SipIp { get; set; }
+        /// <summary>
+        /// 调度机侧外网ip地址
+        /// </summary>
+        [JsonProperty, Column(Name = "sip_public_ip", StringLength = 50)]
+        public string SipPublicIp { get; set; }
+        /// <summary>
+        ///  调度机侧信令端口
+        /// </summary>
+        [JsonProperty, Column(Name = "sip_port", DbType = "int")]
+        public string SipPort { get; set; }
 
-		/// <summary>
-		/// 网关名称
-		/// </summary>
-		[JsonProperty, Column(Name = "gateway_name", IsNullable = false)]
+        /// <summary>
+        /// 网关名称
+        /// </summary>
+        [JsonProperty, Column(Name = "gateway_name", IsNullable = false)]
 		public string GatewayName { get; set; }
 
 

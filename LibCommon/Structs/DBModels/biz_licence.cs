@@ -73,6 +73,11 @@ namespace LibCommon.Structs.DBModels
         /// </summary>
         [JsonProperty, Column(Name = "is_deleted", DbType = "int", IsNullable = true)]
         public int IsDeleted { get; set; } = 0;
+        /// <summary>
+        /// 最大推流并发数量
+        /// </summary>
+        [Column(DbType = "int(32)")]
+        public int max_push_number { get; set; }
 
     }
 }

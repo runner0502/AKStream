@@ -82,10 +82,20 @@ namespace AKStreamWeb
         {
             if (s_calls.Count > 0)
             {
-                StartAudioSendStream(s_LocalPort, info.RemoteIpAddress, info.RemotePort, s_callidIntercom);
-                info.LocalRtpPort = (ushort)s_LocalPort;
-                Common.SipServer.SendInviteOK(req, info);
+                int result= StartAudioSendStream(s_LocalPort, info.RemoteIpAddress, info.RemotePort, s_callidIntercom);
+                if (result > 0)
+                {
+                    GCommon.Logger.Warn("StartAudioSendStream success");
+                    info.LocalRtpPort = (ushort)s_LocalPort;
+                    Common.SipServer.SendInviteOK(req, info);
+                    s_calls[s_callidIntercom].SipChannel.AudioPortConf = result;
+                }
+                else
+                {
+                    GCommon.Logger.Warn("StartAudioSendStream fail");
+                }
                 s_LocalPort += 1;
+
             }
         }
 
@@ -408,11 +418,24 @@ namespace AKStreamWeb
 
                 if (_enableVoice)
                 {
-                    s_callidIntercom = callid;
-                    SipMethodProxy sipMethodProxy = new SipMethodProxy(Common.AkStreamWebConfig.WaitSipRequestTimeOutMSec);
-                    var result = sipMethodProxy.BroadcastRequest(deviceId, channelId);
+                    if (sipChannel.AudioPortConf == -1)
+                    {
+                        GCommon.Logger.Warn("incoming request broadcast");
+                        s_callidIntercom = callid;
+                        SipMethodProxy sipMethodProxy = new SipMethodProxy(Common.AkStreamWebConfig.WaitSipRequestTimeOutMSec);
+                        var result = sipMethodProxy.BroadcastRequest(deviceId, channelId);
+                    }
+                    else
+                    {
+                        var th = new Thread(() =>
+                        {
+                            Thread.Sleep(1000);
+                            GCommon.Logger.Warn("incoming AddToAudioPort");
+                            SPhoneSDK.AddToAudioPort(callid, sipChannel.AudioPortConf);
+                        });
+                        th.Start();
+                    }
                 }
-
             }
             else
             {

@@ -220,6 +220,14 @@ namespace LibCommon.Structs.GB28181
         [BsonIgnore]
         public int TotalNumber { get; set; }
 
+        private int _audioPortConf = -1;
+
+        [JsonIgnore]
+        [BsonIgnore]
+        public int AudioPortConf 
+        { 
+            get=> _audioPortConf; 
+            set=> _audioPortConf= value; }
 
         public void Dispose()
         {

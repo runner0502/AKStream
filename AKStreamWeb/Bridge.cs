@@ -88,6 +88,7 @@ namespace AKStreamWeb
                     {
                         channel.Callid = "";
                         channel.AudioPortConf = -1;
+                        channel.SipCallid = -1;
                         GCommon.Logger.Warn("SipMsgProcess_OnReceiveBye find channelid: " + channel.DeviceId);
                         return;
                     }
@@ -109,6 +110,7 @@ namespace AKStreamWeb
                     Common.SipServer.SendInviteOK(req, info);
                     s_calls[s_callidIntercom].SipChannel.AudioPortConf = result;
                     s_calls[s_callidIntercom].SipChannel.Callid = req.Header.CallId;
+                    s_calls[s_callidIntercom].SipChannel.SipCallid = s_callidIntercom;
                 }
                 else
                 {
@@ -126,11 +128,17 @@ namespace AKStreamWeb
                 case CallState.STATE_DISCONNECTED:
                     try
                     {
+                        GCommon.Logger.Debug("onsipcallstate: disconnect callid: " + callid);
                         lock (_lock)
                         {
                             var call = s_calls[callid];
                             if (call != null)
                             {
+                                if (call.SipChannel.SipCallid == callid)
+                                {
+                                    GCommon.Logger.Debug("onsipcallstate: disconnect callid: " + callid + ", set broadcat terminal");
+                                    call.SipChannel.SipCallid = -1;
+                                }
                                 s_calls.Remove(callid);
                             }
                         }
@@ -447,13 +455,21 @@ namespace AKStreamWeb
                     }
                     else
                     {
-                        var th = new Thread(() =>
-                        {
-                            Thread.Sleep(1000);
-                            GCommon.Logger.Warn("incoming AddToAudioPort");
-                            SPhoneSDK.AddToAudioPort(callid, sipChannel.AudioPortConf);
-                        });
-                        th.Start();
+                        //if (sipChannel.SipCallid >= 0)
+                        //{
+                        //    GCommon.Logger.Warn("incoming broadcast speaking do nothing");
+                        //}
+                        //else
+                        //{
+                            var th = new Thread(() =>
+                            {
+                                Thread.Sleep(500);
+                                GCommon.Logger.Warn("incoming AddToAudioPort");
+                                SPhoneSDK.AddToAudioPort(callid, sipChannel.AudioPortConf);
+                                sipChannel.SipCallid = callid;
+                            });
+                            th.Start();
+                        //}
                     }
                 }
             }

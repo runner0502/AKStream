@@ -33,6 +33,11 @@ namespace LibCommon.Structs.GB28181
         private ushort? _rtpPort;
         private string? _vhost;
 
+        public SipChannel()
+        {
+            SipCallid = -1;
+        }
+
         /*
         private List<KeyValuePair<int, RecordInfo.RecItem>> _lastRecordInfos =
             new List<KeyValuePair<int, RecordInfo.RecItem>>(); //最后一次获取到的录像文件列表
@@ -232,6 +237,9 @@ namespace LibCommon.Structs.GB28181
         [JsonIgnore]
         [BsonIgnore]
         public string Callid { get; set; }
+        [JsonIgnore]
+        [BsonIgnore]
+        public int SipCallid { get; set; }
 
         public void Dispose()
         {

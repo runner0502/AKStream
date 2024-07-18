@@ -432,13 +432,15 @@ namespace LibGB28181SipServer
                 //GCommon.Logger.Debug($"[{Common.LoggerHead}]->发送Sip请求->{req}");
 
                 var mwiURI = SIPURI.ParseSIPURIRelaxed($"{sipDevice.DeviceInfo.DeviceID}@{sipDevice.IpAddress}:{sipDevice.Port}");
-                CatalogQuery catalogQuery = new CatalogQuery()
+                MobilePositionQuery catalogQuery = new MobilePositionQuery()
                 {
-                    CommandType = CommandType.Catalog,
+                    CmdType = CommandType.MobilePosition,
                     DeviceID = sipDevice.DeviceInfo.DeviceID,
                     SN = new Random().Next(1, ushort.MaxValue),
+                    Interval=5,
                 };
-                string xmlBody1 = CatalogQuery.Instance.Save<CatalogQuery>(catalogQuery);
+                //string xmlBody1 = CatalogQuery.Instance.Save<CatalogQuery>(catalogQuery);
+                string xmlBody1 = MobilePositionQuery.Instance.Save<MobilePositionQuery>(catalogQuery);
                 SIPNotifierClient mwiSubscriber = new SIPNotifierClient(_sipTransport, null, SIPEventPackagesEnum.MessageSummary, mwiURI, sipDevice.SipServerConfig.ServerSipDeviceId, Common.SipServerConfig.SipIpAddress , sipDevice.Password, 60, xmlBody1);
                 mwiSubscriber.SubscriptionFailed += (uri, failureStatus, errorMessage) => GCommon.Logger.Debug($"MWI failed for {uri}, {errorMessage}");
                 mwiSubscriber.SubscriptionSuccessful += (uri) => GCommon.Logger.Debug($"MWI subscription successful for {uri}");

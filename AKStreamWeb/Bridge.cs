@@ -152,20 +152,26 @@ namespace AKStreamWeb
         }
 
 
-        //private Timer _timer;
+        private Timer _timer;
 
-        //private void TestTimerCB(object obj)
-        //{
-        //    var device = LibGB28181SipServer.Common.SipDevices.Find(x => x.DeviceId == "11011200002000000001");
-        //    if (device == null)
-        //    {
-        //        return;
-        //    }
-        //    var sipChannel = device.SipChannels.Find(x => x.DeviceId == "11010000581314000001");
-        //    Common.SipServer.Subscribe(device, sipChannel, SIPSorcery.SIP.SIPMethodsEnum.OPTIONS, "", "", "", LibCommon.Structs.GB28181.XML.CommandType.Catalog, false, null, null, null, 100);
-        //}
+        private void TestTimerCB(object obj)
+        {
+            var device = LibGB28181SipServer.Common.SipDevices.Find(x => x.DeviceId == "43100000122000900001");
+            if (device == null)
+            {
+                return;
+            }
+            var sipChannel = device.SipChannels.Find(x => x.DeviceId == "43100000001310615349");
+            Common.SipServer.Subscribe(device, sipChannel, SIPSorcery.SIP.SIPMethodsEnum.OPTIONS, "", "", "", LibCommon.Structs.GB28181.XML.CommandType.MobilePosition, false, null, null, null, 100);
+            _timer.Dispose();
+        }
 
-        public static Dictionary<int, CallInfoInternal> s_calls = new Dictionary<int, CallInfoInternal>();
+        public void Subcribe()
+        {
+            _timer = new Timer(TestTimerCB, null, 10000, 1000000000);
+        }
+
+    public static Dictionary<int, CallInfoInternal> s_calls = new Dictionary<int, CallInfoInternal>();
 
         public static int s_callidIntercom = 0;
 

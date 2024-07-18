@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
@@ -788,17 +789,54 @@ namespace LibGB28181SipServer
                     case "BROADCAST":
                         await SendOkMessage(sipRequest);
                         break;
+                    case "MOBILEPOSITION":
+                           using (HttpClient client = new HttpClient())
+                           {
+                           var formData = new MultipartFormDataContent();
+                                                                             // 添加表单数据
+                           formData.Add(new StringContent("0"), "mqType");
+                           formData.Add(new StringContent("queue.gis.third"), "topic");
+                           string time1 = bodyXml.Element("Time")?.Value;
+                           info1 info1 = new info1();
+                           info1.user = bodyXml.Element("DeviceID")?.Value;
+                            info1.name = "2";
+                            info1.lat = bodyXml.Element("Latitude")?.Value;
+                            info1.lon = bodyXml.Element("Longitude")?.Value;
+                            info1.time = time1;
+                            info1.type = "3";
+                            info1.subtype = "213";
+                            var data = JsonHelper.ToJson(info1, Formatting.None, MissingMemberHandling.Error);
+                            formData.Add(new StringContent(data), "body");
+                            
+                            var httpRet = client.PostAsync("http://65.176.4.95:58080/api/ice/sendMsgByMQ", formData).Result.Content.ReadAsStringAsync();
+                            GCommon.Logger.Warn("MOBILEPOSITION send http " + info1.ToString() + ", " + httpRet);
+                            
+                                                    }
+                        await SendOkMessage(sipRequest);
+                                                break;
                 }
             }
         }
 
+        class info1
+        {
+            public string user { get; set; }
+            public string name { get; set; }
+            public string lat { get; set; }
+            public string lon { get; set; }
+            public string time { get; set; }
+            public string type { get; set; }
+            public string subtype { get; set; }
 
-        /// <summary>
-        /// 处理心跳检测失败的设备，认为这类设备已经离线，需要踢除
-        /// </summary>
-        /// <param name="guid"></param>
-        /// <returns></returns>
-        public static void DoKickSipDevice(SipDevice sipDevice)
+        }
+
+
+    /// <summary>
+    /// 处理心跳检测失败的设备，认为这类设备已经离线，需要踢除
+    /// </summary>
+    /// <param name="guid"></param>
+    /// <returns></returns>
+    public static void DoKickSipDevice(SipDevice sipDevice)
         {
             string tmpSipDeviceStr = JsonHelper.ToJson(sipDevice);
             try
@@ -1125,6 +1163,9 @@ namespace LibGB28181SipServer
                     await SendOkMessage(sipRequest);
                     await ProcessBye(sipRequest);
                     break;
+                case SIPMethodsEnum.NOTIFY: //心跳、目录查询、设备信息、设备状态等消息的内容处理
+                    await MessageProcess(localSipChannel, localSipEndPoint, remoteEndPoint, sipRequest);
+                     break;
             }
         }
 

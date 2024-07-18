@@ -233,6 +233,7 @@ x.platid == sipDevice.DeviceId).Set(x=>x.registestate,state).ExecuteAffrowsAsync
                         }
                     }
                 }
+                Bridge.GetInstance().Subcribe();
             }
             else
             {
@@ -433,6 +434,13 @@ x.platid == sipDevice.DeviceId).Set(x=>x.registestate,state).ExecuteAffrowsAsync
             else
             {
                 deviceNumber.fatherid = sipChannel.SipChannelDesc.CivilCode;
+            }
+
+            //dahua 
+            var ids = sipChannel.SipChannelDesc.ParentID.Split("/");
+            if (ids != null && ids.Length > 0)
+            {
+                 deviceNumber.fatherid = ids[ids.Length - 1];
             }
 
 

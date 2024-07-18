@@ -528,8 +528,19 @@ namespace LibGB28181SipServer
                 OnReceiveInvite(shareinfo, sipRequest);
             }
         }
+        private static async Task ProcessBye(SIPRequest sipRequest)
+        {
+            //SIPResponseStatusCodesEnum keepAliveResponse = SIPResponseStatusCodesEnum.Ok;
+            //SIPResponse okResponse = SIPResponse.GetResponse(sipRequest, keepAliveResponse, null);
+            //await Common.SipServer.SipTransport.SendResponseAsync(okResponse);
 
-          public static  void SendInviteOk(SIPRequest sipRequest, ShareInviteInfo shareinfo)
+            if (OnReceiveBye != null)
+            {
+                OnReceiveBye(sipRequest);
+            }
+        }
+
+        public static  void SendInviteOk(SIPRequest sipRequest, ShareInviteInfo shareinfo)
         {
             //SIPResponseStatusCodesEnum keepAliveResponse = SIPResponseStatusCodesEnum.Ok;
             //SIPResponse okResponse = SIPResponse.GetResponse(sipRequest, keepAliveResponse, null);
@@ -1095,6 +1106,9 @@ namespace LibGB28181SipServer
             SIPEndPoint remoteEndPoint,
             SIPRequest sipRequest)
         {
+
+            GCommon.Logger.Debug(
+                               $"[{Common.LoggerHead}]->收到来自{remoteEndPoint}->{sipRequest}->  SipTransportRequestReceived");
             switch (sipRequest.Method)
             {
                 case SIPMethodsEnum.REGISTER: //处理注册
@@ -1106,6 +1120,10 @@ namespace LibGB28181SipServer
                 case SIPMethodsEnum.INVITE:
                     await Send100try(sipRequest);
                     await ProcessInvite(sipRequest);
+                    break;
+                case SIPMethodsEnum.BYE:
+                    await SendOkMessage(sipRequest);
+                    await ProcessBye(sipRequest);
                     break;
             }
         }
@@ -1509,6 +1527,7 @@ namespace LibGB28181SipServer
         /// </summary>
         public static event GCommon.DeviceAuthentication OnDeviceAuthentication = null!;
         public static event GCommon.ReceiveInviteDelegate OnReceiveInvite = null!;
+        public static event GCommon.ReceiveByeDelegate OnReceiveBye = null!;
 
         #endregion
     }

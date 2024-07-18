@@ -73,7 +73,26 @@ namespace AKStreamWeb
             }
 
             SipMsgProcess.OnReceiveInvite += SipMsgProcess_OnReceiveInvite;
+            SipMsgProcess.OnReceiveBye += SipMsgProcess_OnReceiveBye;
 
+        }
+
+        private void SipMsgProcess_OnReceiveBye(SIPRequest req)
+        {
+            GCommon.Logger.Warn("SipMsgProcess_OnReceiveBye");
+            foreach (var item in LibGB28181SipServer.Common.SipDevices)
+            {
+                foreach (var channel in item.SipChannels)
+                {
+                    if (channel.Callid == req.Header.CallId)
+                    {
+                        channel.Callid = "";
+                        channel.AudioPortConf = -1;
+                        GCommon.Logger.Warn("SipMsgProcess_OnReceiveBye find channelid: " + channel.DeviceId);
+                        return;
+                    }
+                }
+            } 
         }
 
         static int s_LocalPort = 7000;
@@ -85,16 +104,17 @@ namespace AKStreamWeb
                 int result= StartAudioSendStream(s_LocalPort, info.RemoteIpAddress, info.RemotePort, s_callidIntercom);
                 if (result > 0)
                 {
-                    GCommon.Logger.Warn("StartAudioSendStream success");
+                    GCommon.Logger.Warn("StartAudioSendStream success AudioPortConf: " + result + "," + req.Header.CallId);
                     info.LocalRtpPort = (ushort)s_LocalPort;
                     Common.SipServer.SendInviteOK(req, info);
                     s_calls[s_callidIntercom].SipChannel.AudioPortConf = result;
+                    s_calls[s_callidIntercom].SipChannel.Callid = req.Header.CallId;
                 }
                 else
                 {
                     GCommon.Logger.Warn("StartAudioSendStream fail");
                 }
-                s_LocalPort += 1;
+                s_LocalPort += 2;
 
             }
         }

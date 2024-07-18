@@ -227,7 +227,11 @@ namespace LibCommon.Structs.GB28181
         public int AudioPortConf 
         { 
             get=> _audioPortConf; 
-            set=> _audioPortConf= value; }
+            set=> _audioPortConf= value; 
+        }
+        [JsonIgnore]
+        [BsonIgnore]
+        public string Callid { get; set; }
 
         public void Dispose()
         {

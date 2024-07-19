@@ -278,6 +278,8 @@ namespace AKStreamWeb
             if (config != null)
             {
                 Common.AkStreamWebConfig.ListenIp = config.GatewayIp;
+                Common.AkStreamWebConfig.SipPort = int.Parse(config.SipPort);
+                Common.AkStreamWebConfig.SipIp = config.SipIp;
             }
 
 

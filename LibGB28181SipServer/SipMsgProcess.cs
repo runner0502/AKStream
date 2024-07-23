@@ -12,6 +12,7 @@ using LibCommon.Structs.GB28181;
 using LibCommon.Structs.GB28181.Net.SDP;
 using LibCommon.Structs.GB28181.Net.SIP;
 using LibCommon.Structs.GB28181.XML;
+using LinCms.Core.Entities;
 using Newtonsoft.Json;
 using Org.BouncyCastle.Ocsp;
 using SIPSorcery.SIP;
@@ -790,28 +791,38 @@ namespace LibGB28181SipServer
                         await SendOkMessage(sipRequest);
                         break;
                     case "MOBILEPOSITION":
-                           using (HttpClient client = new HttpClient())
-                           {
-                           var formData = new MultipartFormDataContent();
-                                                                             // 添加表单数据
-                           formData.Add(new StringContent("0"), "mqType");
-                           formData.Add(new StringContent("queue.gis.third"), "topic");
-                           string time1 = bodyXml.Element("Time")?.Value;
-                           info1 info1 = new info1();
-                           info1.user = bodyXml.Element("DeviceID")?.Value;
-                            info1.name = "2";
-                            info1.lat = bodyXml.Element("Latitude")?.Value;
-                            info1.lon = bodyXml.Element("Longitude")?.Value;
-                            info1.time = time1;
-                            info1.type = "3";
-                            info1.subtype = "213";
-                            var data = JsonHelper.ToJson(info1, Formatting.None, MissingMemberHandling.Error);
-                            formData.Add(new StringContent(data), "body");
-                            
-                            var httpRet = client.PostAsync("http://65.176.4.95:58080/api/ice/sendMsgByMQ", formData).Result.Content.ReadAsStringAsync();
-                            GCommon.Logger.Warn("MOBILEPOSITION send http " + info1.ToString() + ", " + httpRet);
-                            
-                                                    }
+                        var config = ORMHelper.Db.Select<SysAdvancedConfig>().First();
+                        if (config != null && config.PushGisEnable == 1)
+                        {
+                            using (HttpClient client = new HttpClient())
+                            {
+                                var formData = new MultipartFormDataContent();
+                                // 添加表单数据
+                                formData.Add(new StringContent(config.PushGisType), "mqType");
+                                //formData.Add(new StringContent("queue.gis.third"), "topic");
+
+                                formData.Add(new StringContent(config.PushPositionTopic), "topic");
+                                string time1 = bodyXml.Element("Time")?.Value;
+                                info1 info1 = new info1();
+                                info1.user = bodyXml.Element("DeviceID")?.Value;
+                                info1.name = "2";
+                                info1.lat = bodyXml.Element("Latitude")?.Value;
+                                info1.lon = bodyXml.Element("Longitude")?.Value;
+                                info1.time = time1;
+                                info1.type = "3";
+                                info1.subtype = "213";
+                                var data = JsonHelper.ToJson(info1, Formatting.None, MissingMemberHandling.Error);
+                                formData.Add(new StringContent(data), "body");
+
+                                //var httpRet = client.PostAsync("http://65.176.4.95:58080/api/ice/sendMsgByMQ", formData).Result.Content.ReadAsStringAsync();
+                                var httpRet = client.PostAsync(config.PushGisUrl, formData).Result.Content.ReadAsStringAsync();
+                                GCommon.Logger.Warn("MOBILEPOSITION send http " + info1.ToJson() + ", " + httpRet);
+                            }
+                        }
+                        else
+                        {
+                            GCommon.Logger.Warn("mobileposition config is null");
+                        }
                         await SendOkMessage(sipRequest);
                                                 break;
                 }

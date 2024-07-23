@@ -247,6 +247,7 @@ namespace AKStreamWeb
                 advancedConfig.IsDeleted = 0;
                 advancedConfig.CreateTime = DateTime.Now;
                 advancedConfig.UpdateTime = DateTime.Now;
+                advancedConfig.PushGisEnable = 0;
                 ORMHelper.Db.Insert(advancedConfig).ExecuteAffrows();
             }
             var basicConfigCount = ORMHelper.Db.Select<SysBasicConfig>().Count();

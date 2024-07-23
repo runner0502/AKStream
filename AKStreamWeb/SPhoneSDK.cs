@@ -288,7 +288,7 @@ namespace XyCallLayer
         public extern static void HandleIPChanged();
         //注册
         [DllImport(@"DLL\SPhone.dll")]
-        public extern static bool Regist(string host, string uname, string pwd, bool mobile = false, bool localMode = false,
+        public extern static bool Regist(string host, string uname, string pwd, string mediaPublicIP, bool mobile = false, bool localMode = false,
             int regTimeout = 60, QosType qos = QosType.BEST_EFFORT);
         //注销
         [DllImport(@"DLL\SPhone.dll")]

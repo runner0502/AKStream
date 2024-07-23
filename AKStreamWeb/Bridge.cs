@@ -43,7 +43,7 @@ namespace AKStreamWeb
         {
             SPhoneSDK.SDKInit( Common.AkStreamWebConfig.SipIp, Common.AkStreamWebConfig.SipPort, 5, System.AppContext.BaseDirectory + "pjsip.log");
             //SPhoneSDK.SDKInit("172.19.6.41", 5066, 5, System.AppContext.BaseDirectory +  "pjsip.log");
-            SPhoneSDK.Regist("1.1.1.1", "admin", "admin", false, true);
+            SPhoneSDK.Regist("1.1.1.1", "admin", "admin", Common.AkStreamWebConfig.PublicMediaIp, false, true);
             _onIncoming = OnIncomingCall_WithMsg;
             SPhoneSDK.SetCallback_IncomingCall_WithMsg(_onIncoming);
             _onReceiveDtmf = OnReceiveDtmf;

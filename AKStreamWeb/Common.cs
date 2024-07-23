@@ -272,6 +272,7 @@ namespace AKStreamWeb
             ORMHelper.Db.Select<DeviceNumber>().Count();
             ORMHelper.Db.Select<organization>().Count();
             ORMHelper.Db.Select<MediaStream>().Count();
+            ORMHelper.Db.Select<DevicePlus>().Count();
 
 
             var config = ORMHelper.Db.Select<SysBasicConfig>().First();
@@ -280,6 +281,7 @@ namespace AKStreamWeb
                 Common.AkStreamWebConfig.ListenIp = config.GatewayIp;
                 Common.AkStreamWebConfig.SipPort = int.Parse(config.SipPort);
                 Common.AkStreamWebConfig.SipIp = config.SipIp;
+                Common.AkStreamWebConfig.PublicMediaIp = config.SipPublicIp;
             }
 
 

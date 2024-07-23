@@ -141,5 +141,7 @@ namespace AKStreamWeb.Misc
 
         public string SipIp { get; set; }
         public int SipPort { get; set; }
+        public string PublicMediaIp { get; set; }
+
     }
 }

@@ -5,13 +5,14 @@
   "WebApiPort": 5800,
   "AccessKey": "",
   "HttpClientTimeoutSec": 5,
-  "WaitEventTimeOutMSec" : 10000,
-  "WaitSipRequestTimeOutMSec" : 5000,
-  "DeletedRecordsExpiredDays" : 30,
+  "WaitEventTimeOutMSec": 10000,
+  "WaitSipRequestTimeOutMSec": 5000,
+  "DeletedRecordsExpiredDays": 30,
   "EnableGB28181Server": true,
   "EnableGB28181Client": false,
-  "ZlmFlvPrefix" : "live",
+  "ZlmFlvPrefix": "live",
   "ListenIp": "192.168.31.57",
   "SipIp": "192.168.31.57",
-  "SipPort": 5066
+  "SipPort": 5066,
+  "PublicMediaIp": "192.168.31.57"
 }

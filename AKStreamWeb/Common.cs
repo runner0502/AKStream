@@ -248,6 +248,7 @@ namespace AKStreamWeb
                 advancedConfig.CreateTime = DateTime.Now;
                 advancedConfig.UpdateTime = DateTime.Now;
                 advancedConfig.PushGisEnable = 0;
+                advancedConfig.PushGisType = "0";
                 ORMHelper.Db.Insert(advancedConfig).ExecuteAffrows();
             }
             var basicConfigCount = ORMHelper.Db.Select<SysBasicConfig>().Count();
@@ -259,6 +260,14 @@ namespace AKStreamWeb
                 
                 basicconfig.GatewayCode = LibGB28181SipServer.Common.SipServerConfig.ServerSipDeviceId;
                 basicconfig.GatewayIp = LibGB28181SipServer.Common.SipServerConfig.SipIpAddress;
+                //basicconfig.SipIp = Common.AkStreamWebConfig.SipIp;
+                //basicconfig.SipPort = Common.AkStreamWebConfig.SipPort.ToString();
+                //basicconfig.SipPublicIp = Common.AkStreamWebConfig.PublicMediaIp;
+
+                basicconfig.SipIp = LibGB28181SipServer.Common.SipServerConfig.SipIpAddress;
+                basicconfig.SipPort = Common.AkStreamWebConfig.SipPort.ToString();
+                basicconfig.SipPublicIp = LibGB28181SipServer.Common.SipServerConfig.SipIpAddress;
+
                 basicconfig.GatewayName = "视频监控网关系统";
                 basicconfig.MediaPortStart = 20000;
                 basicconfig.MediaPortEnd = 25000;

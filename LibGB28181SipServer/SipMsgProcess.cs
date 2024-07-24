@@ -8,6 +8,7 @@ using System.Xml.Linq;
 using LibCommon;
 using LibCommon.Enums;
 using LibCommon.Structs;
+using LibCommon.Structs.DBModels;
 using LibCommon.Structs.GB28181;
 using LibCommon.Structs.GB28181.Net.SDP;
 using LibCommon.Structs.GB28181.Net.SIP;
@@ -811,9 +812,16 @@ namespace LibGB28181SipServer
                                 info1.time = time1;
                                 info1.type = "3";
                                 info1.subtype = "213";
+
+                                var deviceinfo = ORMHelper.Db.Select<DevicePlus>().Where(a => a.id == info1.user).First();
+                                if (deviceinfo != null)
+                                {
+                                    info1.DeviceType = deviceinfo.type;
+                                    info1.DeviceInfo = deviceinfo.info;
+                                }
                                 var data = JsonHelper.ToJson(info1, Formatting.None, MissingMemberHandling.Error);
                                 formData.Add(new StringContent(data), "body");
-
+                 
                                 //var httpRet = client.PostAsync("http://65.176.4.95:58080/api/ice/sendMsgByMQ", formData).Result.Content.ReadAsStringAsync();
                                 var httpRet = client.PostAsync(config.PushGisUrl, formData).Result.Content.ReadAsStringAsync();
                                 GCommon.Logger.Warn("MOBILEPOSITION send http " + info1.ToJson() + ", " + httpRet);
@@ -838,6 +846,8 @@ namespace LibGB28181SipServer
             public string time { get; set; }
             public string type { get; set; }
             public string subtype { get; set; }
+            public string DeviceType { get; set; }
+            public string DeviceInfo { get; set; }
 
         }
 

@@ -12,7 +12,7 @@
   "EnableGB28181Client": false,
   "ZlmFlvPrefix": "live",
   "ListenIp": "192.168.31.57",
-  "SipIp": "192.168.31.57",
+  "SipIp": "",
   "SipPort": 5066,
-  "PublicMediaIp": "192.168.31.57"
+  "PublicMediaIp": ""
 }

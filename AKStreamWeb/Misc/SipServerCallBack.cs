@@ -437,10 +437,13 @@ x.platid == sipDevice.DeviceId).Set(x=>x.registestate,state).ExecuteAffrowsAsync
             }
 
             //dahua 
-            var ids = sipChannel.SipChannelDesc.ParentID.Split("/");
-            if (ids != null && ids.Length > 0)
+            if (sipChannel.SipChannelDesc.ParentID.Contains("/"))
             {
-                 deviceNumber.fatherid = ids[ids.Length - 1];
+                var ids = sipChannel.SipChannelDesc.ParentID.Split("/");
+                if (ids != null && ids.Length > 0)
+                {
+                    deviceNumber.fatherid = ids[ids.Length - 1];
+                }
             }
 
 

@@ -127,6 +127,8 @@ namespace AKStreamWeb.Controllers
             var sipDevice = LibGB28181SipServer.Common.SipDevices.FindLast(x => x.DeviceInfo!.DeviceID.Equals(deviceId));
             if (sipDevice == null)
             {
+                SipServerCallBack.SsyncState.SyncStartIndex = 0;
+                SipServerCallBack.SsyncState.State.IsProcessing = false;
                 return false;
             }
 

@@ -195,7 +195,14 @@ namespace AKStreamWeb.Services
 
             string tmpId = videoChannel.MediaServerId;
             //mediaServer = Common.MediaServerList.FindLast(x => x.MediaServerId.Equals(tmpId));
-            mediaServer = Common.MediaServerList[0];
+            try
+            {
+                mediaServer = Common.MediaServerList[0];
+            }
+            catch (Exception ex)
+            {
+                GCommon.Logger.Warn("mediaServer is empty");
+            }
             if (mediaServer == null)
             {
                 rs = new ResponseStruct()

@@ -534,8 +534,10 @@ namespace XyCallLayer
         public extern static int GetVideoDeviceHeight(int id);
         [DllImport(@"DLL\SPhone.dll")]
         public extern static int AddToAudioPort(int callid, int audioPort);
+        [DllImport(@"DLL\SPhone.dll")]
+        public extern static int ConnectSoundportToCall(int captureId, int playId, int callid);
 
-        
+
 
 
 

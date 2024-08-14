@@ -246,6 +246,7 @@ namespace LibGB28181SipServer
                                 }
                                 else
                                 {
+                                    GCommon.Logger.Info("receive catelog update : " + tmpChannelDev.ToJson());
                                     sipChannelInList.LastUpdateTime = DateTime.Now; //如果sip通道已经存在，则更新相关字段
                                     sipChannelInList.SipChannelStatus = tmpChannelDev.Status;
                                     sipChannelInList.SipChannelDesc = tmpChannelDev;
@@ -609,10 +610,14 @@ namespace LibGB28181SipServer
             SIPEndPoint remoteEndPoint,
             SIPRequest sipRequest)
         {
+            GCommon.Logger.Debug(
+                            $"[{Common.LoggerHead}]->收到来自{remoteEndPoint}MessageProcess->{sipRequest}");
             LoadOptions option = new LoadOptions();
             
             XElement bodyXml = XElement.Parse(sipRequest.Body);
             string cmdType = bodyXml.Element("CmdType")?.Value.ToUpper()!;
+            GCommon.Logger.Debug(
+                $"[{Common.LoggerHead}]->收到来自{remoteEndPoint}MessageProcess cmdType->{cmdType}");
             if (!string.IsNullOrEmpty(cmdType))
             {
                 switch (cmdType)
@@ -670,8 +675,18 @@ namespace LibGB28181SipServer
 
                         break;
                     case "CATALOG": //处理设备目录
+                        GCommon.Logger.Debug(
+                            $"[{Common.LoggerHead}]->收到来自{remoteEndPoint}MessageProcess1->{sipRequest}");
                         await SendOkMessage(sipRequest);
-                        Common.TmpCatalogs.Enqueue(UtilsHelper.XMLToObject<Catalog>(bodyXml));
+                        try
+                        {
+                            Common.TmpCatalogs.Enqueue(UtilsHelper.XMLToObject<Catalog>(bodyXml));
+                        }
+                        catch (Exception ex)
+                        {
+                            ProcessSubsribeCatalogNotify(bodyXml);
+                        }
+
                         GCommon.Logger.Debug(
                             $"[{Common.LoggerHead}]->收到来自{remoteEndPoint}设备目录信息->{sipRequest}");
 
@@ -837,6 +852,68 @@ namespace LibGB28181SipServer
             }
         }
 
+        private static void ProcessSubsribeCatalogNotify(XElement bodyXml)
+        {
+            GCommon.Logger.Debug(
+                                        $"[{Common.LoggerHead}]->MessageProcess2 notifycatalog->");
+            var notifyCata = (UtilsHelper.XMLToObject<NotifyCatalog>(bodyXml));
+            GCommon.Logger.Debug(
+            $"[{Common.LoggerHead}]->MessageProcess3 notifycatalog->");
+
+            var config1 = ORMHelper.Db.Select<SysAdvancedConfig>().First();
+            if (config1 != null)
+            {
+                GCommon.Logger.Debug("MessageProcess4");
+                if (notifyCata.DeviceList != null && notifyCata.DeviceList.Items != null)
+                {
+                    foreach (var item in notifyCata.DeviceList.Items)
+                    {
+                        GCommon.Logger.Debug("MessageProcess6");
+
+                        using (HttpClient client = new HttpClient())
+                        {
+                            var formData = new MultipartFormDataContent();
+                            // 添加表单数据
+                            formData.Add(new StringContent(config1.PushGisType), "mqType");
+                            //formData.Add(new StringContent("queue.gis.third"), "topic");
+
+                            formData.Add(new StringContent(config1.PushRegistStateTopic), "topic");
+                            //string time1 = bodyXml.Element("Time")?.Value;
+                            info1 info1 = new info1();
+                            info1.user = item.DeviceID;
+                            info1.name = "2";
+                            //info1.lat = bodyXml.Element("Latitude")?.Value;
+                            //info1.lon = bodyXml.Element("Longitude")?.Value;
+                            //info1.time = time1;
+                            info1.type = "3";
+                            info1.subtype = "213";
+                            if (item.Status == LibCommon.Structs.GB28181.Sys.DevStatus.OFF)
+                            {
+                                info1.status = 0;
+                            }
+                            else
+                            {
+                                info1.status = 1;
+                            }
+
+                            var deviceinfo = ORMHelper.Db.Select<DevicePlus>().Where(a => a.id == info1.user).First();
+                            if (deviceinfo != null)
+                            {
+                                info1.DeviceType = deviceinfo.type;
+                                info1.DeviceInfo = deviceinfo.info;
+                            }
+                            var data = JsonHelper.ToJson(info1, Formatting.None, MissingMemberHandling.Error);
+                            formData.Add(new StringContent(data), "body");
+
+                            //var httpRet = client.PostAsync("http://65.176.4.95:58080/api/ice/sendMsgByMQ", formData).Result.Content.ReadAsStringAsync();
+                            var httpRet = client.PostAsync(config1.PushGisUrl, formData).Result.Content.ReadAsStringAsync();
+                            GCommon.Logger.Warn("catalognotify send http " + info1.ToJson() + ", " + httpRet);
+                        }
+                    }
+                }
+            }
+        }
+
         class info1
         {
             public string user { get; set; }
@@ -848,6 +925,7 @@ namespace LibGB28181SipServer
             public string subtype { get; set; }
             public string DeviceType { get; set; }
             public string DeviceInfo { get; set; }
+            public int status { get; set; }
 
         }
 

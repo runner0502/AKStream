@@ -463,6 +463,100 @@ namespace LibGB28181SipServer
             //return null;
         }
 
+        public void SubscribeCatalog(SipDevice sipDevice, SipChannel sipChannel,
+            SIPMethodsEnum method,
+            string contentType,
+            string xmlBody, string subject, CommandType commandType, bool needResponse, AutoResetEvent evnt,
+            AutoResetEvent evnt2, object obj,
+            int timeout)
+        {
+            try
+            {
+                //IPAddress sipDeviceIpAddr = sipDevice.RemoteEndPoint.Address;
+                //int sipDevicePort = sipDevice.RemoteEndPoint.Port;
+                //SIPProtocolsEnum protocols = sipDevice.RemoteEndPoint.Protocol;
+                //var toSipUri = new SIPURI(SIPSchemesEnum.sip,
+                //    new SIPEndPoint(protocols, new IPEndPoint(sipDeviceIpAddr, sipDevicePort)));
+                //toSipUri.User = sipChannel.DeviceId;
+                //SIPToHeader to = new SIPToHeader(null, toSipUri, null);
+                //IPAddress sipServerIpAddress = IPAddress.Parse(Common.SipServerConfig.SipIpAddress);
+                //var fromSipUri = new SIPURI(SIPSchemesEnum.sip, sipServerIpAddress, Common.SipServerConfig.SipPort);
+                //fromSipUri.User = Common.SipServerConfig.ServerSipDeviceId;
+
+                //SIPFromHeader from = new SIPFromHeader(null, fromSipUri, "AKStream");
+
+
+                //SIPRequest req = SIPRequest.GetRequest(method, toSipUri, to,
+                //    from,
+                //    new SIPEndPoint(sipDevice.SipChannelLayout.SIPProtocol,
+                //        new IPEndPoint(
+                //            IPAddress.Parse(Common.SipServerConfig.SipIpAddress),
+                //            sipDevice.SipChannelLayout.Port)));
+
+
+                //req.Header.Allow = null;
+
+                //req.Header.Contact = new List<SIPContactHeader>()
+                //{
+                //    new SIPContactHeader(null, fromSipUri)
+                //};
+                //req.Header.UserAgent = ConstString.SIP_USERAGENT_STRING;
+                //req.Header.ContentType = contentType;
+                //req.Header.Subject = string.IsNullOrEmpty(subject) ? null : subject;
+                //req.Header.CallId = ((RecordInfo.RecItem)obj).CallId;
+                //req.Header.CSeq = ((RecordInfo.RecItem)obj).CSeq;
+                //req.Body = xmlBody;
+                //if (needResponse)
+                //{
+                //    var nrt = new NeedReturnTask(Common.NeedResponseRequests)
+                //    {
+                //        AutoResetEvent = evnt,
+                //        CallId = req.Header.CallId,
+                //        SipRequest = req,
+                //        Timeout = timeout,
+                //        SipDevice = sipDevice,
+                //        SipChannel = sipChannel,
+                //        AutoResetEvent2 = evnt2 == null ? null : evnt2,
+                //        CommandType = commandType,
+                //        Obj = obj == null ? null : obj, //额外的通用类
+                //    };
+                //    Common.NeedResponseRequests.TryAdd(req.Header.CallId, nrt);
+                //}
+
+
+                //GCommon.Logger.Debug($"[{Common.LoggerHead}]->发送Sip请求->{req}");
+
+                var mwiURI = SIPURI.ParseSIPURIRelaxed($"{sipDevice.DeviceInfo.DeviceID}@{sipDevice.IpAddress}:{sipDevice.Port}");
+                CatalogQuery catalogQuery = new CatalogQuery()
+                {
+                    CommandType = CommandType.Catalog,
+                    DeviceID = sipDevice.DeviceInfo.DeviceID,
+                    SN = new Random().Next(1, ushort.MaxValue),
+                };
+                //string xmlBody1 = CatalogQuery.Instance.Save<CatalogQuery>(catalogQuery);
+                string xmlBody1 = CatalogQuery.Instance.Save<CatalogQuery>(catalogQuery);
+                SIPNotifierClient mwiSubscriber = new SIPNotifierClient(_sipTransport, null, SIPEventPackagesEnum.MessageSummary, mwiURI, sipDevice.SipServerConfig.ServerSipDeviceId, Common.SipServerConfig.SipIpAddress, sipDevice.Password, 60, xmlBody1);
+                mwiSubscriber.SubscriptionFailed += (uri, failureStatus, errorMessage) => GCommon.Logger.Debug($"MWI failed for {uri}, {errorMessage}");
+                mwiSubscriber.SubscriptionSuccessful += (uri) => GCommon.Logger.Debug($"MWI subscription successful for {uri}");
+                mwiSubscriber.NotificationReceived += (evt, msg) => GCommon.Logger.Debug($"MWI notification, type {evt}, message {msg}.");
+
+                mwiSubscriber.Start();
+            }
+            catch (Exception ex)
+            {
+                ResponseStruct rs = new ResponseStruct()
+                {
+                    Code = ErrorNumber.Sip_SendMessageExcept,
+                    Message = ErrorMessage.ErrorDic![ErrorNumber.Sip_SendMessageExcept],
+                    ExceptMessage = ex.Message,
+                    ExceptStackTrace = ex.StackTrace,
+                };
+                throw new AkStreamException(rs);
+            }
+
+            //return null;
+        }
+
         /// <summary>
         /// 检测请求实时视频流参数是否正确
         /// </summary>

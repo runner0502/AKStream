@@ -289,14 +289,11 @@ namespace AKStreamWeb
             if (config != null)
             {
                 Common.AkStreamWebConfig.ListenIp = config.GatewayIp;
-                Common.AkStreamWebConfig.SipPort = int.Parse(config.SipPort);
                 Common.AkStreamWebConfig.SipIp = config.SipIp;
+                Common.AkStreamWebConfig.SipPort = int.Parse(config.SipPort);
                 Common.AkStreamWebConfig.PublicMediaIp = config.SipPublicIp;
+
             }
-
-
-
-
             if (AkStreamWebConfig.EnableGB28181Client)
             {
                 outPath = "";

@@ -18,6 +18,7 @@ using LibGB28181SipServer;
 using System.Linq;
 using System;
 using System.ComponentModel;
+using System.Security.Policy;
 
 namespace AKStreamWeb
 {
@@ -123,7 +124,7 @@ namespace AKStreamWeb
 
         public void OnCallState(int callid, string number, CallState state, string stateText, bool isVideo)
         {
-            switch (state) 
+            switch (state)
             {
                 case CallState.STATE_DISCONNECTED:
                     try
@@ -131,22 +132,47 @@ namespace AKStreamWeb
                         GCommon.Logger.Debug("onsipcallstate: disconnect callid: " + callid);
                         lock (_lock)
                         {
-                            var call = s_calls[callid];
-                            if (call != null)
+                            try
                             {
-                                if (call.SipChannel.SipCallid == callid)
+                                var call = s_calls[callid];
+                                if (call != null)
                                 {
-                                    GCommon.Logger.Debug("onsipcallstate: disconnect callid: " + callid + ", set broadcat terminal");
-                                    call.SipChannel.SipCallid = -1;
+                                    if (call.SipChannel.SipCallid == callid)
+                                    {
+                                        GCommon.Logger.Debug("onsipcallstate: disconnect callid: " + callid + ", set broadcat terminal");
+                                        call.SipChannel.SipCallid = -1;
+                                    }
+                                    s_calls.Remove(callid);
                                 }
-                                s_calls.Remove(callid);
+                            }catch (Exception e) 
+                            {
+                                GCommon.Logger.Warn("OnCallState error: callid: " + callid + e.ToString());
                             }
                         }
                     }
                     catch (System.Exception)
                     {
                     }
-                    
+
+                    break;
+                case CallState.STATE_CONFIRMED:
+                    try
+                    {
+                        SetupCaptureAudioFile(s_calls[callid].Url);
+                        int len = 0;
+                        AudioDeviceInfo[] audioDevices = new AudioDeviceInfo[100];
+                        SPhoneSDK.GetAudioDevices(audioDevices, out len);
+                        if (len > 0)
+                        {
+                            var deviceIdAudio = audioDevices[len - 1].id;
+                            //SPhoneSDK.SetDefaultAudioDevice(deviceIdAudio, deviceIdAudio);
+                            //System.Threading.Thread.Sleep(1000);
+                            SPhoneSDK.ConnectSoundportToCall(deviceIdAudio, deviceIdAudio, callid);
+                        }
+                    }catch(Exception e) 
+                    {
+                        GCommon.Logger.Warn("OnCallState error: callid: " + callid + e.ToString());
+                    }
                     break;
             }
         }
@@ -163,6 +189,7 @@ namespace AKStreamWeb
             }
             var sipChannel = device.SipChannels.Find(x => x.DeviceId == "43100000001310615349");
             Common.SipServer.Subscribe(device, sipChannel, SIPSorcery.SIP.SIPMethodsEnum.OPTIONS, "", "", "", LibCommon.Structs.GB28181.XML.CommandType.MobilePosition, false, null, null, null, 100);
+            Common.SipServer.SubscribeCatalog(device, sipChannel, SIPSorcery.SIP.SIPMethodsEnum.OPTIONS, "", "", "", LibCommon.Structs.GB28181.XML.CommandType.Catalog, false, null, null, null, 100);
             _timer.Dispose();
         }
 
@@ -331,6 +358,7 @@ namespace AKStreamWeb
                 callinfo.CreateTime = DateTime.Now;
                 callinfo.Reslution = "640*480";
                 callinfo.calledDeviceNumber = numberdb;
+                callinfo.Url = url;
                 try
                 {
                     string findStrip = "SIP/2.0/UDP ";
@@ -423,16 +451,16 @@ namespace AKStreamWeb
                 //    //System.Threading.Thread.Sleep(1000);
                 //}
 
-                SetupCaptureAudioFile(url);
-                int len = 0;
-                AudioDeviceInfo[] audioDevices = new AudioDeviceInfo[100];
-                SPhoneSDK.GetAudioDevices(audioDevices, out len);
-                if (len > 0)
-                {
-                    var deviceIdAudio = audioDevices[len - 1].id;
-                    SPhoneSDK.SetDefaultAudioDevice(deviceIdAudio, deviceIdAudio);
-                    //System.Threading.Thread.Sleep(1000);
-                }
+                //SetupCaptureAudioFile(url);
+                //int len = 0;
+                //AudioDeviceInfo[] audioDevices = new AudioDeviceInfo[100];
+                //SPhoneSDK.GetAudioDevices(audioDevices, out len);
+                //if (len > 0)
+                //{
+                //    var deviceIdAudio = audioDevices[len - 1].id;
+                //    SPhoneSDK.SetDefaultAudioDevice(deviceIdAudio, deviceIdAudio);
+                //    //System.Threading.Thread.Sleep(1000);
+                //}
 
                 GCommon.Logger.Warn("sipincoming answer：" + numberdb);
                 lock (_lock)
@@ -615,7 +643,8 @@ namespace AKStreamWeb
         public string Reslution { get; set; }
         public string CallerIP { get; set; }
         public string calledDeviceNumber { get; set; }
-        
+
+        public string Url { get; set; }
 
     }
 }

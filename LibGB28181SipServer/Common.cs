@@ -2,13 +2,19 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
+using System.Net.Http;
 using System.Threading;
+using System.Xml.Linq;
 using LibCommon;
 using LibCommon.Enums;
 using LibCommon.Structs;
+using LibCommon.Structs.DBModels;
 using LibCommon.Structs.GB28181;
 using LibCommon.Structs.GB28181.XML;
 using LibSystemInfo;
+using LinCms.Core.Entities;
+using Newtonsoft.Json;
+using SIPSorcery.SIP;
 
 namespace LibGB28181SipServer
 {
@@ -37,8 +43,90 @@ namespace LibGB28181SipServer
         private static ConcurrentDictionary<string, NeedReturnTask> _needResponseRequests =
             new ConcurrentDictionary<string, NeedReturnTask>();
 
+        class info1
+        {
+            public string user { get; set; }
+            public string name { get; set; }
+            public string lat { get; set; }
+            public string lon { get; set; }
+            public string time { get; set; }
+            public string type { get; set; }
+            public string subtype { get; set; }
+            public string DeviceType { get; set; }
+            public string DeviceInfo { get; set; }
+            public int status { get; set; }
+
+        }
         static Common()
         {
+            //string bodyXml1 = "<?xml version=\"1.0\"?>\r\n<Notify>\r\n<CmdType>Catalog</CmdType>\r\n<SN>45979</SN>\r\n<DeviceID>43100000122000900001</DeviceID>\r\n<SumNum>1</SumNum>\r\n<DeviceList Num=\"1\">\r\n<Item>\r\n<DeviceID>43102200121327000102</DeviceID>\r\n<Event>ON</Event>\r\n</Item>\r\n</DeviceList>\r\n</Notify>\r\n";
+            //XElement bodyXml = XElement.Parse(bodyXml1);
+            //UtilsHelper.XMLToObject<Catalog>(bodyXml);
+
+            //try
+            //{
+            //    Common.TmpCatalogs.Enqueue(UtilsHelper.XMLToObject<Catalog>(bodyXml));
+            //}
+            //catch (Exception ex)
+            //{
+            //    var notifyCata = (UtilsHelper.XMLToObject<NotifyCatalog>(bodyXml));
+
+            //    var config1 = ORMHelper.Db.Select<SysAdvancedConfig>().First();
+            //    if (config1 != null)
+            //    {
+            //        GCommon.Logger.Debug("MessageProcess4");
+            //        if (notifyCata.DeviceList != null && notifyCata.DeviceList.Items != null)
+            //        {
+            //            GCommon.Logger.Debug("MessageProcess5");
+
+            //            foreach (var item in notifyCata.DeviceList.Items)
+            //            {
+            //                GCommon.Logger.Debug("MessageProcess6");
+
+            //                using (HttpClient client = new HttpClient())
+            //                {
+            //                    var formData = new MultipartFormDataContent();
+            //                    // 添加表单数据
+            //                    formData.Add(new StringContent(config1.PushGisType), "mqType");
+            //                    //formData.Add(new StringContent("queue.gis.third"), "topic");
+
+            //                    formData.Add(new StringContent(config1.PushRegistStateTopic), "topic");
+            //                    //string time1 = bodyXml.Element("Time")?.Value;
+            //                    info1 info1 = new info1();
+            //                    info1.user = bodyXml.Element("DeviceID")?.Value;
+            //                    info1.name = "2";
+            //                    //info1.lat = bodyXml.Element("Latitude")?.Value;
+            //                    //info1.lon = bodyXml.Element("Longitude")?.Value;
+            //                    //info1.time = time1;
+            //                    info1.type = "3";
+            //                    info1.subtype = "213";
+            //                    if (item.Status == LibCommon.Structs.GB28181.Sys.DevStatus.OFF)
+            //                    {
+            //                        info1.status = 0;
+            //                    }
+            //                    else
+            //                    {
+            //                        info1.status = 1;
+            //                    }
+
+            //                    var deviceinfo = ORMHelper.Db.Select<DevicePlus>().Where(a => a.id == info1.user).First();
+            //                    if (deviceinfo != null)
+            //                    {
+            //                        info1.DeviceType = deviceinfo.type;
+            //                        info1.DeviceInfo = deviceinfo.info;
+            //                    }
+            //                    var data = LibCommon.JsonHelper.ToJson(info1, Formatting.None, MissingMemberHandling.Error);
+            //                    formData.Add(new StringContent(data), "body");
+
+            //                    //var httpRet = client.PostAsync("http://65.176.4.95:58080/api/ice/sendMsgByMQ", formData).Result.Content.ReadAsStringAsync();
+            //                    var httpRet = client.PostAsync(config1.PushGisUrl, formData).Result.Content.ReadAsStringAsync();
+            //                    GCommon.Logger.Warn("catalognotify send http "  + ", " + httpRet);
+            //                }
+            //            }
+            //        }
+
+            //    }
+            //}
         }
 
         /// <summary>

@@ -283,6 +283,9 @@ namespace AKStreamWeb
             ORMHelper.Db.Select<organization>().Count();
             ORMHelper.Db.Select<MediaStream>().Count();
             ORMHelper.Db.Select<DevicePlus>().Count();
+            ORMHelper.Db.Select<VideoChannel>().Count();
+            var orgChannels = ORMHelper.Db.Select<VideoChannel>();
+            int count =ORMHelper.Db.Update<VideoChannel>().Set(x => x.AutoVideo, false).Set(x => x.NoPlayerBreak, true).Where(x=>1==1).ExecuteAffrows() ;
 
 
             var config = ORMHelper.Db.Select<SysBasicConfig>().First();

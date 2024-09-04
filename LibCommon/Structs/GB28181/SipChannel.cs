@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using LibCommon.Enums;
 using LibCommon.Structs.GB28181.Sys;
 using LibCommon.Structs.GB28181.XML;
@@ -17,6 +18,8 @@ namespace LibCommon.Structs.GB28181
         //  private MediaServerStreamInfo? _channelMediaServerStreamInfo;
         private SIPRequest _inviteSipRequest; //要把请求实时视频时的req和res存起来，因为在结束时要用到这两个内容
         private SIPResponse _inviteSipResponse; //要把请求实时视频时的req和res存起来，因为在结束时要用到这两个内容
+        private SIPRequest _inviteSipRequestBroadcast; //要把请求实时视频时的req和res存起来，因为在结束时要用到这两个内容
+        private SIPResponse _inviteSipResponseBroadcast; //要把请求实时视频时的req和res存起来，因为在结束时要用到这两个内容
         private SIPRequest _lastSipRequest; //保存最后一次sipRequest
         private DateTime _lastUpdateTime;
         private SIPEndPoint _localSipEndPoint = null!;
@@ -36,6 +39,7 @@ namespace LibCommon.Structs.GB28181
         public SipChannel()
         {
             SipCallid = -1;
+            SipCallids = new List<int>();
         }
 
         /*
@@ -236,10 +240,36 @@ namespace LibCommon.Structs.GB28181
         }
         [JsonIgnore]
         [BsonIgnore]
-        public string Callid { get; set; }
+        public string Callid281Broadcast { get; set; }
         [JsonIgnore]
         [BsonIgnore]
         public int SipCallid { get; set; }
+        [JsonIgnore]
+        [BsonIgnore]
+        public List<int> SipCallids { get; set; }
+
+        /// <summary>
+        /// 保存请求实时流时的request,因为在终止实时流的时候要用到
+        /// </summary>
+        [JsonIgnore]
+        [BsonIgnore]
+        public SIPRequest InviteSipRequestBroadcast
+        {
+            get => _inviteSipRequestBroadcast;
+            set => _inviteSipRequestBroadcast = value ?? throw new ArgumentNullException(nameof(value));
+        }
+
+
+        /// <summary>
+        /// 保存请求实时流时的response,因为在终止实时流的时候要用到
+        /// </summary>
+        [JsonIgnore]
+        [BsonIgnore]
+        public SIPResponse InviteSipResponseBroadcast
+        {
+            get => _inviteSipResponseBroadcast;
+            set => _inviteSipResponseBroadcast = value ?? throw new ArgumentNullException(nameof(value));
+        }
 
         public void Dispose()
         {

@@ -85,10 +85,12 @@ namespace AKStreamWeb
             {
                 foreach (var channel in item.SipChannels)
                 {
-                    if (channel.Callid == req.Header.CallId)
+                    if (channel.Callid281Broadcast == req.Header.CallId)
                     {
-                        channel.Callid = "";
+                        channel.Callid281Broadcast = "";
                         channel.AudioPortConf = -1;
+                        channel.InviteSipRequestBroadcast = null;
+                        channel.InviteSipResponseBroadcast = null;
                         channel.SipCallid = -1;
                         GCommon.Logger.Warn("SipMsgProcess_OnReceiveBye find channelid: " + channel.DeviceId);
                         return;
@@ -108,10 +110,13 @@ namespace AKStreamWeb
                 {
                     GCommon.Logger.Warn("StartAudioSendStream success AudioPortConf: " + result + "," + req.Header.CallId);
                     info.LocalRtpPort = (ushort)s_LocalPort;
-                    Common.SipServer.SendInviteOK(req, info);
+                    var response= Common.SipServer.SendInviteOK(req, info);
                     s_calls[s_callidIntercom].SipChannel.AudioPortConf = result;
-                    s_calls[s_callidIntercom].SipChannel.Callid = req.Header.CallId;
+                    s_calls[s_callidIntercom].SipChannel.Callid281Broadcast = req.Header.CallId;
                     s_calls[s_callidIntercom].SipChannel.SipCallid = s_callidIntercom;
+                    s_calls[s_callidIntercom].SipChannel.InviteSipRequestBroadcast = req;
+                    s_calls[s_callidIntercom].SipChannel.InviteSipResponseBroadcast = response;
+
                 }
                 else
                 {
@@ -218,7 +223,6 @@ namespace AKStreamWeb
             string deviceId = "";
             string channelId = "";
             string numberdb = "";
-
         
             string findStr = "To: sip:";
             int toIndex = idsContent.IndexOf(findStr);
@@ -276,8 +280,6 @@ namespace AKStreamWeb
                 return;
             }
 
-
-
             foreach (var device in LibGB28181SipServer.Common.SipDevices)
             {
                 foreach (var channel in device.SipChannels)
@@ -316,7 +318,6 @@ namespace AKStreamWeb
                 return ;
             }
 
-
             GCommon.Logger.Warn("sipincoming before livevideo " + callid);
             var ret = SipServerService.LiveVideo(deviceId, channelId, out rs);
             GCommon.Logger.Warn("sipincoming end livevideo " + callid);
@@ -332,7 +333,6 @@ namespace AKStreamWeb
             //{
             //    throw new AkStreamException(rs);
             //}
-
 
             string url = ret.PlayUrl.Find(a => a.StartsWith("rtsp"));
             if (!string.IsNullOrEmpty(url))

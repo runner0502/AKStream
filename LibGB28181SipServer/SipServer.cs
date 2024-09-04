@@ -1975,7 +1975,6 @@ namespace LibGB28181SipServer
                 int sipDevicePort = tmpSipDevice.RemoteEndPoint.Port;
                 SIPProtocolsEnum protocols = tmpSipDevice.RemoteEndPoint.Protocol;
 
-
                 var toSipUri = new SIPURI(SIPSchemesEnum.sip,
                     new SIPEndPoint(protocols, new IPEndPoint(sipDeviceIpAddr, sipDevicePort)));
                 toSipUri.User = sipChannel.DeviceId;
@@ -2017,6 +2016,16 @@ namespace LibGB28181SipServer
                 Common.NeedResponseRequests.TryAdd(req.Header.CallId, nrt);
                 GCommon.Logger.Debug($"[{Common.LoggerHead}]->发送终止时实流请求->{req}");
                 _sipTransport.SendRequestAsync(tmpSipDevice.RemoteEndPoint, req);
+                var req1= req.Copy();
+                
+                req1.Header.CallId = sipChannel.InviteSipRequestBroadcast.Header.CallId;
+                req1.Header.From =
+                   new SIPFromHeader(null, fromSipUri, sipChannel.InviteSipRequestBroadcast.Header.From.FromTag);
+                req1.Header.To = new SIPToHeader(null, toSipUri, sipChannel.InviteSipResponseBroadcast.Header.To.ToTag);
+                _sipTransport.SendRequestAsync(tmpSipDevice.RemoteEndPoint, req1);
+                sipChannel.InviteSipRequestBroadcast = null;
+                sipChannel.InviteSipResponseBroadcast = null;
+                sipChannel.AudioPortConf = -1;
             }
             catch (Exception ex)
             {
@@ -2347,9 +2356,9 @@ namespace LibGB28181SipServer
             }
         }
 
-        public void SendInviteOK(SIPRequest req, ShareInviteInfo info)
+        public SIPResponse SendInviteOK(SIPRequest req, ShareInviteInfo info)
         {
-            SipMsgProcess.SendInviteOk(req, info);
+            return SipMsgProcess.SendInviteOk(req, info);
         }
     
     }

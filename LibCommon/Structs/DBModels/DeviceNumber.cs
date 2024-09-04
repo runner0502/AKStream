@@ -77,7 +77,7 @@ namespace LibCommon.Structs.DBModels
 
         public int status { get; set; }
 
-        //public string plat_id { get; set; }
+        public string plat_id { get; set; }
 
 
     }

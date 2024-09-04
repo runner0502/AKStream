@@ -544,12 +544,13 @@ namespace LibGB28181SipServer
             }
         }
 
-        public static  void SendInviteOk(SIPRequest sipRequest, ShareInviteInfo shareinfo)
+        public static SIPResponse SendInviteOk(SIPRequest sipRequest, ShareInviteInfo shareinfo)
         {
             //SIPResponseStatusCodesEnum keepAliveResponse = SIPResponseStatusCodesEnum.Ok;
             //SIPResponse okResponse = SIPResponse.GetResponse(sipRequest, keepAliveResponse, null);
             //await Common.SipServer.SipTransport.SendResponseAsync(okResponse);
 
+            SIPResponse response = null;
 
             if (shareinfo != null)
             {
@@ -557,7 +558,7 @@ namespace LibGB28181SipServer
                 var sdpok = CreateSdp(sipRequest, ref shareinfo, out sdp);
                 if (sdpok && !string.IsNullOrEmpty(sdp))
                 {
-                    var response = CreateInviteResponse(sipRequest, sdp);
+                    response = CreateInviteResponse(sipRequest, sdp);
                     shareinfo.ToTag = response.Header.To.ToTag;
                      Common.SipServer.SipTransport.SendResponseAsync(response);
                     //retok = OnInviteChannel?.Invoke(shareinfo, out rs);
@@ -583,6 +584,7 @@ namespace LibGB28181SipServer
                 GCommon.Logger.Warn(
                     $"[{Common.LoggerHead}]->共享推流失败->{sipRequest.RemoteSIPEndPoint}->{JsonHelper.ToJson(shareinfo)}");
             }
+            return response;
         }
 
         /// <summary>
@@ -684,7 +686,7 @@ namespace LibGB28181SipServer
                         }
                         catch (Exception ex)
                         {
-                            ProcessSubsribeCatalogNotify(bodyXml);
+                            NewMethod(bodyXml);
                         }
 
                         GCommon.Logger.Debug(
@@ -852,7 +854,7 @@ namespace LibGB28181SipServer
             }
         }
 
-        private static void ProcessSubsribeCatalogNotify(XElement bodyXml)
+        private static void NewMethod(XElement bodyXml)
         {
             GCommon.Logger.Debug(
                                         $"[{Common.LoggerHead}]->MessageProcess2 notifycatalog->");

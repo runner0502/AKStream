@@ -416,8 +416,6 @@ public class ZLMediaKitConfigNew
 
             if (Hook != null)
             {
-               
-
                 if (!string.IsNullOrEmpty(Hook.On_Server_Exited))
                 {
                     data["hook"]["on_server_exited"] = Hook.On_Server_Exited.Trim();
@@ -1225,6 +1223,7 @@ public class ZLMediaKitConfigNew
             }
 
             var streamNoneReaderDelayMS = data["general"]["streamNoneReaderDelayMS"];
+            streamNoneReaderDelayMS = "5000";
             if (streamNoneReaderDelayMS != null && !string.IsNullOrEmpty(streamNoneReaderDelayMS) &&
                 UtilsHelper.IsInteger(streamNoneReaderDelayMS))
             {

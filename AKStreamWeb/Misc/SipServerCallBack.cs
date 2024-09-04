@@ -12,6 +12,7 @@ using LibCommon.Structs.GB28181.Sys;
 using LibCommon.Structs.GB28181.XML;
 using LibGB28181SipServer;
 using NetTaste;
+using NetTopologySuite.Triangulate;
 using Newtonsoft.Json;
 using Org.BouncyCastle.Ocsp;
 using SIPSorcery.Net;
@@ -227,6 +228,7 @@ x.platid == sipDevice.DeviceId).Set(x=>x.registestate,state).ExecuteAffrowsAsync
                                 newSipChannel.SsrcId = ret.Key;
                                 newSipChannel.Stream = ret.Value;
                             }
+                            
                             sipDevice.SipChannels.Add(newSipChannel);
                             SipDevice.s_count++;
 
@@ -295,7 +297,7 @@ x.platid == sipDevice.DeviceId).Set(x=>x.registestate,state).ExecuteAffrowsAsync
                     var videoChannel = new VideoChannel();
                     videoChannel.Enabled = true;
                     videoChannel.AutoRecord = false;
-                    videoChannel.AutoVideo = true;
+                    videoChannel.AutoVideo = false;
                     videoChannel.ChannelId = sipChannel.DeviceId;
                     if (sipChannel.SipChannelDesc != null && !string.IsNullOrEmpty(sipChannel.SipChannelDesc.Name))
                     {
@@ -321,7 +323,7 @@ x.platid == sipDevice.DeviceId).Set(x=>x.registestate,state).ExecuteAffrowsAsync
                     videoChannel.IpV6Address = sipChannel.RemoteEndPoint.Address.MapToIPv6().ToString();
                     //videoChannel.MediaServerId = $"unknown_server_{DateTime.Now.Ticks}";
                     videoChannel.MediaServerId = "your_server_id";
-                    videoChannel.NoPlayerBreak = false;
+                    videoChannel.NoPlayerBreak = true;
                     videoChannel.PDepartmentId = "";
                     videoChannel.PDepartmentName = "";
                     videoChannel.RtpWithTcp = false;
@@ -473,6 +475,7 @@ x.platid == sipDevice.DeviceId).Set(x=>x.registestate,state).ExecuteAffrowsAsync
                     break;
             }
             deviceNumber.status = status;
+            deviceNumber.plat_id = SsyncState.PlatId;
             SsyncState.Devices.Add(deviceNumber);
         }
 
@@ -498,7 +501,7 @@ x.plat_id.Equals(SsyncState.PlatId)).ExecuteAffrows();
             //                        }
             //    ORMHelper.Db.Insert(org).ExecuteAffrows();
             //                }
-
+            var modifyTime = DateTime.Now;
             foreach (var device in SsyncState.Devices)
             {
                 long count = ORMHelper.Db.Select<DeviceNumber>().Count();
@@ -508,6 +511,7 @@ x.plat_id.Equals(SsyncState.PlatId)).ExecuteAffrows();
                     SsyncState.State.LastResult = false;
                     break;
                 }
+                device.modify_time = modifyTime;
                 var obj1 = ORMHelper.Db.Select<DeviceNumber>().Where(x =>
 x.dev.Equals(device.dev)).First();
                 if (obj1 != null)
@@ -537,6 +541,7 @@ x.dev.Equals(device.dev)).First();
                 ORMHelper.Db.Insert(device).ExecuteAffrows();
                 SsyncState.State.LastResult = true;
             }
+            var result = ORMHelper.Db.Delete<DeviceNumber>().Where(a =>a.plat_id == SsyncState.PlatId).Where(a =>a.modify_time!=modifyTime).ExecuteAffrows();
             SsyncState.State.IsProcessing = false;
             //SsyncState.State.orgCountBefore = 0;
             //SsyncState.State.DeviceCountBefore = 0;

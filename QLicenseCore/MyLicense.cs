@@ -68,6 +68,8 @@ namespace QLicenseCore
 
         public int MaxDeviceCount { get; set; }
         public int MaxRunCount { get; set; }
+        public int MaxPushNumber { get; set; }
+
 
         public DateTime ExpireDateTime { get; set; }
 

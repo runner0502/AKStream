@@ -286,7 +286,8 @@ namespace AKStreamWeb
             ORMHelper.Db.Select<VideoChannel>().Count();
             var orgChannels = ORMHelper.Db.Select<VideoChannel>();
             int count =ORMHelper.Db.Update<VideoChannel>().Set(x => x.AutoVideo, false).Set(x => x.NoPlayerBreak, true).Where(x=>1==1).ExecuteAffrows() ;
-
+            ORMHelper.Db.Update<MediaStream>().Set(x => x.state, 0).Where(x => 1 == 1).ExecuteAffrows();
+            ORMHelper.Db.Update<Device281Plat>().Set(x => x.registestate, 0).Where(x => 1 == 1).ExecuteAffrows();
 
             var config = ORMHelper.Db.Select<SysBasicConfig>().First();
             if (config != null)
@@ -485,6 +486,7 @@ namespace AKStreamWeb
                 newLicence.expire = License.ExpireDateTime;
                 newLicence.max_device_number = License.MaxDeviceCount;
                 newLicence.max_transcode_number = License.MaxRunCount;
+                newLicence.max_push_number = License.MaxPushNumber;
                 newLicence.CreateTime = DateTime.Now;
                 newLicence.UpdateTime = DateTime.Now;
                 newLicence.IsDeleted = 0;

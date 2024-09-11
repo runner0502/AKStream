@@ -755,6 +755,7 @@ namespace AKStreamKeeper
                 tmpKeepAlive.ZlmHttpPort = MediaServerInstance.ZlmHttpPort;
                 tmpKeepAlive.ZlmHttpsPort = MediaServerInstance.ZlmHttpsPort;
                 tmpKeepAlive.ZlmRtmpPort = MediaServerInstance.ZlmRtmpPort;
+                //tmpKeepAlive.ZlmRtmpPort = 51935;
                 tmpKeepAlive.ZlmRtmpsPort = MediaServerInstance.ZlmRtmpsPort;
                 tmpKeepAlive.ZlmRtspPort = MediaServerInstance.ZlmRtspPort;
                 tmpKeepAlive.ZlmRtspsPort = MediaServerInstance.ZlmRtspsPort;

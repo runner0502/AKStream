@@ -11,11 +11,13 @@ Console.WriteLine("最大接入个数：");
 int maxDevice = int.Parse(Console.ReadLine());
 Console.WriteLine("最大并发个数：");
 int maxCon = int.Parse(Console.ReadLine());
+Console.WriteLine("最大推流并发个数：");
+int maxPushStream = int.Parse(Console.ReadLine());
 
 license.ExpireDateTime = expireTime;
 license.MaxDeviceCount = maxDevice;
 license.MaxRunCount = maxCon;
-
+license.MaxPushNumber = maxPushStream;
 
 //license.ExpireDateTime = DateTime.Now;
 //license.MaxDeviceCount = 4;

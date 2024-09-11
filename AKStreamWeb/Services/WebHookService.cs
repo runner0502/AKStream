@@ -527,7 +527,7 @@ namespace AKStreamWeb.Services
                     }
                     else if(videoChannel == null)
                     {
-                        var stream = ORMHelper.Db.Update<MediaStream>().Set(x => x.state, 0).Where(x => x.stream_push_url.Contains("/" + req.App + "/")).Where(x => x.stream_push_url.Contains("/" + req.Stream)).ExecuteAffrows();
+                        var stream = ORMHelper.Db.Update<MediaStream>().Set(x => x.state, 0).Where(x => x.stream_push_url.EndsWith("/" + req.App + "/" + req.Stream)).ExecuteAffrows();
                         GCommon.Logger.Warn("onflowreport set stream state = 0, result: " + stream + ", " + req.ToJson());
                     }
 
@@ -997,34 +997,43 @@ namespace AKStreamWeb.Services
                     .First();
                 if (videoChannel == null)
                 {
-                    var stream = ORMHelper.Db.Update<MediaStream>().Set(x=>x.state,1).Where(x => x.stream_push_url.Contains("/" + req.App + "/")).Where(x => x.stream_push_url.Contains("/" + req.Stream)).ExecuteAffrows();
-                    if (stream > 0)
+                    var count = ORMHelper.Db.Select<MediaStream>().Where(x=>x.state == 1).Count();
+                    if (Common.License.MaxPushNumber > count)
                     {
-                        ResToWebHookOnPublish result = new ResToWebHookOnPublish();
-                        result.Code = 0;
-                        result.Msg = "success";
-                        result.Enable_Hls = true;
-                        result.Enable_Mp4 = false;
-                        result.Enable_Hls_Fmp4 = true;
-                        result.Enable_Rtsp = true;
-                        result.Enable_Rtmp = true;
-                        result.Enable_Ts = true;
-                        result.Enable_Fmp4 = true;
-                        result.Hls_Demand = true;
-                        result.Rtsp_Demand = false;
-                        result.Rtmp_Demand = false;
-                        result.Ts_Demand = true;
-                        result.Fmp4_Demand = true;
-                        result.Enable_Audio = true;
-                        result.Add_Mute_Audio = true;
-                        result.Mp4_Save_Path = "";
-                        result.Mp4_As_Player = false;
-                        result.Hls_Save_Path = "";
-                        result.Auto_Close = false;
-                        return result;
+                        var stream = ORMHelper.Db.Update<MediaStream>().Set(x => x.state, 1).Where(x => x.stream_push_url.EndsWith("/" + req.App + "/" + req.Stream)).ExecuteAffrows();
+                        if (stream > 0)
+                        {
+                            ResToWebHookOnPublish result = new ResToWebHookOnPublish();
+                            result.Code = 0;
+                            result.Msg = "success";
+                            result.Enable_Hls = true;
+                            result.Enable_Mp4 = false;
+                            result.Enable_Hls_Fmp4 = true;
+                            result.Enable_Rtsp = true;
+                            result.Enable_Rtmp = true;
+                            result.Enable_Ts = true;
+                            result.Enable_Fmp4 = true;
+                            result.Hls_Demand = true;
+                            result.Rtsp_Demand = false;
+                            result.Rtmp_Demand = false;
+                            result.Ts_Demand = true;
+                            result.Fmp4_Demand = true;
+                            result.Enable_Audio = true;
+                            result.Add_Mute_Audio = true;
+                            result.Mp4_Save_Path = "";
+                            result.Mp4_As_Player = false;
+                            result.Hls_Save_Path = "";
+                            result.Auto_Close = false;
+                            return result;
+                        }
+                        else 
+                        {
+                            GCommon.Logger.Warn("onpublish fail not in db");
+                        }
                     }
                     else
                     {
+                        GCommon.Logger.Warn("onpublish license fail over max push");
                         return new ResToWebHookOnPublish()
                         {
                             Code = -1,

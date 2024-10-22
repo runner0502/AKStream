@@ -32,7 +32,13 @@ namespace LinCms.Core.Entities {
 		/// 281侧内网ip地址
 		/// </summary>
 		[JsonProperty, Column(Name = "gateway_ip", StringLength = 50)]
-		public string GatewayIp { get; set; }
+        public string GatewayIp { get; set; }
+
+        /// <summary>
+        /// 281侧外网ip地址
+        /// </summary>
+        [JsonProperty, Column(Name = "gateway_public_ip", StringLength = 50)]
+        public string GatewayPublicIp { get; set; }
         /// <summary>
         ///  调度机侧内网ip地址
         /// </summary>
@@ -104,6 +110,22 @@ namespace LinCms.Core.Entities {
         /// </summary>
         [JsonProperty, Column(Name = "is_deleted", DbType = "int", IsNullable = true)]
         public int IsDeleted { get; set; } = 0;
+		/// <summary>
+		/// 流媒体服务器RTSP端口
+		/// </summary>
+        [JsonProperty, Column(Name = "rtsp_port", DbType = "int")]
+        public int RTSPPort { get; set; }
+        /// <summary>
+        /// 流媒体服务器RTMP端口
+        /// </summary>
+        [JsonProperty, Column(Name = "rtmp_port", DbType = "int")]
+        public int RTMPPort { get; set; }
+        /// <summary>
+        /// 流媒体服务器HTTP端口
+        /// </summary>
+        [JsonProperty, Column(Name = "http_port", DbType = "int")]
+        public int HTTPort { get; set; }
+
     }
 
 }

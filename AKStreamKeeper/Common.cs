@@ -161,7 +161,7 @@ namespace AKStreamKeeper
                 MediaServerInstance =
                     new MediaServerInstance(_akStreamKeeperConfig.MediaServerPath, AkStreamKeeperConfig);
             }
-
+            
             return MediaServerInstance.Startup();
         }
 
@@ -905,6 +905,9 @@ namespace AKStreamKeeper
                     string h = AKStreamWebUri.Host.Trim();
                     var newurl = AkStreamKeeperConfig.AkStreamWebRegisterUrl.Replace(h, config.GatewayIp);
                     AkStreamKeeperConfig.AkStreamWebRegisterUrl = newurl;
+                    AkStreamKeeperConfig.RtmpPort = config.RTMPPort;
+                    AkStreamKeeperConfig.RtspPort = config.RTSPPort;
+                    AkStreamKeeperConfig.HttpPort = config.HTTPort;
                 }
             }
             catch (Exception ex)

@@ -253,5 +253,9 @@ namespace AKStreamKeeper.Misc
             get => _enableRtspAuth;
             set => _enableRtspAuth = value;
         }
+
+        public int RtspPort { get; set; }
+        public int HttpPort { get; set; }
+        public int RtmpPort { get; set; }
     }
 }

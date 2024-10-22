@@ -814,6 +814,7 @@ namespace AKStreamKeeper
                             data["record"]["fileSecond"] = Common.AkStreamKeeperConfig.RecordSec.ToString();
                             data["record"]["fastStart"] = "1";
                         }
+                         //data["hook"]["on_server_keepalive"] = "";
 
                         parser.WriteFile(_configPath, data);
 
@@ -945,8 +946,12 @@ namespace AKStreamKeeper
                         _zlmNewConfig.Hook.On_Stream_Not_Found = "";
                         _zlmNewConfig.Hook.On_Server_Started = "";
                         _zlmNewConfig.Hook.TimeoutSec = 20;
+                        _zlmNewConfig.Hook.On_Server_Keepalive = "";
+                        //_zlmNewConfig.Hook.On_Server_Keepalive = "https://127.0.0.1/index/hook/on_server_keepalive";
+
                         _zlmNewConfig.General.FlowThreshold =
                             0; //当用户超过1byte流量时，将触发on_flow_report的webhook(/WebHook/OnStop)
+
                         _zlmNewConfig.FFmpeg.Bin = Common.AkStreamKeeperConfig.FFmpegPath;
                         _zlmNewConfig.FFmpeg.Cmd = "%s -re -i %s -vcodec copy -acodec copy -f flv -y  %s";
                         _zlmNewConfig.FFmpeg.Snap = "%s -i %s -y -f mjpeg -t 0.001 %s";
@@ -977,10 +982,22 @@ namespace AKStreamKeeper
                         {
                             _zlmNewConfig.Api.Secret = UtilsHelper.GeneralGuid();
                         }
-                       // _zlmNewConfig.Api.Secret = "035c73f7-bb6b-4889-a715-d9eb2d1925cc";
+                        // _zlmNewConfig.Api.Secret = "035c73f7-bb6b-4889-a715-d9eb2d1925cc";
                         //_zlmNewConfig.Api.Secret = "";
 
-
+                        if (AkStreamKeeperConfig.RtmpPort > 0)
+                        {
+                            _zlmNewConfig.Rtmp.Port = (ushort)AkStreamKeeperConfig.RtmpPort;
+                        }
+                        if (AkStreamKeeperConfig.RtspPort > 0)
+                        {
+                            _zlmNewConfig.Rtsp.Port = (ushort)AkStreamKeeperConfig.RtspPort;
+                        }
+                        if (AkStreamKeeperConfig.HttpPort > 0)
+                        {
+                            _zlmNewConfig.Http.Port = (ushort)AkStreamKeeperConfig.HttpPort;
+                        }
+    
                         var ok = _zlmNewConfig.SetConfig(_configPath);
                         var parser = new FileIniDataParser();
                         IniData data = parser.ReadFile(_configPath, Encoding.UTF8);

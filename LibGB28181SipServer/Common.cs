@@ -423,7 +423,7 @@ namespace LibGB28181SipServer
                 {
                     return false;
                 }
-                SipServerConfig.SipIpAddress = config.GatewayIp;
+                SipServerConfig.SipIpAddress = config.GatewayPublicIp;
                 SipServerConfig.ListenIp = config.GatewayIp;
                 SipServerConfig.ServerSipDeviceId = config.GatewayCode;
                 SipServerConfig.SipPort = (ushort)config.SignalPort;

@@ -729,7 +729,7 @@ namespace LibGB28181SipServer
             if (tmpSipDevice != null)
             {
                 //pushMediaInfo.MediaServerIpAddress = "172.19.6.41";
-                var sdpConn = new SDPConnectionInformation(pushMediaInfo.MediaServerIpAddress);
+                var sdpConn = new SDPConnectionInformation(Common.SipServerConfig.SipIpAddress);
                 var sdp = new SDP()
                 {
                     Version = 0,
@@ -738,7 +738,7 @@ namespace LibGB28181SipServer
                     SessionName = CommandType.Play.ToString(),
                     Connection = sdpConn,
                     Timing = "0 0",
-                    Address = pushMediaInfo.MediaServerIpAddress,
+                    Address = Common.SipServerConfig.SipIpAddress,
                 };
 
                 var psFormat = new SDPMediaFormat(SDPMediaFormatsEnum.PS)

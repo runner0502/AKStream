@@ -39,6 +39,7 @@ namespace LibCommon.Structs.GB28181
         public SipChannel()
         {
             SipCallid = -1;
+            BroadcastStream=IntPtr.Zero;
             SipCallids = new List<int>();
         }
 
@@ -247,6 +248,9 @@ namespace LibCommon.Structs.GB28181
         [JsonIgnore]
         [BsonIgnore]
         public List<int> SipCallids { get; set; }
+        [JsonIgnore]
+        [BsonIgnore]
+        public IntPtr BroadcastStream { get; set; }
 
         /// <summary>
         /// 保存请求实时流时的request,因为在终止实时流的时候要用到
@@ -255,8 +259,7 @@ namespace LibCommon.Structs.GB28181
         [BsonIgnore]
         public SIPRequest InviteSipRequestBroadcast
         {
-            get => _inviteSipRequestBroadcast;
-            set => _inviteSipRequestBroadcast = value ?? throw new ArgumentNullException(nameof(value));
+            get;set;
         }
 
 
@@ -267,8 +270,7 @@ namespace LibCommon.Structs.GB28181
         [BsonIgnore]
         public SIPResponse InviteSipResponseBroadcast
         {
-            get => _inviteSipResponseBroadcast;
-            set => _inviteSipResponseBroadcast = value ?? throw new ArgumentNullException(nameof(value));
+            get;set;
         }
 
         public void Dispose()

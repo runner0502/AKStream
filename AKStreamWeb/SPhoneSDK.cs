@@ -202,19 +202,12 @@ namespace XyCallLayer
             [MarshalAsAttribute(UnmanagedType.I4)]
             public int outputCnt;
         };
-        [StructLayoutAttribute(LayoutKind.Sequential, Pack = 1)]
-        public struct PTTGroupInfo
+        [StructLayoutAttribute(LayoutKind.Sequential)]
+        public struct StreamStartResult
         {
-            [MarshalAsAttribute(UnmanagedType.I4)]
-            public int id;
-            [MarshalAsAttribute(UnmanagedType.I4)]
-            public int islocal;
-            [MarshalAsAttribute(UnmanagedType.ByValTStr, SizeConst = 64)]
-            public string groupName;
-            [MarshalAsAttribute(UnmanagedType.ByValTStr, SizeConst = 32)]
-            public string groupNum;
-            [MarshalAsAttribute(UnmanagedType.ByValTStr, SizeConst = 16)]
-            public string dnsprefix;
+            public int status;
+            public int confsolt;
+            public IntPtr stream;
         };
 
         [StructLayoutAttribute(LayoutKind.Sequential, Pack = 1)]
@@ -527,11 +520,15 @@ namespace XyCallLayer
         [DllImport(@"DLL\SPhone.dll")]
         public extern static void SetHardEncodeVideo(int callid, int enable);
         [DllImport(@"DLL\SPhone.dll")]
-        public extern static int StartAudioSendStream(int localPort, string remoteIP, int remotePort, int callid);
+        public extern static StreamStartResult StartAudioSendStream(int localPort, string remoteIP, int remotePort, int callid);
+        [DllImport(@"DLL\SPhone.dll")]
+        public extern static int StopAudioSendStream(IntPtr stream, int confslot);
         [DllImport(@"DLL\SPhone.dll")]
         public extern static int GetVideoDeviceWidth(int id);
         [DllImport(@"DLL\SPhone.dll")]
         public extern static int GetVideoDeviceHeight(int id);
+        [DllImport(@"DLL\SPhone.dll")]
+        public extern static int GetVideoCodec(int id);
         [DllImport(@"DLL\SPhone.dll")]
         public extern static int AddToAudioPort(int callid, int audioPort);
         [DllImport(@"DLL\SPhone.dll")]

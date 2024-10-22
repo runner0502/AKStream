@@ -898,6 +898,9 @@ namespace LibGB28181SipServer
                                 info1.status = 1;
                             }
 
+//                            ORMHelper.Db.Update<DeviceNumber>().Where(x =>
+//x.dev == item.DeviceID).Set(x => x.status, info1.status).ExecuteAffrowsAsync();
+
                             var deviceinfo = ORMHelper.Db.Select<DevicePlus>().Where(a => a.id == info1.user).First();
                             if (deviceinfo != null)
                             {

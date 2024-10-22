@@ -1024,6 +1024,7 @@ namespace AKStreamWeb.Services
                             result.Mp4_As_Player = false;
                             result.Hls_Save_Path = "";
                             result.Auto_Close = false;
+                            result.Modify_Stamp = 0;
                             return result;
                         }
                         else 

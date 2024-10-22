@@ -259,14 +259,15 @@ namespace AKStreamWeb
                 basicconfig.SignalPort = LibGB28181SipServer.Common.SipServerConfig.SipPort;
                 
                 basicconfig.GatewayCode = LibGB28181SipServer.Common.SipServerConfig.ServerSipDeviceId;
-                basicconfig.GatewayIp = LibGB28181SipServer.Common.SipServerConfig.SipIpAddress;
+                basicconfig.GatewayIp = LibGB28181SipServer.Common.SipServerConfig.ListenIp;
+                basicconfig.GatewayPublicIp = LibGB28181SipServer.Common.SipServerConfig.SipIpAddress;
                 //basicconfig.SipIp = Common.AkStreamWebConfig.SipIp;
                 //basicconfig.SipPort = Common.AkStreamWebConfig.SipPort.ToString();
                 //basicconfig.SipPublicIp = Common.AkStreamWebConfig.PublicMediaIp;
 
-                basicconfig.SipIp = LibGB28181SipServer.Common.SipServerConfig.SipIpAddress;
+                basicconfig.SipIp = LibGB28181SipServer.Common.SipServerConfig.ListenIp;
                 basicconfig.SipPort = Common.AkStreamWebConfig.SipPort.ToString();
-                basicconfig.SipPublicIp = LibGB28181SipServer.Common.SipServerConfig.SipIpAddress;
+                basicconfig.SipPublicIp = LibGB28181SipServer.Common.SipServerConfig.ListenIp;
 
                 basicconfig.GatewayName = "视频监控网关系统";
                 basicconfig.MediaPortStart = 20000;

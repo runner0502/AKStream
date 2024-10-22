@@ -65,6 +65,11 @@ namespace LibCommon.Structs.DBModels
         /// </summary>
         [Column(DbType = "int(11)", IsNullable = true)]
         public int stream_push_port { get; set; }
+        /// <summary>
+        /// 推流端口
+        /// </summary>
+        [Column(DbType = "int(11)", IsNullable = true)]
+        public int stream_pull_port { get; set; }
 
         /// <summary>
         /// 拉流类型

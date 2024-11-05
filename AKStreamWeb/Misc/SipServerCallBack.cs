@@ -286,8 +286,9 @@ x.platid == sipDevice.DeviceId).Set(x=>x.registestate,state).ExecuteAffrowsAsync
                 //ORMHelper.Db.Select<Device281Plat>().Where(x =>x.platid == )
                 //      ORMHelper.Db.Delete<DeviceNumber>().Where(x =>
                 //x.dev.Equals(sipChannel.DeviceId)).ExecuteAffrows();
-
+                GCommon.Logger.Debug("OnCatalogReceived: CreateDevice");
                 CreateDevice(sipChannel);
+                GCommon.Logger.Debug("OnCatalogReceived: CreateDevice1");
 
                 var obj = ORMHelper.Db.Select<VideoChannel>().Where(x =>
                     x.ChannelId.Equals(sipChannel.DeviceId) && x.DeviceId.Equals(sipChannel.ParentId) &&
@@ -361,8 +362,9 @@ x.platid == sipDevice.DeviceId).Set(x=>x.registestate,state).ExecuteAffrowsAsync
             }
             else
             {
-
+                GCommon.Logger.Debug("OnCatalogReceived: CreateOrg");
                 CreateOrg(sipChannel);
+                GCommon.Logger.Debug("OnCatalogReceived: CreateOrg1");
             }
 
             int platType = 0;
@@ -372,14 +374,29 @@ x.platid == sipDevice.DeviceId).Set(x=>x.registestate,state).ExecuteAffrowsAsync
                 platType = deviceDB.plat_type;
             }
             int currentGetNumber = SsyncState.Orgs.Count + SsyncState.Devices.Count;
+            GCommon.Logger.Debug("OnCatalogReceived: currentGetNumber: " + currentGetNumber + ", sipChannel.TotalNumber: " + sipChannel.TotalNumber + ",SsyncState.Orgs.Count:  " + SsyncState.Orgs.Count + ", SsyncState.Devices.Count: " + SsyncState.Devices.Count);
+
             if (platType == 0) 
             {
                 currentGetNumber++;
+                GCommon.Logger.Debug("OnCatalogReceived2: currentGetNumber: " + currentGetNumber + ", sipChannel.TotalNumber: " + sipChannel.TotalNumber + ",SsyncState.Orgs.Count:  " + SsyncState.Orgs.Count + ", SsyncState.Devices.Count: " + SsyncState.Devices.Count);
+
             }
+            GCommon.Logger.Debug("OnCatalogReceived3: currentGetNumber: " + currentGetNumber + ", sipChannel.TotalNumber: " + sipChannel.TotalNumber + ",SsyncState.Orgs.Count:  " + SsyncState.Orgs.Count + ", SsyncState.Devices.Count: " + SsyncState.Devices.Count);
 
             if (currentGetNumber == sipChannel.TotalNumber)
             {
-                UpdateCatelogToDB();
+                GCommon.Logger.Debug("OnCatalogReceived4: currentGetNumber: " + currentGetNumber + ", sipChannel.TotalNumber: " + sipChannel.TotalNumber + ",SsyncState.Orgs.Count:  " + SsyncState.Orgs.Count + ", SsyncState.Devices.Count: " + SsyncState.Devices.Count);
+                try
+                {
+                    UpdateCatelogToDB();
+                }
+                catch (Exception ex)
+                {
+                    GCommon.Logger.Debug("OnCatalogReceived fail: " + ex.Message);
+                }
+                GCommon.Logger.Debug("OnCatalogReceived5: currentGetNumber: " + currentGetNumber + ", sipChannel.TotalNumber: " + sipChannel.TotalNumber + ",SsyncState.Orgs.Count:  " + SsyncState.Orgs.Count + ", SsyncState.Devices.Count: " + SsyncState.Devices.Count);
+
             }
         }
 
@@ -481,10 +498,15 @@ x.platid == sipDevice.DeviceId).Set(x=>x.registestate,state).ExecuteAffrowsAsync
 
         private static void UpdateCatelogToDB()
         {
+            GCommon.Logger.Debug("UpdateCatelogToDB");
             ORMHelper.Db.Delete<organization>().Where(x =>
 x.plat_id.Equals(SsyncState.PlatId)).ExecuteAffrows();
+            GCommon.Logger.Debug("UpdateCatelogToDB1");
+
             foreach (var org in SsyncState.Orgs)
             {
+                GCommon.Logger.Debug("UpdateCatelogToDB2");
+
                 org.plat_id = SsyncState.PlatId;
                 ORMHelper.Db.Insert(org).ExecuteAffrows();
             }
@@ -504,6 +526,8 @@ x.plat_id.Equals(SsyncState.PlatId)).ExecuteAffrows();
             var modifyTime = DateTime.Now;
             foreach (var device in SsyncState.Devices)
             {
+                GCommon.Logger.Debug("UpdateCatelogToDB3");
+
                 long count = ORMHelper.Db.Select<DeviceNumber>().Count();
                 if (count >= Common.License.MaxDeviceCount) 
                 {
@@ -538,10 +562,18 @@ x.dev.Equals(device.dev)).First();
                     default:
                         break;
                 }
+                GCommon.Logger.Debug("UpdateCatelogToDB4");
+
                 ORMHelper.Db.Insert(device).ExecuteAffrows();
+                GCommon.Logger.Debug("UpdateCatelogToDB5");
+
                 SsyncState.State.LastResult = true;
             }
+            GCommon.Logger.Debug("UpdateCatelogToDB6");
+
             var result = ORMHelper.Db.Delete<DeviceNumber>().Where(a =>a.plat_id == SsyncState.PlatId).Where(a =>a.modify_time!=modifyTime).ExecuteAffrows();
+            GCommon.Logger.Debug("UpdateCatelogToDB7");
+
             SsyncState.State.IsProcessing = false;
             //SsyncState.State.orgCountBefore = 0;
             //SsyncState.State.DeviceCountBefore = 0;

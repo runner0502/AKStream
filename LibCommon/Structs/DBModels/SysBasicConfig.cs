@@ -110,21 +110,21 @@ namespace LinCms.Core.Entities {
         /// </summary>
         [JsonProperty, Column(Name = "is_deleted", DbType = "int", IsNullable = true)]
         public int IsDeleted { get; set; } = 0;
-		/// <summary>
-		/// 流媒体服务器RTSP端口
-		/// </summary>
+        /// <summary>
+        /// 流媒体服务器RTSP端口
+        /// </summary>
         [JsonProperty, Column(Name = "rtsp_port", DbType = "int")]
-        public int RTSPPort { get; set; }
+        public int RTSPPort { get; set; } = 554;
         /// <summary>
         /// 流媒体服务器RTMP端口
         /// </summary>
         [JsonProperty, Column(Name = "rtmp_port", DbType = "int")]
-        public int RTMPPort { get; set; }
+        public int RTMPPort { get; set; } = 1935;
         /// <summary>
         /// 流媒体服务器HTTP端口
         /// </summary>
         [JsonProperty, Column(Name = "http_port", DbType = "int")]
-        public int HTTPort { get; set; }
+        public int HTTPort { get; set; } = 80;
 
     }
 

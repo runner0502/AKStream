@@ -829,7 +829,7 @@ namespace LibGB28181SipServer
                                 info1.time = time1;
                                 info1.type = "3";
                                 info1.subtype = "213";
-
+                                info1.status = 1;
                                 var deviceinfo = ORMHelper.Db.Select<DevicePlus>().Where(a => a.id == info1.user).First();
                                 if (deviceinfo != null)
                                 {

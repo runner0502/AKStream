@@ -202,6 +202,8 @@ namespace AKStreamWeb
                         //}
                         //if (deviceIdAudio < 0)
                         //{
+
+
                         SetupCaptureAudioFile(s_calls[callid].Url);
                         int len1 = 0;
                         AudioDeviceInfo[] audioDevices1 = new AudioDeviceInfo[12801];
@@ -455,7 +457,44 @@ namespace AKStreamWeb
                                         int height = int.Parse(res[1]);
                                         if (width > 0 && height > 0)
                                         {
-                                            SetVideoCodecParam(width, height, 30, 650 * 1024);
+                                            int bps = 500;
+                                            if (width <= 320 && height <= 240)
+                                            {
+                                                bps = 120;
+                                            }else if (width <=352 && height <=288)
+                                            {
+                                                bps = 128;
+                                            }
+                                            else if (width <= 512 && height <= 288)
+                                            {
+                                                bps = 240;
+                                            }
+                                            else if (width <= 640 && height <= 480)
+                                            {
+                                                bps = 500;
+                                            }
+                                            else if (width <= 704 && height <= 576)
+                                            {
+                                                bps = 800;
+                                            }
+                                            else if (width <= 720 && height <= 480)
+                                            {
+                                                bps = 800;
+                                            }
+                                            else if (width <= 720 && height <= 576)
+                                            {
+                                                bps = 800;
+                                            }
+                                            else if (width <= 1280 && height <= 720)
+                                            {
+                                                bps = 1200;
+                                            }
+                                            else if (width <= 1920 && height <= 1080)
+                                            {
+                                                bps = 1500;
+                                            }
+                                            SetVideoCodecParam(width, height, 25, bps * 1024);
+                                            GCommon.Logger.Warn("incoming set video codec width: " +width + ", height: " + height + ", bps: " + bps);
                                             callinfo.Reslution = width + "*" + height;
                                         }
                                     }

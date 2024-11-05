@@ -1223,7 +1223,7 @@ public class ZLMediaKitConfigNew
             }
 
             var streamNoneReaderDelayMS = data["general"]["streamNoneReaderDelayMS"];
-            streamNoneReaderDelayMS = "50000";
+            streamNoneReaderDelayMS = "15000";
             if (streamNoneReaderDelayMS != null && !string.IsNullOrEmpty(streamNoneReaderDelayMS) &&
                 UtilsHelper.IsInteger(streamNoneReaderDelayMS))
             {

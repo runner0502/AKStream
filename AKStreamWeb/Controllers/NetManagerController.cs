@@ -109,6 +109,7 @@ namespace AKStreamWeb.Controllers
             }
             if (SipServerCallBack.SsyncState.State.IsProcessing)
             {
+                GCommon.Logger.Warn("catalog startsync isProcessing");
                 return false;
             }
             SipServerCallBack.SsyncState.PlatId = deviceId;

@@ -332,6 +332,10 @@ namespace LibGB28181SipServer
             {
                 return SipChannelType.VideoChannel;
             }
+            if (extId >= 119 && extId <= 129)
+            {
+                return SipChannelType.VideoChannel;
+            }
 
             return SipChannelType.OtherChannel;
         }

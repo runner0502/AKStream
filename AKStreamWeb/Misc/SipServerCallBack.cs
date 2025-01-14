@@ -256,147 +256,151 @@ x.platid == sipDevice.DeviceId).Set(x=>x.registestate,state).ExecuteAffrowsAsync
             //}
         }
         public static SyncStateFull SsyncState;
+        private static object s_catelogLock = new object();
         /// <summary>
         /// 收到设备目录时
         /// </summary>
         /// <param name="sipChannel"></param>
         public static void OnCatalogReceived(SipChannel sipChannel)
         {
-            GCommon.Logger.Debug(
-                $"[{Common.LoggerHead}]->收到一条设备目录通知->{sipChannel.RemoteEndPoint.Address.MapToIPv4().ToString()}-{sipChannel.ParentId}:{sipChannel.DeviceId}");
-
-           
-            if (sipChannel.SipChannelType.Equals(SipChannelType.VideoChannel) )
-            //&& sipChannel.SipChannelStatus != DevStatus.OFF) //只有视频设备并且是可用状态的进数据库
+            lock (s_catelogLock)
             {
-                #region debug sql output
+                GCommon.Logger.Debug(
+                    $"[{Common.LoggerHead}]->收到一条设备目录通知->{sipChannel.RemoteEndPoint.Address.MapToIPv4().ToString()}-{sipChannel.ParentId}:{sipChannel.DeviceId}");
 
-                if (Common.IsDebug)
+
+                if (sipChannel.SipChannelType.Equals(SipChannelType.VideoChannel))
+                //&& sipChannel.SipChannelStatus != DevStatus.OFF) //只有视频设备并且是可用状态的进数据库
                 {
-                    var sql = ORMHelper.Db.Select<VideoChannel>().Where(x =>
-                        x.ChannelId.Equals(sipChannel.DeviceId) && x.DeviceId.Equals(sipChannel.ParentId) &&
-                        x.DeviceStreamType.Equals(DeviceStreamType.GB28181)).ToSql();
+                    #region debug sql output
 
-                    GCommon.Logger.Debug(
-                        $"[{Common.LoggerHead}]->OnCatalogReceived->执行SQL:->{sql}");
+                    if (Common.IsDebug)
+                    {
+                        var sql = ORMHelper.Db.Select<VideoChannel>().Where(x =>
+                            x.ChannelId.Equals(sipChannel.DeviceId) && x.DeviceId.Equals(sipChannel.ParentId) &&
+                            x.DeviceStreamType.Equals(DeviceStreamType.GB28181)).ToSql();
+
+                        GCommon.Logger.Debug(
+                            $"[{Common.LoggerHead}]->OnCatalogReceived->执行SQL:->{sql}");
+                    }
+
+                    #endregion
+
+                    //ORMHelper.Db.Select<Device281Plat>().Where(x =>x.platid == )
+                    //      ORMHelper.Db.Delete<DeviceNumber>().Where(x =>
+                    //x.dev.Equals(sipChannel.DeviceId)).ExecuteAffrows();
+                    GCommon.Logger.Debug("OnCatalogReceived: CreateDevice");
+                    CreateDevice(sipChannel);
+                    GCommon.Logger.Debug("OnCatalogReceived: CreateDevice1");
+
+                    var obj = ORMHelper.Db.Select<VideoChannel>().Where(x =>
+                        x.ChannelId.Equals(sipChannel.DeviceId) && x.DeviceId.Equals(sipChannel.ParentId) &&
+                        x.DeviceStreamType.Equals(DeviceStreamType.GB28181)).First();
+                    if (obj == null)
+                    {
+                        var videoChannel = new VideoChannel();
+                        videoChannel.Enabled = true;
+                        videoChannel.AutoRecord = false;
+                        videoChannel.AutoVideo = false;
+                        videoChannel.ChannelId = sipChannel.DeviceId;
+                        if (sipChannel.SipChannelDesc != null && !string.IsNullOrEmpty(sipChannel.SipChannelDesc.Name))
+                        {
+                            videoChannel.ChannelName = sipChannel.SipChannelDesc.Name.Trim();
+                        }
+                        else
+                        {
+                            videoChannel.ChannelName = sipChannel.DeviceId;
+                        }
+
+                        videoChannel.CreateTime = DateTime.Now;
+                        videoChannel.App = "rtp";
+                        videoChannel.Vhost = "__defaultVhost__";
+                        videoChannel.DepartmentId = "";
+                        videoChannel.DepartmentName = "";
+                        videoChannel.DeviceId = sipChannel.ParentId;
+                        videoChannel.HasPtz = false;
+                        videoChannel.UpdateTime = DateTime.Now;
+                        videoChannel.DeviceNetworkType = DeviceNetworkType.Fixed;
+                        videoChannel.DeviceStreamType = DeviceStreamType.GB28181;
+                        videoChannel.DefaultRtpPort = false;
+                        videoChannel.IpV4Address = sipChannel.RemoteEndPoint.Address.MapToIPv4().ToString();
+                        videoChannel.IpV6Address = sipChannel.RemoteEndPoint.Address.MapToIPv6().ToString();
+                        //videoChannel.MediaServerId = $"unknown_server_{DateTime.Now.Ticks}";
+                        videoChannel.MediaServerId = "your_server_id";
+                        videoChannel.NoPlayerBreak = true;
+                        videoChannel.PDepartmentId = "";
+                        videoChannel.PDepartmentName = "";
+                        videoChannel.RtpWithTcp = false;
+                        videoChannel.VideoSrcUrl = null;
+                        videoChannel.RecordSecs = 0;
+                        videoChannel.MethodByGetStream = MethodByGetStream.None;
+                        videoChannel.MainId = sipChannel.Stream;
+                        videoChannel.VideoDeviceType = VideoDeviceType.UNKNOW;
+                        try
+                        {
+                            #region debug sql output
+
+                            if (Common.IsDebug)
+                            {
+                                var sql = ORMHelper.Db.Insert(videoChannel).ToSql();
+
+                                GCommon.Logger.Debug(
+                                    $"[{Common.LoggerHead}]->OnCatalogReceived->执行SQL:->{sql}");
+                            }
+
+                            #endregion
+
+                            var ret = ORMHelper.Db.Insert(videoChannel).ExecuteAffrows();
+                            if (ret > 0)
+                            {
+                                GCommon.Logger.Debug(
+                                    $"[{Common.LoggerHead}]->写入一条新的设备目录到数据库，需激活后使用->{sipChannel.RemoteEndPoint.Address.MapToIPv4().ToString()}-{sipChannel.ParentId}:{sipChannel.DeviceId}");
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            GCommon.Logger.Error($"[{Common.LoggerHead}]->数据库写入异常->{ex.Message}\r\n{ex.StackTrace}");
+                        }
+                    }
+                }
+                else
+                {
+                    GCommon.Logger.Debug("OnCatalogReceived: CreateOrg");
+                    CreateOrg(sipChannel);
+                    GCommon.Logger.Debug("OnCatalogReceived: CreateOrg1");
                 }
 
-                #endregion
-
-                //ORMHelper.Db.Select<Device281Plat>().Where(x =>x.platid == )
-                //      ORMHelper.Db.Delete<DeviceNumber>().Where(x =>
-                //x.dev.Equals(sipChannel.DeviceId)).ExecuteAffrows();
-                GCommon.Logger.Debug("OnCatalogReceived: CreateDevice");
-                CreateDevice(sipChannel);
-                GCommon.Logger.Debug("OnCatalogReceived: CreateDevice1");
-
-                var obj = ORMHelper.Db.Select<VideoChannel>().Where(x =>
-                    x.ChannelId.Equals(sipChannel.DeviceId) && x.DeviceId.Equals(sipChannel.ParentId) &&
-                    x.DeviceStreamType.Equals(DeviceStreamType.GB28181)).First();
-                if (obj == null)
+                int platType = 0;
+                var deviceDB = ORMHelper.Db.Select<Device281Plat>().Where(a => a.platid == sipChannel.ParentId).First();
+                if (deviceDB != null)
                 {
-                    var videoChannel = new VideoChannel();
-                    videoChannel.Enabled = true;
-                    videoChannel.AutoRecord = false;
-                    videoChannel.AutoVideo = false;
-                    videoChannel.ChannelId = sipChannel.DeviceId;
-                    if (sipChannel.SipChannelDesc != null && !string.IsNullOrEmpty(sipChannel.SipChannelDesc.Name))
-                    {
-                        videoChannel.ChannelName = sipChannel.SipChannelDesc.Name.Trim();
-                    }
-                    else
-                    {
-                        videoChannel.ChannelName = sipChannel.DeviceId;
-                    }
+                    platType = deviceDB.plat_type;
+                }
+                int currentGetNumber = SsyncState.Orgs.Count + SsyncState.Devices.Count;
+                GCommon.Logger.Debug("OnCatalogReceived: currentGetNumber: " + currentGetNumber + ", sipChannel.TotalNumber: " + sipChannel.TotalNumber + ",SsyncState.Orgs.Count:  " + SsyncState.Orgs.Count + ", SsyncState.Devices.Count: " + SsyncState.Devices.Count);
 
-                    videoChannel.CreateTime = DateTime.Now;
-                    videoChannel.App = "rtp";
-                    videoChannel.Vhost = "__defaultVhost__";
-                    videoChannel.DepartmentId = "";
-                    videoChannel.DepartmentName = "";
-                    videoChannel.DeviceId = sipChannel.ParentId;
-                    videoChannel.HasPtz = false;
-                    videoChannel.UpdateTime = DateTime.Now;
-                    videoChannel.DeviceNetworkType = DeviceNetworkType.Fixed;
-                    videoChannel.DeviceStreamType = DeviceStreamType.GB28181;
-                    videoChannel.DefaultRtpPort = false;
-                    videoChannel.IpV4Address = sipChannel.RemoteEndPoint.Address.MapToIPv4().ToString();
-                    videoChannel.IpV6Address = sipChannel.RemoteEndPoint.Address.MapToIPv6().ToString();
-                    //videoChannel.MediaServerId = $"unknown_server_{DateTime.Now.Ticks}";
-                    videoChannel.MediaServerId = "your_server_id";
-                    videoChannel.NoPlayerBreak = true;
-                    videoChannel.PDepartmentId = "";
-                    videoChannel.PDepartmentName = "";
-                    videoChannel.RtpWithTcp = false;
-                    videoChannel.VideoSrcUrl = null;
-                    videoChannel.RecordSecs = 0;
-                    videoChannel.MethodByGetStream = MethodByGetStream.None;
-                    videoChannel.MainId = sipChannel.Stream;
-                    videoChannel.VideoDeviceType = VideoDeviceType.UNKNOW;
+                if (platType == 0)
+                {
+                    //currentGetNumber++;
+                    GCommon.Logger.Debug("OnCatalogReceived2: currentGetNumber: " + currentGetNumber + ", sipChannel.TotalNumber: " + sipChannel.TotalNumber + ",SsyncState.Orgs.Count:  " + SsyncState.Orgs.Count + ", SsyncState.Devices.Count: " + SsyncState.Devices.Count);
+
+                }
+                GCommon.Logger.Debug("OnCatalogReceived3: currentGetNumber: " + currentGetNumber + ", sipChannel.TotalNumber: " + sipChannel.TotalNumber + ",SsyncState.Orgs.Count:  " + SsyncState.Orgs.Count + ", SsyncState.Devices.Count: " + SsyncState.Devices.Count);
+
+                if (currentGetNumber == sipChannel.TotalNumber)
+                {
+                    GCommon.Logger.Debug("OnCatalogReceived4: currentGetNumber: " + currentGetNumber + ", sipChannel.TotalNumber: " + sipChannel.TotalNumber + ",SsyncState.Orgs.Count:  " + SsyncState.Orgs.Count + ", SsyncState.Devices.Count: " + SsyncState.Devices.Count);
                     try
                     {
-                        #region debug sql output
-
-                        if (Common.IsDebug)
-                        {
-                            var sql = ORMHelper.Db.Insert(videoChannel).ToSql();
-
-                            GCommon.Logger.Debug(
-                                $"[{Common.LoggerHead}]->OnCatalogReceived->执行SQL:->{sql}");
-                        }
-
-                        #endregion
-
-                        var ret = ORMHelper.Db.Insert(videoChannel).ExecuteAffrows();
-                        if (ret > 0)
-                        {
-                            GCommon.Logger.Debug(
-                                $"[{Common.LoggerHead}]->写入一条新的设备目录到数据库，需激活后使用->{sipChannel.RemoteEndPoint.Address.MapToIPv4().ToString()}-{sipChannel.ParentId}:{sipChannel.DeviceId}");
-                        }
+                        UpdateCatelogToDB();
                     }
                     catch (Exception ex)
                     {
-                        GCommon.Logger.Error($"[{Common.LoggerHead}]->数据库写入异常->{ex.Message}\r\n{ex.StackTrace}");
+                        GCommon.Logger.Debug("OnCatalogReceived fail: " + ex.Message);
                     }
+                    GCommon.Logger.Debug("OnCatalogReceived5: currentGetNumber: " + currentGetNumber + ", sipChannel.TotalNumber: " + sipChannel.TotalNumber + ",SsyncState.Orgs.Count:  " + SsyncState.Orgs.Count + ", SsyncState.Devices.Count: " + SsyncState.Devices.Count);
+
                 }
-            }
-            else
-            {
-                GCommon.Logger.Debug("OnCatalogReceived: CreateOrg");
-                CreateOrg(sipChannel);
-                GCommon.Logger.Debug("OnCatalogReceived: CreateOrg1");
-            }
-
-            int platType = 0;
-            var deviceDB= ORMHelper.Db.Select<Device281Plat>().Where(a => a.platid == sipChannel.ParentId).First();
-            if (deviceDB != null) 
-            {
-                platType = deviceDB.plat_type;
-            }
-            int currentGetNumber = SsyncState.Orgs.Count + SsyncState.Devices.Count;
-            GCommon.Logger.Debug("OnCatalogReceived: currentGetNumber: " + currentGetNumber + ", sipChannel.TotalNumber: " + sipChannel.TotalNumber + ",SsyncState.Orgs.Count:  " + SsyncState.Orgs.Count + ", SsyncState.Devices.Count: " + SsyncState.Devices.Count);
-
-            if (platType == 0) 
-            {
-                currentGetNumber++;
-                GCommon.Logger.Debug("OnCatalogReceived2: currentGetNumber: " + currentGetNumber + ", sipChannel.TotalNumber: " + sipChannel.TotalNumber + ",SsyncState.Orgs.Count:  " + SsyncState.Orgs.Count + ", SsyncState.Devices.Count: " + SsyncState.Devices.Count);
-
-            }
-            GCommon.Logger.Debug("OnCatalogReceived3: currentGetNumber: " + currentGetNumber + ", sipChannel.TotalNumber: " + sipChannel.TotalNumber + ",SsyncState.Orgs.Count:  " + SsyncState.Orgs.Count + ", SsyncState.Devices.Count: " + SsyncState.Devices.Count);
-
-            if (currentGetNumber == sipChannel.TotalNumber)
-            {
-                GCommon.Logger.Debug("OnCatalogReceived4: currentGetNumber: " + currentGetNumber + ", sipChannel.TotalNumber: " + sipChannel.TotalNumber + ",SsyncState.Orgs.Count:  " + SsyncState.Orgs.Count + ", SsyncState.Devices.Count: " + SsyncState.Devices.Count);
-                try
-                {
-                    UpdateCatelogToDB();
-                }
-                catch (Exception ex)
-                {
-                    GCommon.Logger.Debug("OnCatalogReceived fail: " + ex.Message);
-                }
-                GCommon.Logger.Debug("OnCatalogReceived5: currentGetNumber: " + currentGetNumber + ", sipChannel.TotalNumber: " + sipChannel.TotalNumber + ",SsyncState.Orgs.Count:  " + SsyncState.Orgs.Count + ", SsyncState.Devices.Count: " + SsyncState.Devices.Count);
-
             }
         }
 
@@ -429,6 +433,16 @@ x.platid == sipDevice.DeviceId).Set(x=>x.registestate,state).ExecuteAffrowsAsync
                 {
                     org.super_id = sipChannel.SipChannelDesc.CivilCode;
                 }
+
+                if (sipChannel.SipChannelDesc.ParentID.Contains("/"))
+                {
+                    var ids = sipChannel.SipChannelDesc.ParentID.Split("/");
+                    if (ids != null && ids.Length > 0)
+                    {
+                        org.super_id = ids[ids.Length - 1];
+                    }
+                }
+
                 org.name = sipChannel.SipChannelDesc.Name;
                 org.domain = sipChannel.SipChannelDesc.IPAddress;
                 //deviceNumber.status = sipChannel.SipChannelStatus;

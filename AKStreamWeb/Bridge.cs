@@ -19,6 +19,8 @@ using System.Linq;
 using System;
 using System.ComponentModel;
 using System.Security.Policy;
+using System.Xml.Linq;
+using SIPSorcery.Net;
 
 namespace AKStreamWeb
 {
@@ -42,6 +44,13 @@ namespace AKStreamWeb
 
         private Bridge()
         {
+
+            //string str = "<?xml version=\"1.0\" encoding=\"gb2312\"?>\r\n<Response>\r\n<CmdType>Catalog</CmdType>\r\n<SN>54208</SN>\r\n<DeviceID>23070000012007661031</DeviceID>\r\n<SumNum>13</SumNum>\r\n<DeviceList Num=\"10\">\r\n<Item>\r\n<DeviceID>11010500002160000000</DeviceID>\r\n<Name>资源中心</Name>\r\n<BusinessGroupID/>\r\n<ParentID>23070000012007661031</ParentID>\r\n</Item>\r\n<Item>\r\n<DeviceID>23078100682160000001</DeviceID>\r\n<Name>海康下级域01</Name>\r\n<BusinessGroupID/>\r\n<ParentID>11010500002160000000</ParentID>\r\n</Item>\r\n<Item>\r\n<DeviceID>23078105</DeviceID>\r\n<Name>5-维护</Name>\r\n<Manufacturer/>\r\n<Model/>\r\n<Owner/>\r\n<CivilCode>230781</CivilCode>\r\n<Address/>\r\n<RegisterWay>1</RegisterWay>\r\n<Secrecy>0</Secrecy>\r\n<ParentID>23070000012007661031/23078100682160000001</ParentID>\r\n<IPAddress/>\r\n<Parental>0</Parental>\r\n<SafetyWay>0</SafetyWay>\r\n<Status/>\r\n<Longitude/>\r\n<Latitude/>\r\n<Port>0</Port>\r\n<Password/>\r\n</Item>\r\n<Item>\r\n<DeviceID>23078105581314000003</DeviceID>\r\n<Name>2023_磨矿3号皮带驱动站下_140</Name>\r\n<Manufacturer>第三方厂家</Manufacturer>\r\n<Model/>\r\n<Owner/>\r\n<CivilCode>230781</CivilCode>\r\n<Address/>\r\n<RegisterWay>0</RegisterWay>\r\n<Secrecy>0</Secrecy>\r\n<ParentID>23078105</ParentID>\r\n<IPAddress>10.50.57.80</IPAddress>\r\n<Parental>0</Parental>\r\n<SafetyWay>0</SafetyWay>\r\n<Status>OFF</Status>\r\n<Longitude>116.404472</Longitude>\r\n<Latitude>39.91982</Latitude>\r\n<Port>140</Port>\r\n<Password/>\r\n<Info>\r\n<PTZType>1</PTZType>\r\n</Info>\r\n</Item>\r\n<Item>\r\n<DeviceID>23078105581314000006</DeviceID>\r\n<Name>3102_选厂办公楼前停车场_55</Name>\r\n<Manufacturer>第三方厂家</Manufacturer>\r\n<Model/>\r\n<Owner/>\r\n<CivilCode>230781</CivilCode>\r\n<Address/>\r\n<RegisterWay>0</RegisterWay>\r\n<Secrecy>0</Secrecy>\r\n<ParentID>23078105</ParentID>\r\n<IPAddress>10.50.58.55</IPAddress>\r\n<Parental>0</Parental>\r\n<SafetyWay>0</SafetyWay>\r\n<Status>OFF</Status>\r\n<Longitude>116.404472</Longitude>\r\n<Latitude>39.91982</Latitude>\r\n<Port>1111</Port>\r\n<Password/>\r\n<Info>\r\n<PTZType>2</PTZType>\r\n</Info>\r\n</Item>\r\n<Item>\r\n<DeviceID>23078104</DeviceID>\r\n<Name>4-恒冠爆破</Name>\r\n<Manufacturer/>\r\n<Model/>\r\n<Owner/>\r\n<CivilCode>230781</CivilCode>\r\n<Address/>\r\n<RegisterWay>1</RegisterWay>\r\n<Secrecy>0</Secrecy>\r\n<ParentID>23070000012007661031/23078100682160000001</ParentID>\r\n<IPAddress/>\r\n<Parental>1</Parental>\r\n<SafetyWay>0</SafetyWay>\r\n<Status>ON</Status>\r\n<Longitude/>\r\n<Latitude/>\r\n<Port>0</Port>\r\n<Password/>\r\n</Item>\r\n<Item>\r\n<DeviceID>23078104582160000037</DeviceID>\r\n<Name>3-炸药库</Name>\r\n<BusinessGroupID/>\r\n<ParentID>23078104</ParentID>\r\n</Item>\r\n<Item>\r\n<DeviceID>23078104581314000044</DeviceID>\r\n<Name>炸药库正门</Name>\r\n<Manufacturer>第三方厂家</Manufacturer>\r\n<Model/>\r\n<Owner/>\r\n<CivilCode>230781</CivilCode>\r\n<Address/>\r\n<RegisterWay>0</RegisterWay>\r\n<Secrecy>0</Secrecy>\r\n<ParentID>23070000012007661031/23078104582160000037</ParentID>\r\n<IPAddress>222.170.169.238</IPAddress>\r\n<Parental>0</Parental>\r\n<SafetyWay>0</SafetyWay>\r\n<Status>ON</Status>\r\n<Longitude>116.404472</Longitude>\r\n<Latitude>39.91982</Latitude>\r\n<Port>8887</Port>\r\n<Password/>\r\n<Info>\r\n<PTZType>3</PTZType>\r\n</Info>\r\n</Item>\r\n<Item>\r\n<DeviceID>23078102</DeviceID>\r\n<Name>2-安防监控</Name>\r\n<Manufacturer/>\r\n<Model/>\r\n<Owner/>\r\n<CivilCode>230781</CivilCode>\r\n<Address/>\r\n<RegisterWay>1</RegisterWay>\r\n<Secrecy>0</Secrecy>\r\n<ParentID>23070000012007661031/23078100682160000001</ParentID>\r\n<IPAddress/>\r\n<Parental>1</Parental>\r\n<SafetyWay>0</SafetyWay>\r\n<Status>ON</Status>\r\n<Longitude/>\r\n<Latitude/>\r\n<Port>0</Port>\r\n<Password/>\r\n</Item>\r\n<Item>\r\n<DeviceID>23078102582160000017</DeviceID>\r\n<Name>1-生活区</Name>\r\n<BusinessGroupID/>\r\n<ParentID>23078102</ParentID>\r\n</Item>\r\n</DeviceList>\r\n</Response>";
+            //string str ="<?xml version=\"1.0\" encoding=\"gb2312\"?>\r\n<Response>\r\n<CmdType>Catalog</CmdType>\r\n<SN>12969</SN>\r\n<DeviceID>23070000012007661031</DeviceID>\r\n<SumNum>13</SumNum>\r\n<DeviceList Num=\"10\">\r\n<Item>\r\n<DeviceID>11010500002160000000</DeviceID>\r\n<Name>资源中心</Name>\r\n<BusinessGroupID/>\r\n<ParentID>23070000012007661031</ParentID>\r\n</Item>\r\n<Item>\r\n<DeviceID>23078100682160000001</DeviceID>\r\n<Name>海康下级域01</Name>\r\n<BusinessGroupID/>\r\n<ParentID>11010500002160000000</ParentID>\r\n</Item>\r\n<Item>\r\n<DeviceID>23078105</DeviceID>\r\n<Name>5-维护</Name>\r\n<Manufacturer/>\r\n<Model/>\r\n<Owner/>\r\n<CivilCode>230781</CivilCode>\r\n<Address/>\r\n<RegisterWay>1</RegisterWay>\r\n<Secrecy>0</Secrecy>\r\n<ParentID>23070000012007661031/23078100682160000001</ParentID>\r\n<IPAddress/>\r\n<Parental>0</Parental>\r\n<SafetyWay>0</SafetyWay>\r\n<Status/>\r\n<Longitude/>\r\n<Latitude/>\r\n<Port>0</Port>\r\n<Password/>\r\n</Item>\r\n<Item>\r\n<DeviceID>23078105581314000003</DeviceID>\r\n<Name>2023_磨矿3号皮带驱动站下_140</Name>\r\n<Manufacturer>第三方厂家</Manufacturer>\r\n<Model/>\r\n<Owner/>\r\n<CivilCode>230781</CivilCode>\r\n<Address/>\r\n<RegisterWay>0</RegisterWay>\r\n<Secrecy>0</Secrecy>\r\n<ParentID>23078105</ParentID>\r\n<IPAddress>10.50.57.80</IPAddress>\r\n<Parental>0</Parental>\r\n<SafetyWay>0</SafetyWay>\r\n<Status>OFF</Status>\r\n<Longitude>116.404472</Longitude>\r\n<Latitude>39.91982</Latitude>\r\n<Port>140</Port>\r\n<Password/>\r\n<Info>\r\n<PTZType>1</PTZType>\r\n</Info>\r\n</Item>\r\n<Item>\r\n<DeviceID>23078105581314000006</DeviceID>\r\n<Name>3102_选厂办公楼前停车场_55</Name>\r\n<Manufacturer>第三方厂家</Manufacturer>\r\n<Model/>\r\n<Owner/>\r\n<CivilCode>230781</CivilCode>\r\n<Address/>\r\n<RegisterWay>0</RegisterWay>\r\n<Secrecy>0</Secrecy>\r\n<ParentID>23078105</ParentID>\r\n<IPAddress>10.50.58.55</IPAddress>\r\n<Parental>0</Parental>\r\n<SafetyWay>0</SafetyWay>\r\n<Status>OFF</Status>\r\n<Longitude>116.404472</Longitude>\r\n<Latitude>39.91982</Latitude>\r\n<Port>1111</Port>\r\n<Password/>\r\n<Info>\r\n<PTZType>2</PTZType>\r\n</Info>\r\n</Item>\r\n<Item>\r\n<DeviceID>23078104</DeviceID>\r\n<Name>4-恒冠爆破</Name>\r\n<Manufacturer/>\r\n<Model/>\r\n<Owner/>\r\n<CivilCode>230781</CivilCode>\r\n<Address/>\r\n<RegisterWay>1</RegisterWay>\r\n<Secrecy>0</Secrecy>\r\n<ParentID>23070000012007661031/23078100682160000001</ParentID>\r\n<IPAddress/>\r\n<Parental>1</Parental>\r\n<SafetyWay>0</SafetyWay>\r\n<Status/>\r\n<Longitude/>\r\n<Latitude/>\r\n<Port>0</Port>\r\n<Password/>\r\n</Item>\r\n<Item>\r\n<DeviceID>23078104582160000037</DeviceID>\r\n<Name>3-炸药库</Name>\r\n<BusinessGroupID/>\r\n<ParentID>23078104</ParentID>\r\n</Item>\r\n<Item>\r\n<DeviceID>23078104581314000044</DeviceID>\r\n<Name>炸药库正门</Name>\r\n<Manufacturer>第三方厂家</Manufacturer>\r\n<Model/>\r\n<Owner/>\r\n<CivilCode>230781</CivilCode>\r\n<Address/>\r\n<RegisterWay>0</RegisterWay>\r\n<Secrecy>0</Secrecy>\r\n<ParentID>23070000012007661031/23078104582160000037</ParentID>\r\n<IPAddress>222.170.169.238</IPAddress>\r\n<Parental>0</Parental>\r\n<SafetyWay>0</SafetyWay>\r\n<Status>ON</Status>\r\n<Longitude>116.404472</Longitude>\r\n<Latitude>39.91982</Latitude>\r\n<Port>8887</Port>\r\n<Password/>\r\n<Info>\r\n<PTZType>3</PTZType>\r\n</Info>\r\n</Item>\r\n<Item>\r\n<DeviceID>23078102</DeviceID>\r\n<Name>2-安防监控</Name>\r\n<Manufacturer/>\r\n<Model/>\r\n<Owner/>\r\n<CivilCode>230781</CivilCode>\r\n<Address/>\r\n<RegisterWay>1</RegisterWay>\r\n<Secrecy>0</Secrecy>\r\n<ParentID>23070000012007661031/23078100682160000001</ParentID>\r\n<IPAddress/>\r\n<Parental>1</Parental>\r\n<SafetyWay>0</SafetyWay>\r\n<Status/>\r\n<Longitude/>\r\n<Latitude/>\r\n<Port>0</Port>\r\n<Password/>\r\n</Item>\r\n<Item>\r\n<DeviceID>23078102582160000017</DeviceID>\r\n<Name>1-生活区</Name>\r\n<BusinessGroupID/>\r\n<ParentID>23078102</ParentID>\r\n</Item>\r\n</DeviceList>\r\n</Response>\r\n";
+            //str = str.Replace("<Status/>", "<Status>OFF</Status>");
+            //XElement bodyXml = XElement.Parse(str);
+            //UtilsHelper.XMLToObject<Catalog>(bodyXml);
+
             SPhoneSDK.SDKInit( Common.AkStreamWebConfig.SipIp, Common.AkStreamWebConfig.SipPort, 5, System.AppContext.BaseDirectory + "pjsip.log");
             //SPhoneSDK.SDKInit("172.19.6.41", 5066, 5, System.AppContext.BaseDirectory +  "pjsip.log");
             SPhoneSDK.Regist("1.1.1.1", "admin", "admin", Common.AkStreamWebConfig.PublicMediaIp, false, true);
@@ -231,14 +240,25 @@ namespace AKStreamWeb
 
         private void TestTimerCB(object obj)
         {
-            var device = LibGB28181SipServer.Common.SipDevices.Find(x => x.DeviceId == "43100000122000900001");
-            if (device == null)
+            //var device = LibGB28181SipServer.Common.SipDevices.Find(x => x.DeviceId == "43100000122000900001");
+            //if (device == null)
+            //{
+            //    return;
+            //}
+            //var sipChannel = device.SipChannels.Find(x => x.DeviceId == "43100000001310615349");
+
+            foreach (var device in LibGB28181SipServer.Common.SipDevices)
             {
-                return;
+                foreach (var sipChannel in device.SipChannels)
+                {
+                    Common.SipServer.Subscribe(device, sipChannel, SIPSorcery.SIP.SIPMethodsEnum.OPTIONS, "", "", "", LibCommon.Structs.GB28181.XML.CommandType.MobilePosition, false, null, null, null, 100);
+                    Common.SipServer.SubscribeCatalog(device, sipChannel, SIPSorcery.SIP.SIPMethodsEnum.OPTIONS, "", "", "", LibCommon.Structs.GB28181.XML.CommandType.Catalog, false, null, null, null, 100);
+                    Thread.Sleep(1);
+                }
             }
-            var sipChannel = device.SipChannels.Find(x => x.DeviceId == "43100000001310615349");
-            Common.SipServer.Subscribe(device, sipChannel, SIPSorcery.SIP.SIPMethodsEnum.OPTIONS, "", "", "", LibCommon.Structs.GB28181.XML.CommandType.MobilePosition, false, null, null, null, 100);
-            Common.SipServer.SubscribeCatalog(device, sipChannel, SIPSorcery.SIP.SIPMethodsEnum.OPTIONS, "", "", "", LibCommon.Structs.GB28181.XML.CommandType.Catalog, false, null, null, null, 100);
+           
+
+
             _timer.Dispose();
         }
 

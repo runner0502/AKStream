@@ -615,7 +615,7 @@ namespace LibGB28181SipServer
             GCommon.Logger.Debug(
                             $"[{Common.LoggerHead}]->收到来自{remoteEndPoint}MessageProcess->{sipRequest}");
             LoadOptions option = new LoadOptions();
-            
+            sipRequest.Body = sipRequest.Body.Replace("<Status/>", "<Status>OFF</Status>");
             XElement bodyXml = XElement.Parse(sipRequest.Body);
             string cmdType = bodyXml.Element("CmdType")?.Value.ToUpper()!;
             GCommon.Logger.Debug(

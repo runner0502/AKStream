@@ -598,7 +598,7 @@ namespace AKStreamWeb.Services
                 var videoChannel = ORMHelper.Db.Select<VideoChannel>().Where(x => x.MainId.Equals(req.Stream))
                     .Where(x => x.MediaServerId.Equals(req.MediaServerId)).First();
 
-                if (videoChannel.AutoVideo == false && videoChannel.NoPlayerBreak == true) //或者要求没有人观看时自动断流的，就断流
+                if (videoChannel != null && videoChannel.AutoVideo == false && videoChannel.NoPlayerBreak == true) //或者要求没有人观看时自动断流的，就断流
                 {
                     var ret = MediaServerService.StreamStop(videoChannel.MediaServerId, videoChannel.MainId,
                         out ResponseStruct rs);

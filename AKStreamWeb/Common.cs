@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Reflection;
 using System.Threading.Channels;
 using System.Timers;
 using AKStreamWeb.AutoTask;
@@ -411,9 +412,9 @@ namespace AKStreamWeb
             {
                 if (DateTime.Now.Subtract(_lastGCtime).TotalMinutes > 1)
                 {
-                    GC.Collect();
+                    //GC.Collect();
                     _lastGCtime = DateTime.Now;
-                    GCommon.Logger.Warn("license gccollcet ");
+                    GCommon.Logger.Warn("license akversion " + Assembly.GetExecutingAssembly().GetName().Version);
                 }
                 return;
             }
@@ -525,7 +526,7 @@ namespace AKStreamWeb
             GCommon.Logger.Info(
                 $"[{LoggerHead}]->Let's Go...");
             GCommon.Logger.Info(
-                $"[{LoggerHead}]->程序版本标识:{Version}");
+                $"[{LoggerHead}]->程序版本标识:{Version} akversion {Assembly.GetExecutingAssembly().GetName().Version}");
             StartTimer();
         }
 

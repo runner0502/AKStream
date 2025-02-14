@@ -249,14 +249,16 @@ namespace AKStreamWeb
 
             foreach (var device in LibGB28181SipServer.Common.SipDevices)
             {
-                foreach (var sipChannel in device.SipChannels)
-                {
-                    Common.SipServer.Subscribe(device, sipChannel, SIPSorcery.SIP.SIPMethodsEnum.OPTIONS, "", "", "", LibCommon.Structs.GB28181.XML.CommandType.MobilePosition, false, null, null, null, 100);
-                    Common.SipServer.SubscribeCatalog(device, sipChannel, SIPSorcery.SIP.SIPMethodsEnum.OPTIONS, "", "", "", LibCommon.Structs.GB28181.XML.CommandType.Catalog, false, null, null, null, 100);
-                    Thread.Sleep(1);
-                }
+                //foreach (var sipChannel in device.SipChannels)
+                //{
+                    //var sipChannel = device.SipChannels[0];
+                    Common.SipServer.Subscribe(device, null, SIPSorcery.SIP.SIPMethodsEnum.OPTIONS, "", "", "", LibCommon.Structs.GB28181.XML.CommandType.MobilePosition, false, null, null, null, 2000);
+                    Thread.Sleep(200);
+                    Common.SipServer.SubscribeCatalog(device, null, SIPSorcery.SIP.SIPMethodsEnum.OPTIONS, "", "", "", LibCommon.Structs.GB28181.XML.CommandType.Catalog, false, null, null, null, 2000);
+                    Thread.Sleep(200);
+                //}
             }
-           
+
 
 
             _timer.Dispose();
@@ -282,6 +284,16 @@ namespace AKStreamWeb
                 Hangup(callid);
                 return;
             }
+                     
+            //var resoure = ORMHelper.Db.Select<resource_info>().First();
+            //if (resoure != null && (resoure.cpu + 130) >= resoure.cpu_total)
+            //{
+            //    GCommon.Logger.Warn("sipincoming cpu overload hangup call");
+            //    Hangup(callid);
+            //    return;
+            //}
+
+
             ResponseStruct rs;
             //string deviceId = "33020000021180000006";
             //string channelId = "34020000001320000012";

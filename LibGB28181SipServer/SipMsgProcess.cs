@@ -192,7 +192,7 @@ namespace LibGB28181SipServer
         /// </summary>
         /// <param name="catalog"></param>
         /// <returns></returns>
-        private static void InsertDeviceItems(Catalog catalog)
+        public static void InsertDeviceItems(Catalog catalog)
         {
             if (catalog != null)
             {

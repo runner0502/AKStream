@@ -50,6 +50,9 @@ x.platid == sipDeviceId).First();
 
             GCommon.Logger.Debug(
                 $"[{Common.LoggerHead}]->设备就绪(OnRegister)->{sipDevice.IpAddress.ToString()}-{sipDevice.DeviceId}");
+
+            Bridge.GetInstance().Subcribe();
+
             ResponseStruct rs;
             SipMethodProxy sipMethodProxy2 = new SipMethodProxy(Common.AkStreamWebConfig.WaitSipRequestTimeOutMSec);
             if (sipMethodProxy2.GetSipDeviceInfo(sipDevice, out rs))
@@ -235,7 +238,7 @@ x.platid == sipDevice.DeviceId).Set(x=>x.registestate,state).ExecuteAffrowsAsync
                         }
                     }
                 }
-                Bridge.GetInstance().Subcribe();
+               // Bridge.GetInstance().Subcribe();
             }
             else
             {
@@ -371,23 +374,25 @@ x.platid == sipDevice.DeviceId).Set(x=>x.registestate,state).ExecuteAffrowsAsync
                 }
 
                 int platType = 0;
+                int manufacturer = 99; //其他
                 var deviceDB = ORMHelper.Db.Select<Device281Plat>().Where(a => a.platid == sipChannel.ParentId).First();
                 if (deviceDB != null)
                 {
                     platType = deviceDB.plat_type;
+                    manufacturer = deviceDB.manufacturer;
                 }
                 int currentGetNumber = SsyncState.Orgs.Count + SsyncState.Devices.Count;
                 GCommon.Logger.Debug("OnCatalogReceived: currentGetNumber: " + currentGetNumber + ", sipChannel.TotalNumber: " + sipChannel.TotalNumber + ",SsyncState.Orgs.Count:  " + SsyncState.Orgs.Count + ", SsyncState.Devices.Count: " + SsyncState.Devices.Count);
 
-                if (platType == 0)
+                if (platType == 0 && manufacturer == 2) //海康
                 {
-                    //currentGetNumber++;
+                    currentGetNumber++;
                     GCommon.Logger.Debug("OnCatalogReceived2: currentGetNumber: " + currentGetNumber + ", sipChannel.TotalNumber: " + sipChannel.TotalNumber + ",SsyncState.Orgs.Count:  " + SsyncState.Orgs.Count + ", SsyncState.Devices.Count: " + SsyncState.Devices.Count);
 
                 }
                 GCommon.Logger.Debug("OnCatalogReceived3: currentGetNumber: " + currentGetNumber + ", sipChannel.TotalNumber: " + sipChannel.TotalNumber + ",SsyncState.Orgs.Count:  " + SsyncState.Orgs.Count + ", SsyncState.Devices.Count: " + SsyncState.Devices.Count);
 
-                if (currentGetNumber == sipChannel.TotalNumber)
+                if ( currentGetNumber >= sipChannel.TotalNumber)
                 {
                     GCommon.Logger.Debug("OnCatalogReceived4: currentGetNumber: " + currentGetNumber + ", sipChannel.TotalNumber: " + sipChannel.TotalNumber + ",SsyncState.Orgs.Count:  " + SsyncState.Orgs.Count + ", SsyncState.Devices.Count: " + SsyncState.Devices.Count);
                     try
@@ -401,11 +406,31 @@ x.platid == sipDevice.DeviceId).Set(x=>x.registestate,state).ExecuteAffrowsAsync
                     GCommon.Logger.Debug("OnCatalogReceived5: currentGetNumber: " + currentGetNumber + ", sipChannel.TotalNumber: " + sipChannel.TotalNumber + ",SsyncState.Orgs.Count:  " + SsyncState.Orgs.Count + ", SsyncState.Devices.Count: " + SsyncState.Devices.Count);
 
                 }
+                //else if (DateTime.Now.Subtract(SsyncState.StartTime).Minutes >= 1)
+                //{
+                //    GCommon.Logger.Debug("OnCatalogReceived6: currentGetNumber: " + currentGetNumber + ", sipChannel.TotalNumber: " + sipChannel.TotalNumber + ",SsyncState.Orgs.Count:  " + SsyncState.Orgs.Count + ", SsyncState.Devices.Count: " + SsyncState.Devices.Count);
+                //    try
+                //    {
+                //        UpdateCatelogToDB();
+                //    }
+                //    catch (Exception ex)
+                //    {
+                //        GCommon.Logger.Debug("OnCatalogReceived fail7: " + ex.Message);
+                //    }
+                //    GCommon.Logger.Debug("OnCatalogReceived8: currentGetNumber: " + currentGetNumber + ", sipChannel.TotalNumber: " + sipChannel.TotalNumber + ",SsyncState.Orgs.Count:  " + SsyncState.Orgs.Count + ", SsyncState.Devices.Count: " + SsyncState.Devices.Count);
+                //}
+                //GCommon.Logger.Debug("OnCatalogReceived9: DateTime.Now.Subtract(SsyncState.StartTime).Minutes : " + DateTime.Now.Subtract(SsyncState.StartTime).Minutes + ", " + DateTime.Now.Subtract(SsyncState.StartTime).Seconds+ currentGetNumber + ", sipChannel.TotalNumber: " + sipChannel.TotalNumber + ",SsyncState.Orgs.Count:  " + SsyncState.Orgs.Count + ", SsyncState.Devices.Count: " + SsyncState.Devices.Count);
+
+
             }
         }
 
         private static void CreateOrg(SipChannel sipChannel)
         {
+            try
+            {
+
+           
             if (sipChannel.ParentId != sipChannel.DeviceId)
             {
                 var org = new organization();
@@ -434,7 +459,7 @@ x.platid == sipDevice.DeviceId).Set(x=>x.registestate,state).ExecuteAffrowsAsync
                     org.super_id = sipChannel.SipChannelDesc.CivilCode;
                 }
 
-                if (sipChannel.SipChannelDesc.ParentID.Contains("/"))
+                if (!string.IsNullOrEmpty(sipChannel.SipChannelDesc.ParentID) && sipChannel.SipChannelDesc.ParentID.Contains("/"))
                 {
                     var ids = sipChannel.SipChannelDesc.ParentID.Split("/");
                     if (ids != null && ids.Length > 0)
@@ -448,6 +473,12 @@ x.platid == sipDevice.DeviceId).Set(x=>x.registestate,state).ExecuteAffrowsAsync
                 //deviceNumber.status = sipChannel.SipChannelStatus;
                 SsyncState.Orgs.Add(org);
 
+            }
+            }
+            catch (Exception ex)
+            {
+                GCommon.Logger.Warn("createorgexp " + ex.Message);
+                throw;
             }
         }
 
@@ -522,7 +553,15 @@ x.plat_id.Equals(SsyncState.PlatId)).ExecuteAffrows();
                 GCommon.Logger.Debug("UpdateCatelogToDB2");
 
                 org.plat_id = SsyncState.PlatId;
-                ORMHelper.Db.Insert(org).ExecuteAffrows();
+                try
+                {
+                    ORMHelper.Db.Insert(org).ExecuteAffrows();
+                }
+                catch (Exception ex)
+                {
+                    GCommon.Logger.Warn("UpdateCatelogToDB org insertdb fail: " + ex.Message);
+                    continue;
+                }
             }
 
             //foreach (var org in SsyncState.Orgs)
@@ -578,7 +617,16 @@ x.dev.Equals(device.dev)).First();
                 }
                 GCommon.Logger.Debug("UpdateCatelogToDB4");
 
-                ORMHelper.Db.Insert(device).ExecuteAffrows();
+                try
+                {
+                    ORMHelper.Db.Insert(device).ExecuteAffrows();
+                }
+                catch (Exception ex)
+                {
+                    GCommon.Logger.Warn("UpdateCatelogToDB device insertdb fail: " + ex.Message);
+                    continue;
+                }
+
                 GCommon.Logger.Debug("UpdateCatelogToDB5");
 
                 SsyncState.State.LastResult = true;
@@ -611,6 +659,8 @@ x.dev.Equals(device.dev)).First();
 
         public SyncMethod Method{ get; set; }
         public BigInteger SyncStartIndex { get; set; }
+
+        public DateTime StartTime { get; set; }
 
         public SyncStateFull()
         {

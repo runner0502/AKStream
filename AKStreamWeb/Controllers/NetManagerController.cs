@@ -132,7 +132,7 @@ namespace AKStreamWeb.Controllers
                 SipServerCallBack.SsyncState.State.IsProcessing = false;
                 return false;
             }
-
+            SipServerCallBack.SsyncState.StartTime = DateTime.Now;
             if (sipMethodProxy.DeviceCatalogQuery(sipDevice, out rs))
             {
                 GCommon.Logger.Debug(

@@ -52,9 +52,9 @@ namespace AKStreamWeb
             new ConcurrentDictionary<string, WebHookNeedReturnTask>();
 
         public static DateTime StartupDateTime;
-        private static MyLicense _license;
+        private static LicenseNative _license;
 
-        public static MyLicense License 
+        public static LicenseNative License 
         {
             get { return _license; }
             set { _license = value; }
@@ -408,20 +408,125 @@ namespace AKStreamWeb
             //{
             //    WebPerformanceInfo = _webSystemInfo.GetSystemInfoObject();
             //}
-            if (!_vailLicense)
-            {
-                if (DateTime.Now.Subtract(_lastGCtime).TotalMinutes > 1)
-                {
-                    //GC.Collect();
-                    _lastGCtime = DateTime.Now;
-                    GCommon.Logger.Warn("license akversion " + Assembly.GetExecutingAssembly().GetName().Version);
-                }
-                return;
-            }
 
-            _vailLicense = false;
-            GCommon.Logger.Warn("license timer ");
+            //if (!_vailLicense)
+            //{
+            //    if (DateTime.Now.Subtract(_lastGCtime).TotalMinutes > 1)
+            //    {
+            //        //GC.Collect();
+            //        _lastGCtime = DateTime.Now;
+            //        GCommon.Logger.Warn("license akversion " + Assembly.GetExecutingAssembly().GetName().Version);
+            //    }
+            //    return;
+            //}
 
+            //_vailLicense = false;
+            //GCommon.Logger.Warn("license timer ");
+
+
+            CheckLicense();
+
+            // _perFormanceInfoTimer.Enabled = false;
+        }
+
+        //private static void CheckLicenseNET()
+        //{
+        //    if (License == null)
+        //    {
+        //        GCommon.Logger.Warn("license timer1 ");
+        //        string _msg = string.Empty;
+        //        LicenseStatus _status = LicenseStatus.UNDEFINED;
+        //        try
+        //        {
+        //            //var licenseFile = Environment.CurrentDirectory + "/license";
+
+        //            var licenseFile = "license";
+        //            License = (MyLicense)LicenseHandler.ParseLicenseFromBASE64String(
+        //                               typeof(MyLicense),
+        //                               File.ReadAllText(licenseFile),
+        //                               null,
+        //                               out _status,
+        //                               out _msg);
+
+        //            //License = new MyLicense();
+        //            //License.MaxDeviceCount = 100;
+        //            //License.MaxRunCount = 100;
+        //            //License.ExpireDateTime = DateTime.Now.AddYears(1);
+
+        //            if (License == null)
+        //            {
+        //                GCommon.Logger.Warn("license fail null");
+        //                s_licenceVaid = false;
+        //                return;
+        //            }
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            GCommon.Logger.Warn("license fail:" + ex.Message);
+        //            s_licenceVaid = false;
+        //            //_perFormanceInfoTimer.Stop();
+        //            //var life = Program._builder.Services.GetRequiredService<IHostApplicationLifetime>();
+        //            //life.StopApplication();
+        //            //Program._builder.StopAsync().Wait();
+        //            //return;
+        //            //Environment.Exit(1);
+        //            return;
+        //        }
+        //    }
+
+        //    GCommon.Logger.Warn("license timer2 ");
+        //    LicenseStatus result = LicenseStatus.INVALID;
+        //    string msg = string.Empty;
+        //    try
+        //    {
+        //        result = License.DoExtraValidation(out msg);
+        //        //result = LicenseStatus.VALID;
+
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        GCommon.Logger.Warn("license fail: " + ex.Message);
+        //        throw;
+        //    }
+        //    GCommon.Logger.Warn("license timer21 ");
+
+        //    if (result == LicenseStatus.VALID)
+        //    {
+        //        GCommon.Logger.Warn("license timer 3");
+        //        var licenceInDB = ORMHelper.Db.Select<biz_licence>().First();
+        //        var newLicence = new biz_licence();
+        //        newLicence.expire = License.ExpireDateTime;
+        //        newLicence.max_device_number = License.MaxDeviceCount;
+        //        newLicence.max_transcode_number = License.MaxRunCount;
+        //        newLicence.max_push_number = License.MaxPushNumber;
+        //        newLicence.CreateTime = DateTime.Now;
+        //        newLicence.UpdateTime = DateTime.Now;
+        //        newLicence.IsDeleted = 0;
+        //        newLicence.id = "0";
+        //        if (licenceInDB != null)
+        //        {
+        //            GCommon.Logger.Warn("license timer4 ");
+        //            //ORMHelper.Db.Update<biz_licence>(newLicence).Where(a=>a.id == newLicence.id).ExecuteAffrows();
+        //            ORMHelper.Db.Delete<biz_licence>().Where(a => a.id.Equals("0")).ExecuteAffrows();
+        //            GCommon.Logger.Warn("license timer 5");
+        //        }
+
+        //        ORMHelper.Db.Insert<biz_licence>(newLicence).ExecuteAffrows();
+        //        s_licenceVaid = true;
+        //        GCommon.Logger.Warn("license success ");
+
+        //    }
+        //    else
+        //    {
+        //        GCommon.Logger.Warn("license fail invalid");
+        //        s_licenceVaid = false;
+        //        //Program._builder.StopAsync();
+        //        //Environment.Exit(0);
+        //    }
+        //}
+
+        private static void CheckLicense()
+        {
             if (License == null)
             {
                 GCommon.Logger.Warn("license timer1 ");
@@ -431,13 +536,7 @@ namespace AKStreamWeb
                 {
                     //var licenseFile = Environment.CurrentDirectory + "/license";
 
-                    var licenseFile = "license";
-                    License = (MyLicense)LicenseHandler.ParseLicenseFromBASE64String(
-                                       typeof(MyLicense),
-                                       File.ReadAllText(licenseFile),
-                                       null,
-                                       out _status,
-                                       out _msg);
+                    License = new LicenseNative();
 
                     //License = new MyLicense();
                     //License.MaxDeviceCount = 100;
@@ -451,9 +550,9 @@ namespace AKStreamWeb
                         return;
                     }
                 }
-                catch (Exception ex) 
+                catch (Exception ex)
                 {
-                    GCommon.Logger.Warn("license fail:" +ex.Message);
+                    GCommon.Logger.Warn("license fail:" + ex.Message);
                     s_licenceVaid = false;
                     //_perFormanceInfoTimer.Stop();
                     //var life = Program._builder.Services.GetRequiredService<IHostApplicationLifetime>();
@@ -464,6 +563,7 @@ namespace AKStreamWeb
                     return;
                 }
             }
+
             GCommon.Logger.Warn("license timer2 ");
             LicenseStatus result = LicenseStatus.INVALID;
             string msg = string.Empty;
@@ -497,11 +597,11 @@ namespace AKStreamWeb
                 {
                     GCommon.Logger.Warn("license timer4 ");
                     //ORMHelper.Db.Update<biz_licence>(newLicence).Where(a=>a.id == newLicence.id).ExecuteAffrows();
-                    ORMHelper.Db.Delete<biz_licence>().Where(a=>a.id.Equals("0")).ExecuteAffrows();
+                    ORMHelper.Db.Delete<biz_licence>().Where(a => a.id.Equals("0")).ExecuteAffrows();
                     GCommon.Logger.Warn("license timer 5");
                 }
-                   
-               ORMHelper.Db.Insert<biz_licence>(newLicence).ExecuteAffrows();
+
+                ORMHelper.Db.Insert<biz_licence>(newLicence).ExecuteAffrows();
                 s_licenceVaid = true;
                 GCommon.Logger.Warn("license success ");
 
@@ -513,10 +613,7 @@ namespace AKStreamWeb
                 //Program._builder.StopAsync();
                 //Environment.Exit(0);
             }
-
-           // _perFormanceInfoTimer.Enabled = false;
         }
-
 
         /// <summary>
         /// 所有程序的入口

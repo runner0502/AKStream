@@ -226,6 +226,17 @@ namespace XyCallLayer
             public string dnsprefix;
         };
 
+        [StructLayoutAttribute(LayoutKind.Sequential)]
+        public struct LicenseResult
+        {
+            public bool result;           
+            public int maxDevice;
+            public int maxTranscode;
+            public int maxPushMedia;
+            [MarshalAsAttribute(UnmanagedType.ByValTStr, SizeConst = 255)]
+            public string expireDate;
+        };
+
         public delegate void SDK_onIncomingCall(int callid, string number, CallState state, bool isVideo);
         public delegate void SDK_onIncomingCall_WithIDS(int callid, string number, CallState state, bool isVideo, string idsContent);
         public delegate void SDK_onIncomingCall_WithMsg(int callid, string number, CallState state, bool isVideo, string idsContent);
@@ -533,10 +544,8 @@ namespace XyCallLayer
         public extern static int AddToAudioPort(int callid, int audioPort);
         [DllImport(@"DLL\SPhone.dll")]
         public extern static int ConnectSoundportToCall(int captureId, int playId, int callid);
-
-
-
-
+        [DllImport(@"DLL\SPhone.dll")]
+        public extern static bool VerifyLicense(ref LicenseResult licenseResult);
 
     }
 }

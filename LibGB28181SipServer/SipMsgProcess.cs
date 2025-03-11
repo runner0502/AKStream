@@ -330,7 +330,7 @@ namespace LibGB28181SipServer
         {
             info = null;
             var sdpBody = req.Body;
-
+            GCommon.Logger.Debug("GetShareInfo request body: " + sdpBody.ToString());
             try
             {
                 string mediaip = "";
@@ -340,26 +340,44 @@ namespace LibGB28181SipServer
                     req.Header.Subject.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries)[
                         0];
                 channelid = channelid.Substring(0, channelid.IndexOf(':'));
-                Console.WriteLine(channelid);
+                //Console.WriteLine(channelid);
+                int index = sdpBody.IndexOf("\r\n");
+                GCommon.Logger.Debug("GetShareInfo111: index: " + index);
 
                 string[] sdpBodys = sdpBody.Split("\r\n", StringSplitOptions.RemoveEmptyEntries);
-                if (sdpBodys.Length == 0)
+                if (sdpBodys.Length <= 1)
                 {
+                    GCommon.Logger.Debug("GetShareInfo1: ");
+
                     sdpBodys = sdpBody.Split("\n", StringSplitOptions.RemoveEmptyEntries);
                 }
 
-                if (sdpBodys.Length == 0)
+                if (sdpBodys.Length <=1 )
                 {
+                    GCommon.Logger.Debug("GetShareInfo2: ");
+
                     sdpBodys = sdpBody.Split("\r", StringSplitOptions.RemoveEmptyEntries);
+                }
+                GCommon.Logger.Debug("GetShareInfo3: " + sdpBodys.Length);
+                for (global::System.Int32 i = 0; i < sdpBodys.Length; i++)
+                {
+                    GCommon.Logger.Debug("GetShareInfo: body,  " + i + ", " + sdpBodys[i]);
+
                 }
 
                 foreach (var line in sdpBodys)
                 {
+                    GCommon.Logger.Debug("GetShareInfo4: " + line);
+
                     if (line.Trim().ToLower().StartsWith("o="))
                     {
+                        GCommon.Logger.Debug("GetShareInfo6: ");
+
                         var tmp = line.ToLower().Split("ip4", StringSplitOptions.RemoveEmptyEntries);
                         if (tmp.Length == 2)
                         {
+                            GCommon.Logger.Debug("GetShareInfo7: ");
+
                             mediaip = tmp[1];
                         }
                         else
@@ -370,11 +388,14 @@ namespace LibGB28181SipServer
 
                     if (line.Trim().ToLower().StartsWith("m=audio"))
                     {
+                        GCommon.Logger.Debug("GetShareInfo8: ");
+
                         mediaport = ushort.Parse(UtilsHelper.GetValue(line.ToLower(), "m\\=audio", "rtp").Trim());
                     }
 
                     if (line.Trim().ToLower().StartsWith("y="))
                     {
+                        GCommon.Logger.Debug("GetShareInfo100: ");
                         var tmp2 = line.Split("=", StringSplitOptions.RemoveEmptyEntries);
                         if (tmp2.Length == 2)
                         {

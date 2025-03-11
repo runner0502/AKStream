@@ -1251,6 +1251,7 @@ public class ZLMediaKitConfigNew
             }
 
             var wait_track_ready_ms = data["general"]["wait_track_ready_ms"];
+            wait_track_ready_ms = "2000";
             if (wait_track_ready_ms != null && !string.IsNullOrEmpty(wait_track_ready_ms) &&
                 UtilsHelper.IsInteger(wait_track_ready_ms))
             {

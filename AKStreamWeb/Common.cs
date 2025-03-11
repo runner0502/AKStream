@@ -22,6 +22,7 @@ using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json;
+using Org.BouncyCastle.Ocsp;
 using QLicenseCore;
 using XyCallLayer;
 using static XyCallLayer.SPhoneSDK;
@@ -100,8 +101,71 @@ namespace AKStreamWeb
             set => _shareInviteChannels = value;
         }
 
+        static bool aysdp()
+        {
+            //info = null;
+            var sdpBody = "v=0\r\no=34020000002000000668 0 0 IN IP4 120.24.54.248\r\ns=Play\r\nu=34020000071314195066:3\r\nc=IN IP4 120.24.54.248\r\nt=0 0\r\nm=audio 3016 RTP/AVP 96\r\na=rtpmap:96 PS/90000\r\na=recvonly\r\ny=0000000000\r\nf=v/////a/1/8/1";
+
+                string mediaip = "";
+                ushort mediaport = 0;
+                string ssrc = "";
+                //string channelid =
+                //    req.Header.Subject.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries)[
+                //        0];
+                //channelid = channelid.Substring(0, channelid.IndexOf(':'));
+                //Console.WriteLine(channelid);
+
+                string[] sdpBodys = sdpBody.Split("1111111");
+                if (sdpBodys.Length == 0)
+                {
+                    sdpBodys = sdpBody.Split("\n", StringSplitOptions.RemoveEmptyEntries);
+                }
+
+                if (sdpBodys.Length == 0)
+                {
+                    sdpBodys = sdpBody.Split("\r", StringSplitOptions.RemoveEmptyEntries);
+                }
+
+                foreach (var line in sdpBodys)
+                {
+                    if (line.Trim().ToLower().StartsWith("o="))
+                    {
+                        var tmp = line.ToLower().Split("ip4", StringSplitOptions.RemoveEmptyEntries);
+                        if (tmp.Length == 2)
+                        {
+                            mediaip = tmp[1];
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                    }
+
+                    if (line.Trim().ToLower().StartsWith("m=audio"))
+                    {
+                        mediaport = ushort.Parse(UtilsHelper.GetValue(line.ToLower(), "m\\=audio", "rtp").Trim());
+                    }
+
+                    if (line.Trim().ToLower().StartsWith("y="))
+                    {
+                        var tmp2 = line.Split("=", StringSplitOptions.RemoveEmptyEntries);
+                        if (tmp2.Length == 2)
+                        {
+                            ssrc = tmp2[1];
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                    }
+                }
+                return true;
+            }
+
         static Common()
         {
+            //aysdp();
+
             if (!File.Exists("uid"))
             {
                 var uid = QLicenseCore.LicenseHandler.GenerateUID("281");

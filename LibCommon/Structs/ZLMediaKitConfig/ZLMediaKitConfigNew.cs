@@ -1068,6 +1068,7 @@ public class ZLMediaKitConfigNew
             }
 
             var enable_audio = data["protocol"]["enable_audio"];
+           // enable_audio = "0";
             if (enable_audio != null && !string.IsNullOrEmpty(enable_audio) &&
                 UtilsHelper.IsInteger(enable_audio))
             {
@@ -1251,7 +1252,7 @@ public class ZLMediaKitConfigNew
             }
 
             var wait_track_ready_ms = data["general"]["wait_track_ready_ms"];
-            wait_track_ready_ms = "2000";
+            //wait_track_ready_ms = "10000";
             if (wait_track_ready_ms != null && !string.IsNullOrEmpty(wait_track_ready_ms) &&
                 UtilsHelper.IsInteger(wait_track_ready_ms))
             {

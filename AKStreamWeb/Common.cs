@@ -53,9 +53,10 @@ namespace AKStreamWeb
             new ConcurrentDictionary<string, WebHookNeedReturnTask>();
 
         public static DateTime StartupDateTime;
-        private static LicenseNative _license;
+        //private static LicenseNative _license;
+        private static MyLicenseCommon _license;
 
-        public static LicenseNative License 
+        public static MyLicenseCommon License 
         {
             get { return _license; }
             set { _license = value; }
@@ -600,12 +601,21 @@ namespace AKStreamWeb
                 {
                     //var licenseFile = Environment.CurrentDirectory + "/license";
 
-                    License = new LicenseNative();
 
                     //License = new MyLicense();
                     //License.MaxDeviceCount = 100;
                     //License.MaxRunCount = 100;
                     //License.ExpireDateTime = DateTime.Now.AddYears(1);
+
+                    License = new LicenseNative();
+
+                    //var licenseFile = "license";  // for windows
+                    //License = (MyLicense)LicenseHandler.ParseLicenseFromBASE64String(
+                    //typeof(MyLicense),
+                    //File.ReadAllText(licenseFile),
+                    //null,
+                    //out _status,
+                    //out _msg);
 
                     if (License == null)
                     {

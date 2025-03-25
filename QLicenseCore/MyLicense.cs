@@ -6,7 +6,16 @@ using System.Xml.Serialization;
 
 namespace QLicenseCore
 {
-    public class MyLicense : QLicenseCore.LicenseEntity
+    public abstract class MyLicenseCommon : QLicenseCore.LicenseEntity
+    {
+        public int MaxDeviceCount { get; set; }
+        public int MaxRunCount { get; set; }
+        public int MaxPushNumber { get; set; }
+
+        public DateTime ExpireDateTime { get; set; }
+    }
+
+    public class MyLicense : MyLicenseCommon
     {
         [DisplayName("Enable Feature 01")]
         [Category("License Options")]        
@@ -66,12 +75,7 @@ namespace QLicenseCore
             return _licStatus;
         }
 
-        public int MaxDeviceCount { get; set; }
-        public int MaxRunCount { get; set; }
-        public int MaxPushNumber { get; set; }
 
-
-        public DateTime ExpireDateTime { get; set; }
 
     }
 }

@@ -42,6 +42,8 @@ namespace AKStreamWeb
 
         private static object _lock = new object();
 
+        public bool EnableAudio { get { return true; } }
+
         private Bridge()
         {
 
@@ -196,36 +198,38 @@ namespace AKStreamWeb
                 case CallState.STATE_CONFIRMED:
                     try
                     {
-                        int deviceIdAudio = -1;
-                        //int len = 0;
-                        //AudioDeviceInfo[] audioDevices = new AudioDeviceInfo[100];
-                        //SPhoneSDK.GetAudioDevices(audioDevices, out len);
-                        //foreach (var item in audioDevices)
-                        //{
-                        //    if (item.name == s_calls[callid].Url)
-                        //    {
-                        //        GCommon.Logger.Warn("callstate loop audiodevice name: " + item.name);
-                        //        deviceIdAudio = item.id;
-                        //        break;
-                        //    }
-                        //}
-                        //if (deviceIdAudio < 0)
-                        //{
-
-
-                        SetupCaptureAudioFile(s_calls[callid].Url);
-                        int len1 = 0;
-                        AudioDeviceInfo[] audioDevices1 = new AudioDeviceInfo[12801];
-                        SPhoneSDK.GetAudioDevices(audioDevices1, out len1);
-                        if (len1 > 0)
+                        if (EnableAudio)//for dongfangguoxin
                         {
-                            deviceIdAudio = audioDevices1[len1 - 1].id;
-                            //SPhoneSDK.SetDefaultAudioDevice(deviceIdAudio, deviceIdAudio);
-                            //System.Threading.Thread.Sleep(1000);
-                        }
-                        //}
-                        SPhoneSDK.ConnectSoundportToCall(deviceIdAudio, deviceIdAudio, callid);
+                            int deviceIdAudio = -1;
+                            //int len = 0;
+                            //AudioDeviceInfo[] audioDevices = new AudioDeviceInfo[100];
+                            //SPhoneSDK.GetAudioDevices(audioDevices, out len);
+                            //foreach (var item in audioDevices)
+                            //{
+                            //    if (item.name == s_calls[callid].Url)
+                            //    {
+                            //        GCommon.Logger.Warn("callstate loop audiodevice name: " + item.name);
+                            //        deviceIdAudio = item.id;
+                            //        break;
+                            //    }
+                            //}
+                            //if (deviceIdAudio < 0)
+                            //{
 
+
+                            SetupCaptureAudioFile(s_calls[callid].Url);
+                            int len1 = 0;
+                            AudioDeviceInfo[] audioDevices1 = new AudioDeviceInfo[12801];
+                            SPhoneSDK.GetAudioDevices(audioDevices1, out len1);
+                            if (len1 > 0)
+                            {
+                                deviceIdAudio = audioDevices1[len1 - 1].id;
+                                //SPhoneSDK.SetDefaultAudioDevice(deviceIdAudio, deviceIdAudio);
+                                //System.Threading.Thread.Sleep(1000);
+                            }
+                            //}
+                            SPhoneSDK.ConnectSoundportToCall(deviceIdAudio, deviceIdAudio, callid);
+                        }
                     }
                     catch(Exception e) 
                     {

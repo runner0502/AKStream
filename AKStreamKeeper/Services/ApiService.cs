@@ -179,7 +179,77 @@ namespace AKStreamKeeper.Services
             }
         }
 
+        private static ushort _guessAnRtpPortRandom(ushort minPort, ushort maxPort)
+        {
+            try
+            {
+                lock (Common._getRtpPortLock)
+                {
+                    IPGlobalProperties ipProperties = IPGlobalProperties.GetIPGlobalProperties();
+                    List<IPEndPoint> tcpIpEndPoints = ipProperties.GetActiveTcpListeners().ToList();
+                    List<IPEndPoint> udpIpEndPoints = ipProperties.GetActiveUdpListeners().ToList();
+                    if (minPort > maxPort)
+                    {
+                        var tmp = minPort;
+                        maxPort = minPort;
+                        minPort = tmp;
+                    }
 
+
+                    if (minPort == maxPort)
+                    {
+                        var tcp = tcpIpEndPoints.FindLast(x => x.Port == minPort);
+                        var udp = udpIpEndPoints.FindLast(x => x.Port == minPort);
+                        var portUsed = Common.PortInfoList.FindLast(x => x.Port.Equals(minPort));
+                        if (tcp == null && udp == null)
+                        {
+                            if (portUsed == null)
+                            {
+                                Common.PortInfoList.Add(new PortInfo()
+                                {
+                                    DateTime = DateTime.Now,
+                                    Port = minPort,
+                                    Useed = true,
+                                });
+                                GCommon.Logger.Info($"[{Common.LoggerHead}]->获取可用rtp端口:{minPort}");
+                                return minPort;
+                            }
+
+                            if (!portUsed.Useed.Equals(true))
+                            {
+                                if ((DateTime.Now - portUsed.DateTime).TotalSeconds >
+                                    Common.AkStreamKeeperConfig.RtpPortCdTime)
+                                {
+                                    portUsed.DateTime = DateTime.Now;
+                                    portUsed.Useed = true;
+                                    GCommon.Logger.Info($"[{Common.LoggerHead}]->获取可用rtp端口:{minPort}");
+                                    return minPort;
+                                }
+                            }
+                        }
+
+                        GCommon.Logger.Warn($"[{Common.LoggerHead}]->获取可用rtp端口失败");
+                        return 0;
+                    }
+
+                    var rdm = new Random();
+                    int port = rdm.Next(minPort, maxPort);
+                    if (UtilsHelper.IsOdd(port))
+                    {
+                        port++;
+                    }
+                    return (ushort)port;
+                }
+
+                GCommon.Logger.Warn($"[{Common.LoggerHead}]->获取可用rtp端口失败");
+                return 0;
+            }
+            catch (Exception ex)
+            {
+                GCommon.Logger.Error($"[{Common.LoggerHead}]->获取可用rtp端口失败->" + ex.Message + "\r\n" + ex.StackTrace);
+                return 0;
+            }
+        }
         /// <summary>
         /// 选择一个可用的rtp(发送)端口，仅使用偶数端口
         /// </summary>
@@ -713,10 +783,14 @@ namespace AKStreamKeeper.Services
             {
                 port = _guessAnRtpPort(Common.AkStreamKeeperConfig.MinRtpPort,
                     Common.AkStreamKeeperConfig.MaxRtpPort);
+
+                //port = _guessAnRtpPortRandom(Common.AkStreamKeeperConfig.MinRtpPort,
+                //    Common.AkStreamKeeperConfig.MaxRtpPort); //for dongfangguoxin
             }
             else
             {
                 port = _guessAnRtpPort((ushort)min, (ushort)max);
+                //port = _guessAnRtpPortRandom((ushort)min, (ushort)max);//for dongfangguoxin
             }
 
             if (port > 0)

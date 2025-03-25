@@ -609,7 +609,7 @@ namespace AKStreamWeb
 
                     License = new LicenseNative();
 
-                    //var licenseFile = "license";  // for windows
+                    //var licenseFile = "license";  //old version
                     //License = (MyLicense)LicenseHandler.ParseLicenseFromBASE64String(
                     //typeof(MyLicense),
                     //File.ReadAllText(licenseFile),

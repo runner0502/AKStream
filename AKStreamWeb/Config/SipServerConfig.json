@@ -13,7 +13,7 @@
   "KeepAliveLostNumber": 3,
   "IpV6Enable": true,
   "EncodingType": "GB2312",
-  //"IsPassive": false,
+  "IsPassive": true,
   "ListenIp": "192.168.31.57",
   "NoAuthenticationRequireds": [
     {

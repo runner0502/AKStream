@@ -1636,5 +1636,70 @@ namespace LibZLMediaKitMediaServer
 
             return null;
         }
+
+        public ResZLMediakitStartSendRtp StartSendRtpPassive(ReqZLMediaKitStartSendRtpPassive req, out ResponseStruct rs)
+        {
+            rs = new ResponseStruct()
+            {
+                Code = ErrorNumber.None,
+                Message = ErrorMessage.ErrorDic![ErrorNumber.None],
+            };
+
+            string url = (_useSSL ? "https://" : "http://") + $"{_ipAddress}:{_webApiPort}{_baseUri}startSendRtpPassive";
+            try
+            {
+                req.Secret = this._secret;
+                string reqData = JsonHelper.ToJson(req);
+                var httpRet = NetHelper.HttpPostRequest(url, null, reqData, "utf-8", _httpClientTimeout);
+                if (!string.IsNullOrEmpty(httpRet))
+                {
+                    if (UtilsHelper.HttpClientResponseIsNetWorkError(httpRet))
+                    {
+                        rs = new ResponseStruct()
+                        {
+                            Code = ErrorNumber.Sys_HttpClientTimeout,
+                            Message = ErrorMessage.ErrorDic![ErrorNumber.Sys_HttpClientTimeout],
+                        };
+                        return null;
+                    }
+
+                    var resZLMediakitStartSendRtp = JsonHelper.FromJson<ResZLMediakitStartSendRtp>(httpRet);
+                    if (resZLMediakitStartSendRtp != null)
+                    {
+                        return resZLMediakitStartSendRtp;
+                    }
+
+                    var resError = JsonHelper.FromJson<ResZLMediaKitErrorResponse>(httpRet);
+                    rs = new ResponseStruct()
+                    {
+                        Code = ErrorNumber.MediaServer_WebApiDataExcept,
+                        Message = ErrorMessage.ErrorDic![ErrorNumber.MediaServer_WebApiDataExcept],
+                        ExceptMessage = httpRet,
+                        ExceptStackTrace = JsonHelper.ToJson(resError),
+                    };
+                }
+                else
+                {
+                    rs = new ResponseStruct()
+                    {
+                        Code = ErrorNumber.MediaServer_WebApiDataExcept,
+                        Message = ErrorMessage.ErrorDic![ErrorNumber.MediaServer_WebApiDataExcept],
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                rs = new ResponseStruct()
+                {
+                    Code = ErrorNumber.MediaServer_WebApiExcept,
+                    Message = ErrorMessage.ErrorDic![ErrorNumber.MediaServer_WebApiExcept],
+                    ExceptMessage = ex.Message,
+                    ExceptStackTrace = ex.StackTrace,
+                };
+            }
+
+            return null;
+        }
+
     }
 }

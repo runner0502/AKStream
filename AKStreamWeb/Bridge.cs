@@ -21,6 +21,10 @@ using System.ComponentModel;
 using System.Security.Policy;
 using System.Xml.Linq;
 using SIPSorcery.Net;
+using LibCommon.Structs.WebResponse;
+using LibZLMediaKitMediaServer.Structs.WebRequest.ZLMediaKit;
+using System.IO;
+using LibZLMediaKitMediaServer.Structs.WebResponse.ZLMediaKit;
 
 namespace AKStreamWeb
 {
@@ -42,7 +46,7 @@ namespace AKStreamWeb
 
         private static object _lock = new object();
 
-        public bool EnableAudio { get { return true; } }
+        public bool EnableAudio { get { return true; } } //test tcp ; for dongfangguoxin
 
         private Bridge()
         {
@@ -67,6 +71,7 @@ namespace AKStreamWeb
             SPhoneSDK.SetCallback_ReceiveKeyframeRequest(_onReceiveKeyframeRequest);
             //SPhoneSDK.SetCallback_IncomingCall(OnIncomingCall);
             SPhoneSDK.SetDefaultVideoDevice(1);
+            //SPhoneSDK.SetDefaultAudioDevice(-99, -99);
 
             //_timer = new Timer(TestTimerCB, null, 10000, 10000);
 
@@ -230,8 +235,65 @@ namespace AKStreamWeb
                             //}
                             SPhoneSDK.ConnectSoundportToCall(deviceIdAudio, deviceIdAudio, callid);
                         }
+
+
+                        /*
+
+                        ReqZLMediaKitOpenRtpPort reqZlMediaKitOpenRtpPort = new ReqZLMediaKitOpenRtpPort()
+                        {
+                            Enable_Tcp = 0,
+                            Port = 0,
+                            Stream_Id = "kdkd",
+                        };
+
+                        ResponseStruct rs;
+                        var zlRet = Common.MediaServerList[0].WebApiHelper.OpenRtpPort(reqZlMediaKitOpenRtpPort, out rs);
+                        if (zlRet == null || !rs.Code.Equals(ErrorNumber.None))
+                        {
+                            //GCommon.Logger.Warn(
+                            //    $"[{Common.LoggerHead}]->请求开放rtp端口失败->{Common.MediaServerList[0]}->{stream}->{JsonHelper.ToJson(rs, Formatting.Indented)}");
+
+                            //return null;
+                        }
+
+                        if (zlRet.Code != 0)
+                        {
+                            rs = new ResponseStruct()
+                            {
+                                Code = ErrorNumber.MediaServer_OpenRtpPortExcept,
+                                Message = ErrorMessage.ErrorDic![ErrorNumber.MediaServer_OpenRtpPortExcept],
+                            };
+                            //GCommon.Logger.Warn(
+                            //    $"[{Common.LoggerHead}]->请求开放rtp端口失败->{mediaServerId}->{stream}->{JsonHelper.ToJson(rs, Formatting.Indented)}");
+
+                            //return null;
+                        }
+                        else
+                        {
+                            var result = StartAudioSendStream(s_LocalPort, "192.168.31.57", (int)zlRet.Port, s_callidIntercom);
+                            Thread.Sleep(10000);
+                            ReqZLMediaKitStartSendRtpPassive req = new ReqZLMediaKitStartSendRtpPassive()
+                            {
+                                App = "rtp",
+                                Only_audio = 1,
+                                Pt = 101,
+                                Src_Port = 0,
+                                Stream = "kdkd",
+                                Vhost = "192.168.31.57",
+                                Use_ps = 0,
+                                Ssrc = "77887"
+                            };
+
+                            ResponseStruct rs1;
+                            var result1 = Common.MediaServerList[0].WebApiHelper.StartSendRtpPassive(req, out rs1);
+                            Thread.Sleep(1000);
+
+                        }
+                        */
+
+
                     }
-                    catch(Exception e) 
+                    catch (Exception e) 
                     {
                         GCommon.Logger.Warn("OnCallState error: callid: " + callid + e.ToString());
                     }

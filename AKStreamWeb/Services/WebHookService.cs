@@ -997,6 +997,30 @@ namespace AKStreamWeb.Services
                     .First();
                 if (videoChannel == null)
                 {
+                    //ResToWebHookOnPublish result1 = new ResToWebHookOnPublish(); //test tcp 
+                    //result1.Code = 0;
+                    //result1.Msg = "success";
+                    //result1.Enable_Hls = true;
+                    //result1.Enable_Mp4 = false;
+                    //result1.Enable_Hls_Fmp4 = true;
+                    //result1.Enable_Rtsp = true;
+                    //result1.Enable_Rtmp = true;
+                    //result1.Enable_Ts = true;
+                    //result1.Enable_Fmp4 = true;
+                    //result1.Hls_Demand = true;
+                    //result1.Rtsp_Demand = false;
+                    //result1.Rtmp_Demand = false;
+                    //result1.Ts_Demand = true;
+                    //result1.Fmp4_Demand = true;
+                    //result1.Enable_Audio = true;
+                    //result1.Add_Mute_Audio = true;
+                    //result1.Mp4_Save_Path = "";
+                    //result1.Mp4_As_Player = false;
+                    //result1.Hls_Save_Path = "";
+                    //result1.Auto_Close = false;
+                    //result1.Modify_Stamp = 0;
+                    //return result1;
+
                     var count = ORMHelper.Db.Select<MediaStream>().Where(x=>x.state == 1).Count();
                     if (Common.License.MaxPushNumber > count)
                     {

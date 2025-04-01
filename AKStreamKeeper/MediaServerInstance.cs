@@ -997,7 +997,7 @@ namespace AKStreamKeeper
                         {
                             _zlmNewConfig.Http.Port = (ushort)AkStreamKeeperConfig.HttpPort;
                         }
-                        _zlmNewConfig.General.Wait_Track_Ready_Ms = 2000;
+                        //_zlmNewConfig.General.Wait_Track_Ready_Ms = 2000;
 
                         var ok = _zlmNewConfig.SetConfig(_configPath);
                         var parser = new FileIniDataParser();

@@ -251,300 +251,300 @@ namespace XyCallLayer
 
 
         //来电回调
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static void SetCallback_IncomingCall(SDK_onIncomingCall callback);
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static void SetCallback_IncomingCall_WithIDS(SDK_onIncomingCall_WithIDS callback);
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static void SetCallback_IncomingCall_WithMsg(SDK_onIncomingCall_WithMsg callback);
         //呼叫状态回调
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static void SetCallback_CallState(SDK_onCallState callback);
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static void SetCallback_CallState_WithIDS(SDK_onCallState_WithIDS callback);
         //注册状态
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static void SetCallback_RegState(SDK_onRegState callback);
         //短消息发送状态回调
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static void SetCallback_SendMsgState(SDK_onSendMsgState callback);
         //收消息回调
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static void SetCallback_ReceiveMsg(SDK_onReceiveMsg callback);
         //对讲状态通知
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static void SetCallback_PTTState(SDK_onPTTState callback);
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static void SetCallback_ReceiveDtmf(SDK_onReceiveDtmf callback);
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static void SetCallback_ReceiveKeyframeRequest(SDK_onReceiveKeyframeRequest callback);
 
         //初始化
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static void SDKInit(string localIp, int localPort, int loglevel, string logFileName, TransportType typ = TransportType.UDP);
         //设置socket发送缓冲大小，默认128k，真实值需视系统api接口
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static void SetSocketRcvBufferSize(int size);
         //销毁
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static void SDKDestory();
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static void HandleIPChanged();
         //注册
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static bool Regist(string host, string uname, string pwd, string mediaPublicIP, bool mobile = false, bool localMode = false,
             int regTimeout = 60, QosType qos = QosType.BEST_EFFORT);
         //注销
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static void UnRegist();
         //发起呼叫
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static bool MakeCall(string number, bool isVideo);
         //本地模式发起呼叫
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static bool MakeCallLocalMode(string uri, int port, bool isVideo);
         //应答
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static void Answer(int callid, bool isVideo);
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static void AnswerWithHandle2(int callid, bool isVideo, int hwnd, StatusCode code);
         //挂断呼叫
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static void Hangup(int callid);
         //挂断所有
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static void HangupAll();
         //切换视频设备
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static bool ChangeVideoDevice(int callid, int deviceIndex);
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static bool ChangeVideoDevice1(int callid, int deviceIndex);
         //切换音频输入设备
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static bool ChangeAudCaptureDevice(int callid, int deviceIndex);
         //切换音频输出设备
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static bool ChangeAudSpeakerDevice(int callid, int deviceIndex);
         //获取所有视频设备
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static void GetVideoDevices([Out] VideoDeviceInfo[] info, out int len);
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static void GetVideoDevicesCount(out int len);
         //获取所有音频设备信息
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static void GetAudioDevices([Out] AudioDeviceInfo[] info, out int len);
         //设置默认视频设备
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static void SetDefaultVideoDevice(int index);
         //设置默认音频设备
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static bool SetDefaultAudioDevice(int input, int output);
         //预览-开始
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static void Preview_Start();
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static void Preview_Start_WithHandle(IntPtr p);
         //预览-结束
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static void Preview_Stop();
         //设置视频图像句柄
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static void SetVideoHandle(IntPtr p);
         //设置视频大小
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static void SetVideoSize(int callid, int x, int y, int w, int h);
         //本地预览句柄
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static void SetPreviewHandle(IntPtr h);
         //更改本地预览窗口大小
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static void SetPreviewSize(int x, int y, int w, int h);
         //设置视频参数，分辨率、帧率、码率
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static bool SetVideoCodecParam(int w, int h, int fps, int bps);
         //发送关键帧
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static void SendKeyFrame(int callid);
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static void SendKeyFrame1();
         //请求关键帧
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static void RequestKeyFrame(int callid);
         //保持
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static void Hold(int callid);
         //取保持
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static void UnHold(int callid);
         //发送DTMF（rfc2833）
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static void SendDtmf(int callid, string dtmf);
         //发送短消息
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static void SendMsg(string num, string msg);
         //设置接收音频放大倍数
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static void SetRxLevel(int callid, float value);
         //设置发送音频放大倍数
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static void SetTxLevel(int callid, float value);
 
         //该量为实时音量幅度，无法作为声音大小量化系数
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static void GetRxLevel(int callid, ref float value);
-        //[DllImport(@"DLL\SPhone.dll")]
+        //[DllImport(@"./nativesip/libsphone.so")]
         //public extern static void GetTxLevel(int callid, ref float value); 
 
         //设置视频是否启用抖动缓冲,默认启用
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static void SetVidUseJBuffer(bool value);
         //开启或关闭FEC编解码
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static void EnableFec(bool fec);
         //设置fec参数，dropDelay抖动缓冲，redunMode模式（0=自动，1=固定冗余），redunRatio（冗余比率，有效值10~60），groupSize（FEC分组大小，建议值：D1=10,720P=16,1080P=22）
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static void SetFecParams(int dropDelay_aud, int dropDelay_vid, int redunMode, int redunRatio, int groupSize);
         //呼叫中开启或关闭FEC编码（用于对比测试FEC效果），默认开启
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static void SetFecEncodeEnable(int callid, bool bEnable);
         //设置指定呼叫的FEC编码丢包，用于对比测试及模拟丢包场景，type：0=不丢包，1=按间隔丢包，2=按随机比例丢包
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static void SetFecForceEncodeLost(int callid, int type, int value);
         //获取指定呼叫的音视频下行丢包率，对结果乘了100后取整
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static void GetDownLostRatio(int callid, out int aud, out int vid);
         //获取指定呼叫的音视频上行丢包率，对结果乘了100后取整
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static void GetUpLostRatio(int callid, out int aud, out int vid);
         //获取指定呼叫的音视频双向时延，毫秒单位
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static void GetDelayInMs(int callid, out int aud, out int vid);
         //获取指定呼叫的语音/视频上下行带宽，单位kbps
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static void GetBandWidth(int callid, out int aud_up, out int aud_down, out int vid_up, out int vid_down);
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static void GetAudioCodecs(out string num, out int length);
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static void SetAudioCodecPriority(string num, int priority);
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static void GetVideoCodecs(out string num, out int length);
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static void SetVideoCodecPriority(string num, int priority);
 
 
 
         //开始接收并渲染视频vidType 0=h264,1=h265，目前仅支持h264，远程IP及端口主要用于nat打洞（本地端口及本地端口+1两个会被占用）
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static bool StartReceiveVideo(string remoteIp, int remotePort, int localPort, IntPtr h, int payload_type, int vidType = 0);
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static bool StartSendVideo(string remoteIp, int remotePort, int localPort, int payload_type, int vidType = 0);
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static void GetReceiveVideoStatisticalInfo(int localPort, out int downLostRatio, out int downBandWidth, out int DelayInMs);
         //停止接收及渲染视频
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static void StopReceiveVideo(int localPort);
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static void StopSendVideo(int localPort);
         //停止所有接收及渲染视频
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static void StopAllReceiver();
 
         //开始录制语音 id=callid或localport，支持格式：.wav .mp3 .aac .amr
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static void StartRecordAudio(int id, string fileName);
         //停止录制语音 id=callid或localport
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static void StopRecordAudio(int id);
         //开始录制视频 id=callid或localport fmt 0=mp4,1=avi
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static void StartRecordVideo(int id, string fileName);
         //停止录制视频 id=callid或localport
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static void StopRecordVideo(int id);
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static void TakeVideoSnapshoot(int id, string fileName);
         //设置视频渲染模式，0=拉伸 1=等比缩放，id=呼叫id或者本地port
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static void SetVideoRenderMode(int id, int mode);
         //本地视频预览显示模式，，0=拉伸 1=等比缩放
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static bool Preview_Show_Mode(int mode);
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static void AudioDevTestStart(int capture, int speaker);
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static void AudioDevTestStop();
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static void AudioDevTestGetLevel(out int captureLevel, out int speakerLevel);
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         //播放wav语音文件,callid>=0呼叫中播放，callid<0本地播放。16bit PCM mono/single channel (any clock rate is supported)
         public extern static void StartPlayAudio(int callid, string fileName, bool localPlay, bool loop);
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static void StopPlayAudio(int callid);
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static int StartRecordLocalAudio(string fileName);
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static int StopRecordLocalAudio();
         //开始录制本地视频
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static int StartRecordLocalVideo(string fileName);
 
         //开始录制本地视频
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static int StartRecordLocalVideo2(string fileName, int capid);
         //停止录制本地视频
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static int StopRecordLocalVideo();
 
         //本地视频截图 (必须开启视频预览)
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static int TakeLocalVideoSnapshoot(string fileName);
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static bool TakeLocalVideoSnapshoot(bool bl);
         /// <summary>
         /// 设置视频无花屏
         /// </summary>
         /// <param name="val">设置=true，取消=flase</param>
         /// <returns></returns>
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static bool SetVideoNoBadPicture(bool val);
         /// <summary>
         /// 设置硬件加速
         /// </summary>
         /// <param name="val">设置=true，取消=flase</param>
         /// <returns></returns>
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static bool SetRendererUsesHardwareAcceleration(bool val);
         /// <summary>
         /// 共享屏幕-取消共享
         /// </summary>
         /// <param name="localPort"></param>
         /// <param name="deviceIndex"></param>
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static void ChangeSendVideoDevice(int localPort, int deviceIndex);
 
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static int SetupCaptureVideoFile(string fileName);
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static int SetupCaptureAudioFile(string fileName);
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static void SetVidHardwareEncoding(bool value);
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static void SetHardEncodeVideo(int callid, int enable);
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static StreamStartResult StartAudioSendStream(int localPort, string remoteIP, int remotePort, int callid);
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static int StopAudioSendStream(IntPtr stream, int confslot);
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static int GetVideoDeviceWidth(int id);
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static int GetVideoDeviceHeight(int id);
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static int GetVideoCodec(int id);
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static int AddToAudioPort(int callid, int audioPort);
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static int ConnectSoundportToCall(int captureId, int playId, int callid);
-        [DllImport(@"DLL\SPhone.dll")]
+        [DllImport(@"./nativesip/libsphone.so")]
         public extern static bool VerifyLicense(ref LicenseResult licenseResult);
 
     }

@@ -18,7 +18,7 @@ namespace LibZLMediaKitMediaServer.Structs.WebRequest.ZLMediaKit
         }
 
         [JsonIgnore]
-        public int? Enable_Tcp
+        public int? Tcp_Mode
         {
             get => _enable_tcp;
             set => _enable_tcp = value;

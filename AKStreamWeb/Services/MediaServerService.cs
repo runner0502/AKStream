@@ -2530,6 +2530,11 @@ namespace AKStreamWeb.Services
                 };
             }
 
+            if (LibGB28181SipServer.Common.SipServerConfig.MsgProtocol == "TCP")
+            {
+                 reqZlMediaKitOpenRtpPort.Tcp_Mode = 1;
+            }
+
             var zlRet = mediaServer.WebApiHelper.OpenRtpPort(reqZlMediaKitOpenRtpPort, out rs);
             if (zlRet == null || !rs.Code.Equals(ErrorNumber.None))
             {

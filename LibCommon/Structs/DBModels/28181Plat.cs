@@ -46,7 +46,7 @@ namespace LibCommon.Structs.DBModels
         /// </summary>
         public int manufacturer { get; set; }
         /// <summary>
-        /// SIP协议
+        /// SIP协议(0 tcp, 1 udp)
         /// </summary>
         public int sipprotocol { get; set; }
         /// <summary>

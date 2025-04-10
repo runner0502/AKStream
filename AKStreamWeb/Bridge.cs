@@ -140,30 +140,106 @@ namespace AKStreamWeb
 
         private void SipMsgProcess_OnReceiveInvite(LibCommon.Structs.ShareInviteInfo info, SIPRequest req)
         {
-            GCommon.Logger.Warn("SipMsgProcess_OnReceiveInvite broadcast intercom"); 
+            GCommon.Logger.Warn("SipMsgProcess_OnReceiveInvite broadcast intercom");
             if (s_calls.Count > 0)
             {
-                GCommon.Logger.Warn("SipMsgProcess_OnReceiveInvite StartAudioSendStream intercom localport:" + s_LocalPort + ", remoteip:" + info.RemoteIpAddress + ", remotePort: " + info.RemotePort + ",callid: " + s_callidIntercom);
-                var result= StartAudioSendStream(s_LocalPort, info.RemoteIpAddress, info.RemotePort, s_callidIntercom);
-                GCommon.Logger.Warn("StartAudioSendStream intercom success AudioPortConf: " + result.confsolt + "," + result.status + ", " + result.stream + "," + req.Header.CallId);
-
-                if (result.status == 0)
+                StreamStartResult result = new StreamStartResult();
+                ushort audioPort = 0;
+                if (LibGB28181SipServer.Common.SipServerConfig.MsgProtocol == "TCP")
                 {
-                    info.LocalRtpPort = (ushort)s_LocalPort;
-                    var response= Common.SipServer.SendInviteOK(req, info);
-                    s_calls[s_callidIntercom].SipChannel.AudioPortConf = result.confsolt;
-                    s_calls[s_callidIntercom].SipChannel.Callid281Broadcast = req.Header.CallId;
-                    s_calls[s_callidIntercom].SipChannel.SipCallid = s_callidIntercom;
-                    s_calls[s_callidIntercom].SipChannel.InviteSipRequestBroadcast = req;
-                    s_calls[s_callidIntercom].SipChannel.InviteSipResponseBroadcast = response;
-                    s_calls[s_callidIntercom].SipChannel.BroadcastStream = result.stream;
+                    String broadcastStreamId = "broadcast" + s_LocalPort;
+                    ReqZLMediaKitOpenRtpPort reqZlMediaKitOpenRtpPort = new ReqZLMediaKitOpenRtpPort() //test tcp
+                    {
+                        Tcp_Mode = 0,
+                        Port = 0,
+                        Stream_Id = broadcastStreamId,
+                    };
+
+                    ResponseStruct rs;
+                    var zlRet = Common.MediaServerList[0].WebApiHelper.OpenRtpPort(reqZlMediaKitOpenRtpPort, out rs);
+                    if (zlRet == null || !rs.Code.Equals(ErrorNumber.None))
+                    {
+                        //GCommon.Logger.Warn(
+                        //    $"[{Common.LoggerHead}]->请求开放rtp端口失败->{Common.MediaServerList[0]}->{stream}->{JsonHelper.ToJson(rs, Formatting.Indented)}");
+
+                        return;
+                    }
+
+                    if (zlRet.Code != 0)
+                    {
+                        rs = new ResponseStruct()
+                        {
+                            Code = ErrorNumber.MediaServer_OpenRtpPortExcept,
+                            Message = ErrorMessage.ErrorDic![ErrorNumber.MediaServer_OpenRtpPortExcept],
+                        };
+                        //GCommon.Logger.Warn(
+                        //    $"[{Common.LoggerHead}]->请求开放rtp端口失败->{mediaServerId}->{stream}->{JsonHelper.ToJson(rs, Formatting.Indented)}");
+
+                        return;
+                    }
+                    else
+                    {
+                        GCommon.Logger.Warn("SipMsgProcess_OnReceiveInvite StartAudioSendStream intercom localport:" + s_LocalPort + ", remoteip:" + info.RemoteIpAddress + ", remotePort: " + info.RemotePort + ",callid: " + s_callidIntercom);
+                        result = StartAudioSendStream(s_LocalPort, Common.AkStreamWebConfig.SipIp, (int)zlRet.Port, s_callidIntercom);
+                        GCommon.Logger.Warn("StartAudioSendStream intercom success AudioPortConf: " + result.confsolt + "," + result.status + ", " + result.stream + "," + req.Header.CallId);
+
+                        s_LocalPort += 2;
+                        if (result.status != 0)
+                        {
+                            GCommon.Logger.Warn("StartAudioSendStream fail");
+                            return;
+                        }
+
+                        // var result= StartAudioSendStream(s_LocalPort, info.RemoteIpAddress, info.RemotePort, s_callidIntercom);
+                        //s_LocalPort = s_LocalPort + 2;
+                        Thread.Sleep(10000);
+                        ReqZLMediaKitStartSendRtpPassive req2 = new ReqZLMediaKitStartSendRtpPassive()
+                        {
+                            App = "rtp",
+                            Only_audio = 1,
+                            Pt = 8,
+                            Src_Port = 0,
+                            Stream = broadcastStreamId,
+                            Vhost = Common.AkStreamWebConfig.SipIp,
+                            Use_ps = 0,
+                            Ssrc = info.Ssrc
+                        };
+
+                        ResponseStruct rs1;
+                        var result1 = Common.MediaServerList[0].WebApiHelper.StartSendRtpPassive(req2, out rs1);
+                        audioPort = ushort.Parse(result1.Local_Port);
+
+                        if (result1.Code != 0)
+                        {
+                            GCommon.Logger.Warn("StartSendRtpPassive fail");
+                            return;
+                        }
+                    }
                 }
                 else
                 {
-                    GCommon.Logger.Warn("StartAudioSendStream fail");
-                }
-                s_LocalPort += 2;
+                    GCommon.Logger.Warn("SipMsgProcess_OnReceiveInvite StartAudioSendStream intercom localport:" + s_LocalPort + ", remoteip:" + info.RemoteIpAddress + ", remotePort: " + info.RemotePort + ",callid: " + s_callidIntercom);
+                    //result = StartAudioSendStream(s_LocalPort, Common.AkStreamWebConfig.SipIp, (int)zlRet.Port, s_callidIntercom);
+                    result = StartAudioSendStream(s_LocalPort, info.RemoteIpAddress, info.RemotePort, s_callidIntercom);
+                    GCommon.Logger.Warn("StartAudioSendStream intercom success AudioPortConf: " + result.confsolt + "," + result.status + ", " + result.stream + "," + req.Header.CallId);
+                    audioPort = (ushort)s_LocalPort;
+                    s_LocalPort += 2;
+                    if (result.status != 0)
+                    {
+                        GCommon.Logger.Warn("StartAudioSendStream fail");
+                        return;
+                    }
 
+                }
+                //info.LocalRtpPort = (ushort)s_LocalPort;
+                info.LocalRtpPort = audioPort;
+                var response = Common.SipServer.SendInviteOK(req, info);
+                s_calls[s_callidIntercom].SipChannel.AudioPortConf = result.confsolt;
+                s_calls[s_callidIntercom].SipChannel.Callid281Broadcast = req.Header.CallId;
+                s_calls[s_callidIntercom].SipChannel.SipCallid = s_callidIntercom;
+                s_calls[s_callidIntercom].SipChannel.InviteSipRequestBroadcast = req;
+                s_calls[s_callidIntercom].SipChannel.InviteSipResponseBroadcast = response;
+                s_calls[s_callidIntercom].SipChannel.BroadcastStream = result.stream;
             }
         }
 

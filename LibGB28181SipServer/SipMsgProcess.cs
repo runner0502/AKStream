@@ -390,7 +390,14 @@ namespace LibGB28181SipServer
                     {
                         GCommon.Logger.Debug("GetShareInfo8: ");
 
-                        mediaport = ushort.Parse(UtilsHelper.GetValue(line.ToLower(), "m\\=audio", "rtp").Trim());
+                        if (line.Contains("TCP"))
+                        {
+                            mediaport = ushort.Parse(UtilsHelper.GetValue(line.ToLower(), "m\\=audio", "tcp").Trim());
+                        }
+                        else
+                        {
+                            mediaport = ushort.Parse(UtilsHelper.GetValue(line.ToLower(), "m\\=audio", "rtp").Trim());
+                        }
                     }
 
                     if (line.Trim().ToLower().StartsWith("y="))
@@ -499,7 +506,16 @@ namespace LibGB28181SipServer
                 //media.MediaFormats.Add(psFormat);
                 media.MediaFormats.Add(h264Format);
                 media.AddExtra("a=sendonly");
-                media.Transport = "RTP/AVP";
+                if (Common.SipServerConfig.MsgProtocol == "TCP")
+                {
+                    media.Transport = "TCP/RTP/AVP";
+                    media.AddExtra("a=connection:new");
+                    media.AddExtra("a=setup:passive");
+                }
+                else
+                {
+                    media.Transport = "RTP/AVP";
+                }
                 //media.AddFormatParameterAttribute(psFormat.FormatID, psFormat.Name);
                 media.AddFormatParameterAttribute(h264Format.FormatID, h264Format.Name);
                 

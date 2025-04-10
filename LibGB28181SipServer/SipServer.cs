@@ -759,6 +759,14 @@ namespace LibGB28181SipServer
                 media.MediaFormats.Add(h264Format);
                 media.AddExtra("a=recvonly");
 
+                if (Common.SipServerConfig.MsgProtocol == "TCP")
+                {
+                    pushMediaInfo.PushStreamSocketType = PushStreamSocketType.TCP;
+                }
+                else
+                {
+                    pushMediaInfo.PushStreamSocketType = PushStreamSocketType.UDP;
+                }
                 if (pushMediaInfo.PushStreamSocketType == PushStreamSocketType.TCP)
                 {
                     media.Transport = "TCP/RTP/AVP";
@@ -771,6 +779,10 @@ namespace LibGB28181SipServer
                     {
                         media.AddExtra("a=setup:passive");  //active：主动模式，由摄像头告知服务器监听哪个端口，passive：被动模式，服务器告知摄像头连接端口
                     }
+                }
+                else
+                {
+                    media.Transport = "RTP/AVP";
                 }
 
                 media.AddExtra("y=" + sipChannel.SsrcId); //设置ssrc

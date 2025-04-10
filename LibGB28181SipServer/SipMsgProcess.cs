@@ -340,6 +340,7 @@ namespace LibGB28181SipServer
                     req.Header.Subject.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries)[
                         0];
                 channelid = channelid.Substring(0, channelid.IndexOf(':'));
+                bool isUdp = true;
                 //Console.WriteLine(channelid);
                 int index = sdpBody.IndexOf("\r\n");
                 GCommon.Logger.Debug("GetShareInfo111: index: " + index);
@@ -392,10 +393,12 @@ namespace LibGB28181SipServer
 
                         if (line.Contains("TCP"))
                         {
+                            isUdp = false;
                             mediaport = ushort.Parse(UtilsHelper.GetValue(line.ToLower(), "m\\=audio", "tcp").Trim());
                         }
                         else
                         {
+                            isUdp = true;
                             mediaport = ushort.Parse(UtilsHelper.GetValue(line.ToLower(), "m\\=audio", "rtp").Trim());
                         }
                     }
@@ -437,7 +440,7 @@ namespace LibGB28181SipServer
                             //Stream = obj.MainId.Trim(),
                             //App = obj.App.Trim(),
                             //Vhost = obj.Vhost.Trim(),
-                            Is_Udp = true,
+                            Is_Udp = isUdp,
                         };
 
                         GCommon.Logger.Debug(
@@ -506,7 +509,7 @@ namespace LibGB28181SipServer
                 //media.MediaFormats.Add(psFormat);
                 media.MediaFormats.Add(h264Format);
                 media.AddExtra("a=sendonly");
-                if (Common.SipServerConfig.MsgProtocol == "TCP")
+                if (!info.Is_Udp)
                 {
                     media.Transport = "TCP/RTP/AVP";
                     media.AddExtra("a=connection:new");

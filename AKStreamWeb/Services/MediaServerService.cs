@@ -2476,6 +2476,11 @@ namespace AKStreamWeb.Services
             return ret;
         }
 
+        public static ResMediaServerOpenRtpPort MediaServerOpenRtpPort(string mediaServerId, string stream,
+      out ResponseStruct rs)
+        {
+            return MediaServerOpenRtpPort(mediaServerId, stream, 0, out rs);
+        }
         /// <summary>
         /// 开放一个rtp端口
         /// </summary>
@@ -2483,7 +2488,7 @@ namespace AKStreamWeb.Services
         /// <param name="streamid"></param>
         /// <param name="rs"></param>
         /// <returns></returns>
-        public static ResMediaServerOpenRtpPort MediaServerOpenRtpPort(string mediaServerId, string stream,
+        public static ResMediaServerOpenRtpPort MediaServerOpenRtpPort(string mediaServerId, string stream, int tcpMode,
             out ResponseStruct rs)
         {
             rs = new ResponseStruct()
@@ -2515,7 +2520,7 @@ namespace AKStreamWeb.Services
 
                 reqZlMediaKitOpenRtpPort = new ReqZLMediaKitOpenRtpPort()
                 {
-                    Tcp_Mode = 0, //test tcp
+                    Tcp_Mode = tcpMode, //test tcp
                     Port = rtpPortGuess,
                     Stream_Id = stream,
                 };
@@ -2524,15 +2529,10 @@ namespace AKStreamWeb.Services
             {
                 reqZlMediaKitOpenRtpPort = new ReqZLMediaKitOpenRtpPort()
                 {
-                    Tcp_Mode = 0,
+                    Tcp_Mode = tcpMode,
                     Port = 0,
                     Stream_Id = stream,
                 };
-            }
-
-            if (LibGB28181SipServer.Common.SipServerConfig.MsgProtocol == "TCP")
-            {
-                 reqZlMediaKitOpenRtpPort.Tcp_Mode = 1;
             }
 
             var zlRet = mediaServer.WebApiHelper.OpenRtpPort(reqZlMediaKitOpenRtpPort, out rs);

@@ -1006,8 +1006,14 @@ namespace AKStreamWeb.Services
                 {
                     try
                     {
+                        bool isTcp = LibGB28181SipServer.Common.GetUnderPlatMediaTransferProtocalIsTcpByChannelId(channelId);
+                        int tcpmode = 0;
+                        if (isTcp)
+                        {
+                            tcpmode = 1;
+                        }
                         openRtpPort =
-                            MediaServerService.MediaServerOpenRtpPort(mediaServer.MediaServerId, videoChannel.MainId,
+                            MediaServerService.MediaServerOpenRtpPort(mediaServer.MediaServerId, videoChannel.MainId, tcpmode,
                                 out rs);
                         if (openRtpPort == null || !rs.Code.Equals(ErrorNumber.None))
                         {

@@ -145,7 +145,8 @@ namespace AKStreamWeb
             {
                 StreamStartResult result = new StreamStartResult();
                 ushort audioPort = 0;
-                if (LibGB28181SipServer.Common.SipServerConfig.MsgProtocol == "TCP")
+                bool isTcp = LibGB28181SipServer.Common.GetUnderPlatMediaTransferProtocalIsTcpByChannelId(info.ChannelId);
+                if (isTcp)
                 {
                     String broadcastStreamId = "broadcast" + s_LocalPort;
                     ReqZLMediaKitOpenRtpPort reqZlMediaKitOpenRtpPort = new ReqZLMediaKitOpenRtpPort() //test tcp

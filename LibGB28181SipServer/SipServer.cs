@@ -759,7 +759,7 @@ namespace LibGB28181SipServer
                 media.MediaFormats.Add(h264Format);
                 media.AddExtra("a=recvonly");
 
-                if (Common.SipServerConfig.MsgProtocol == "TCP")
+                if (Common.GetUnderPlatMediaTransferProtocalIsTcpByChannelId(sipChannel.DeviceId))
                 {
                     pushMediaInfo.PushStreamSocketType = PushStreamSocketType.TCP;
                 }

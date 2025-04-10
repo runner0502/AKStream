@@ -457,5 +457,24 @@ namespace LibGB28181SipServer
             //}
             return false;
         }
+
+        public static bool GetUnderPlatMediaTransferProtocalIsTcpByChannelId(string channelId)
+        {
+            var channelDB = ORMHelper.Db.Select<DeviceNumber>().Where(a => a.dev == channelId).First();
+            if (channelDB == null)
+            {
+                return false;
+            }
+            var plat = ORMHelper.Db.Select<Device281Plat>().Where(a => a.platid == channelDB.plat_id).First();
+            if (plat == null)
+            {
+                return false;
+            }
+            if (plat.sipprotocol == 0)
+            {
+                return true;
+            }
+            return false;
+        }
     }
 }

@@ -145,8 +145,7 @@ namespace AKStreamWeb
             {
                 StreamStartResult result = new StreamStartResult();
                 ushort audioPort = 0;
-                bool isTcp = LibGB28181SipServer.Common.GetUnderPlatMediaTransferProtocalIsTcpByChannelId(info.ChannelId);
-                if (isTcp)
+                if (!info.Is_Udp)
                 {
                     String broadcastStreamId = "broadcast" + s_LocalPort;
                     ReqZLMediaKitOpenRtpPort reqZlMediaKitOpenRtpPort = new ReqZLMediaKitOpenRtpPort() //test tcp
@@ -313,85 +312,7 @@ namespace AKStreamWeb
                             SPhoneSDK.ConnectSoundportToCall(deviceIdAudio, deviceIdAudio, callid);
                         }
 
-
-
-                        //String broadcastStreamId = "broadcast" + s_LocalPort;
-                        //ReqZLMediaKitOpenRtpPort reqZlMediaKitOpenRtpPort = new ReqZLMediaKitOpenRtpPort() //test tcp
-                        //{
-                        //    Tcp_Mode = 0,
-                        //    Port = 0,
-                        //    Stream_Id = broadcastStreamId,
-                        //};
-
-                        //ResponseStruct rs;
-                        //var zlRet = Common.MediaServerList[0].WebApiHelper.OpenRtpPort(reqZlMediaKitOpenRtpPort, out rs);
-                        //if (zlRet == null || !rs.Code.Equals(ErrorNumber.None))
-                        //{
-                        //    //GCommon.Logger.Warn(
-                        //    //    $"[{Common.LoggerHead}]->请求开放rtp端口失败->{Common.MediaServerList[0]}->{stream}->{JsonHelper.ToJson(rs, Formatting.Indented)}");
-
-                        //    //return null;
-                        //}
-
-                        //if (zlRet.Code != 0)
-                        //{
-                        //    rs = new ResponseStruct()
-                        //    {
-                        //        Code = ErrorNumber.MediaServer_OpenRtpPortExcept,
-                        //        Message = ErrorMessage.ErrorDic![ErrorNumber.MediaServer_OpenRtpPortExcept],
-                        //    };
-                        //    //GCommon.Logger.Warn(
-                        //    //    $"[{Common.LoggerHead}]->请求开放rtp端口失败->{mediaServerId}->{stream}->{JsonHelper.ToJson(rs, Formatting.Indented)}");
-
-                        //    //return null;
-                        //}
-                        //else
-                        //{
-                        //    var result = StartAudioSendStream(s_LocalPort, Common.AkStreamWebConfig.SipIp, (int)zlRet.Port, s_callidIntercom);
-                        //    s_LocalPort = s_LocalPort + 2;
-                        //    Thread.Sleep(10000);
-                        //    ReqZLMediaKitStartSendRtpPassive req = new ReqZLMediaKitStartSendRtpPassive()
-                        //    {
-                        //        App = "rtp",
-                        //        Only_audio = 1,
-                        //        Pt = 8,
-                        //        Src_Port = 0,
-                        //        Stream = broadcastStreamId,
-                        //        Vhost = Common.AkStreamWebConfig.SipIp,
-                        //        Use_ps = 0,
-                        //        Ssrc = "2705443"
-                        //    };
-
-                        //    ResponseStruct rs1;
-                        //    var result1 = Common.MediaServerList[0].WebApiHelper.StartSendRtpPassive(req, out rs1);
-
-
-                        //    ReqZLMediaKitOpenRtpPort reqZlMediaKitOpenRtpPort1 = new ReqZLMediaKitOpenRtpPort() //test tcp
-                        //    {
-                        //        Tcp_Mode = 2,
-                        //        Port = 0,
-                        //        Stream_Id = "allen",
-                        //    };
-                        //    ResponseStruct rs3;
-                        //    var zlRet3 = Common.MediaServerList[0].WebApiHelper.OpenRtpPort(reqZlMediaKitOpenRtpPort1, out rs3);
-                        //    Thread.Sleep(1000);
-
-
-                        //    ReqZLMediaKitConnectRtpSever req2 = new ReqZLMediaKitConnectRtpSever()
-                        //    {
-                        //        Stream_Id = "allen",
-                        //        Dst_Url = Common.AkStreamWebConfig.SipIp,
-                        //        Dst_Port = ushort.Parse(result1.Local_Port)
-
-                        //    };
-
-                        //    ResponseStruct rs2;
-                        //    var result2 = Common.MediaServerList[0].WebApiHelper.ConnectRtpServer(req2, out rs2);
-                        //    Thread.Sleep(1000);
-
-                        //}
-                        
-
+                        //TestBroadcastAudio();
 
                     }
                     catch (Exception e) 
@@ -402,6 +323,85 @@ namespace AKStreamWeb
             }
         }
 
+        private static void TestBroadcastAudio()
+        {
+            String broadcastStreamId = "broadcast" + s_LocalPort;
+            ReqZLMediaKitOpenRtpPort reqZlMediaKitOpenRtpPort = new ReqZLMediaKitOpenRtpPort() //test tcp
+            {
+                Tcp_Mode = 0,
+                Port = 0,
+                Stream_Id = broadcastStreamId,
+            };
+
+            ResponseStruct rs;
+            var zlRet = Common.MediaServerList[0].WebApiHelper.OpenRtpPort(reqZlMediaKitOpenRtpPort, out rs);
+            if (zlRet == null || !rs.Code.Equals(ErrorNumber.None))
+            {
+                //GCommon.Logger.Warn(
+                //    $"[{Common.LoggerHead}]->请求开放rtp端口失败->{Common.MediaServerList[0]}->{stream}->{JsonHelper.ToJson(rs, Formatting.Indented)}");
+
+                //return null;
+            }
+
+            if (zlRet.Code != 0)
+            {
+                rs = new ResponseStruct()
+                {
+                    Code = ErrorNumber.MediaServer_OpenRtpPortExcept,
+                    Message = ErrorMessage.ErrorDic![ErrorNumber.MediaServer_OpenRtpPortExcept],
+                };
+                //GCommon.Logger.Warn(
+                //    $"[{Common.LoggerHead}]->请求开放rtp端口失败->{mediaServerId}->{stream}->{JsonHelper.ToJson(rs, Formatting.Indented)}");
+
+                //return null;
+            }
+            else
+            {
+                var result = StartAudioSendStream(s_LocalPort, Common.AkStreamWebConfig.SipIp, (int)zlRet.Port, s_callidIntercom);
+                s_LocalPort = s_LocalPort + 2;
+                Thread.Sleep(10000);
+                ReqZLMediaKitStartSendRtpPassive req = new ReqZLMediaKitStartSendRtpPassive()
+                {
+                    App = "rtp",
+                    Only_audio = 1,
+                    Pt = 8,
+                    Src_Port = 0,
+                    Stream = broadcastStreamId,
+                    Vhost = Common.AkStreamWebConfig.SipIp,
+                    Use_ps = 0,
+                    Ssrc = "2705443"
+                };
+
+                ResponseStruct rs1;
+                var result1 = Common.MediaServerList[0].WebApiHelper.StartSendRtpPassive(req, out rs1);
+
+
+                string testStreamId = broadcastStreamId + "test";
+                ReqZLMediaKitOpenRtpPort reqZlMediaKitOpenRtpPort1 = new ReqZLMediaKitOpenRtpPort() //test tcp
+                {
+                    Tcp_Mode = 2,
+                    Port = 0,
+                    Stream_Id = testStreamId,
+                };
+                ResponseStruct rs3;
+                var zlRet3 = Common.MediaServerList[0].WebApiHelper.OpenRtpPort(reqZlMediaKitOpenRtpPort1, out rs3);
+                Thread.Sleep(1000);
+
+
+                ReqZLMediaKitConnectRtpSever req2 = new ReqZLMediaKitConnectRtpSever()
+                {
+                    Stream_Id = testStreamId,
+                    Dst_Url = Common.AkStreamWebConfig.SipIp,
+                    Dst_Port = ushort.Parse(result1.Local_Port)
+
+                };
+
+                ResponseStruct rs2;
+                var result2 = Common.MediaServerList[0].WebApiHelper.ConnectRtpServer(req2, out rs2);
+                Thread.Sleep(1000);
+
+            }
+        }
 
         private Timer _timer;
 

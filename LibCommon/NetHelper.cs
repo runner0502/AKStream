@@ -188,6 +188,7 @@ namespace LibCommon
             //异常请求  
             catch (WebException e)
             {
+                GCommon.Logger.Warn("http get request exception: " + e.ToString());
                 myResponse = (HttpWebResponse)e.Response;
                 if (myResponse == null) return e.Message;
                 using (Stream errData = myResponse.GetResponseStream())
@@ -202,6 +203,7 @@ namespace LibCommon
             }
             catch (Exception e)
             {
+                GCommon.Logger.Warn("http get request exception: " + e.ToString());
                 throw e;
             }
             finally

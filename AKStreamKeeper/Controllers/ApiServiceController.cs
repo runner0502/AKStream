@@ -420,6 +420,7 @@ namespace AKStreamKeeper.Controllers
         public ushort GuessAnRtpPort([FromHeader(Name = "AccessKey")] string AccessKey, ushort? min = 0,
             ushort? max = 0)
         {
+            GCommon.Logger.Debug("GuessAnRtpPort");
             ResponseStruct rs;
             var ret = ApiService.GuessAnRtpPort(out rs, min, max);
             if (ret == 0 || !rs.Code.Equals(ErrorNumber.None))

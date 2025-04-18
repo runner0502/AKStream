@@ -1253,6 +1253,7 @@ namespace LibZLMediaKitMediaServer
         /// <returns></returns>
         public ushort GuessAnRtpPort(out ResponseStruct rs, ushort? min = 0, ushort? max = 0)
         {
+            GCommon.Logger.Debug("GuessAnRtpPort");
             rs = new ResponseStruct()
             {
                 Code = ErrorNumber.None,
@@ -1273,7 +1274,10 @@ namespace LibZLMediaKitMediaServer
             {
                 Dictionary<string, string> headers = new Dictionary<string, string>();
                 headers.Add("AccessKey", _accessKey);
+                GCommon.Logger.Debug("GuessAnRtpPort url: " + url + ", headers: " + _accessKey);
                 var httpRet = NetHelper.HttpGetRequest(url, headers, "utf-8", _httpClientTimeout);
+                GCommon.Logger.Debug("GuessAnRtpPort res: " + httpRet);
+
                 if (!string.IsNullOrEmpty(httpRet))
                 {
                     if (UtilsHelper.HttpClientResponseIsNetWorkError(httpRet))

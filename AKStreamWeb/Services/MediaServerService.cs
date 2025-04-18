@@ -2500,7 +2500,7 @@ namespace AKStreamWeb.Services
             if (!rs.Code.Equals(ErrorNumber.None) || mediaServer == null)
             {
                 GCommon.Logger.Warn(
-                    $"[{Common.LoggerHead}]->请求开放rtp端口失败->{mediaServerId}->{stream}->{JsonHelper.ToJson(rs, Formatting.Indented)}");
+                    $"[{Common.LoggerHead}]->请求开放rtp端口失败CheckMediaServer->{mediaServerId}->{stream}->{JsonHelper.ToJson(rs, Formatting.Indented)}");
 
                 return null;
             }
@@ -2513,7 +2513,7 @@ namespace AKStreamWeb.Services
                 if (rtpPortGuess <= 0 || !rs.Code.Equals(ErrorNumber.None))
                 {
                     GCommon.Logger.Warn(
-                        $"[{Common.LoggerHead}]->请求开放rtp端口失败->{mediaServerId}->{stream}->{JsonHelper.ToJson(rs, Formatting.Indented)}->{rs.ExceptMessage}");
+                        $"[{Common.LoggerHead}]->请求开放rtp端口失败GuessAnRtpPort->{mediaServerId}->{stream}->{JsonHelper.ToJson(rs, Formatting.Indented)}->{rs.ExceptMessage}");
 
                     return null;
                 }
@@ -2539,7 +2539,7 @@ namespace AKStreamWeb.Services
             if (zlRet == null || !rs.Code.Equals(ErrorNumber.None))
             {
                 GCommon.Logger.Warn(
-                    $"[{Common.LoggerHead}]->请求开放rtp端口失败->{mediaServerId}->{stream}->{JsonHelper.ToJson(rs, Formatting.Indented)}");
+                    $"[{Common.LoggerHead}]->请求开放rtp端口失败 OpenRtpPort->{mediaServerId}->{stream}->{JsonHelper.ToJson(rs, Formatting.Indented)}");
 
                 return null;
             }

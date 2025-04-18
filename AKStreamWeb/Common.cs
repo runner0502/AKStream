@@ -395,8 +395,7 @@ namespace AKStreamWeb
                 }
                 catch (AkStreamException ex)
                 {
-                    GCommon.Logger.Error(
-                        $"[{LoggerHead}]->启动Sip服务时异常,系统无法运行->\r\n{JsonHelper.ToJson(ex, Formatting.Indented)}");
+                    GCommon.Logger.Error( $"[{LoggerHead}]->启动Sip服务时异常,系统无法运行->\r\n{ex.ToString()}");
                     Environment.Exit(0); //退出程序
                 }
             }

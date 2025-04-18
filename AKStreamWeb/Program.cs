@@ -3,6 +3,7 @@ using LibCommon.Structs.DBModels;
 using LinCms.Core.Entities;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
+using System;
 
 namespace AKStreamWeb
 {
@@ -10,6 +11,7 @@ namespace AKStreamWeb
     {
         public static void Main(string[] args)
         {
+            AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
             var tmpRet = UtilsHelper.GetMainParams(args);
             if (tmpRet != null && tmpRet.Count > 0)
             {
@@ -55,6 +57,11 @@ namespace AKStreamWeb
             //var result = ORMHelper.Db.Select<SysBasicConfig>().ToListAsync();
 
             CreateHostBuilder(args).Build().Run();
+        }
+
+        private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+        {
+            GCommon.Logger.Error("CurrentDomain_UnhandledException : " + e.ExceptionObject.ToString());
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>

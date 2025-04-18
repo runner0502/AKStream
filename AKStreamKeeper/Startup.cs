@@ -160,7 +160,7 @@ namespace AKStreamKeeper
                 catch (Exception ex)
                 {
                     Console.WriteLine(ex.Message + "\r\n" + ex.StackTrace);
-                    return;
+                    //return;
                 }
             }
             else

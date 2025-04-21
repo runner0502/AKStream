@@ -492,7 +492,7 @@ namespace LibGB28181SipServer
             //{
             //    IsStandardAttribute = false,
             //};
-            var h264Format = new SDPMediaFormat(SDPMediaFormatsEnum.PCMA)
+            var pcmaFormat = new SDPMediaFormat(SDPMediaFormatsEnum.PCMA)
             {
                 IsStandardAttribute = false,
             };
@@ -507,7 +507,7 @@ namespace LibGB28181SipServer
                 };
                 //info.LocalRtpPort = rtpPort;
                 //media.MediaFormats.Add(psFormat);
-                media.MediaFormats.Add(h264Format);
+                media.MediaFormats.Add(pcmaFormat);
                 media.AddExtra("a=sendonly");
                 if (!info.Is_Udp)
                 {
@@ -520,7 +520,7 @@ namespace LibGB28181SipServer
                     media.Transport = "RTP/AVP";
                 }
                 //media.AddFormatParameterAttribute(psFormat.FormatID, psFormat.Name);
-                media.AddFormatParameterAttribute(h264Format.FormatID, h264Format.Name);
+                media.AddFormatParameterAttribute(pcmaFormat.FormatID, pcmaFormat.Name);
                 
                 //media.AddExtra($"a=username:{Common.SipServerConfig.SipUsername}");
                 //media.AddExtra($"a=password:{Common.SipServerConfig.SipPassword}");

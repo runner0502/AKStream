@@ -127,6 +127,9 @@ x.fatherid == sipDevice.DeviceId).Set(x => x.status, 0).ExecuteAffrowsAsync();
                 case "OK":
                     state = 1;
                     break;
+                case "ON":
+                    state = 1;
+                    break;
                 default:
                     break;
             }

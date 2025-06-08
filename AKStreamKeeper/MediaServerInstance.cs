@@ -156,6 +156,7 @@ namespace AKStreamKeeper
             }
             catch (Exception ex)
             {
+                GCommon.Logger.Warn("MediaServerInstance ctor fail:  = " +ex.ToString());
                 rs = new ResponseStruct()
                 {
                     Code = ErrorNumber.Other,

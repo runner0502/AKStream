@@ -1299,38 +1299,38 @@ namespace AKStreamWeb.Services
                     {
                         #region debug sql output
 
-                        if (Common.IsDebug)
-                        {
-                            var sql = ORMHelper.Db.Select<UserAuth>()
-                                .Where(x => x.MediaServerId.Equals(mediaServer.MediaServerId)).ToSql();
+                        //if (Common.IsDebug)
+                        //{
+                        //    var sql = ORMHelper.Db.Select<UserAuth>()
+                        //        .Where(x => x.MediaServerId.Equals(mediaServer.MediaServerId)).ToSql();
 
-                            GCommon.Logger.Debug(
-                                $"[{Common.LoggerHead}]->MediaServerKeepAlive->执行SQL:->{sql}");
-                        }
+                        //    GCommon.Logger.Debug(
+                        //        $"[{Common.LoggerHead}]->MediaServerKeepAlive->执行SQL:->{sql}");
+                        //}
 
                         #endregion
 
-                        var tmp_list_count = ORMHelper.Db.Select<UserAuth>()
-                            .Where(x => x.MediaServerId.Equals(mediaServer.MediaServerId)).Count();
-                        if (tmp_list_count <= 0)
-                        {
-                            UserAuth auth = new UserAuth()
-                            {
-                                MediaServerId = mediaServer.MediaServerId,
-                                Username = "defaultuser",
-                                Password = UtilsHelper.Md5New($"defaultuser:default:defaultpasswd"),
-                            };
-                            var b = ORMHelper.Db.Insert<UserAuth>(auth).ExecuteAffrows();
-                            //  var b = MediaServerService.AddRtspAuthData(auth, out _);
-                            if (b > 0)
-                            {
-                                mediaServer.IsInitRtspAuthData = true;
-                            }
-                        }
-                        else
-                        {
-                            mediaServer.IsInitRtspAuthData = true;
-                        }
+                        //var tmp_list_count = ORMHelper.Db.Select<UserAuth>()
+                        //    .Where(x => x.MediaServerId.Equals(mediaServer.MediaServerId)).Count();
+                        //if (tmp_list_count <= 0)
+                        //{
+                        //    UserAuth auth = new UserAuth()
+                        //    {
+                        //        MediaServerId = mediaServer.MediaServerId,
+                        //        Username = "defaultuser",
+                        //        Password = UtilsHelper.Md5New($"defaultuser:default:defaultpasswd"),
+                        //    };
+                        //    var b = ORMHelper.Db.Insert<UserAuth>(auth).ExecuteAffrows();
+                        //    //  var b = MediaServerService.AddRtspAuthData(auth, out _);
+                        //    if (b > 0)
+                        //    {
+                        //        mediaServer.IsInitRtspAuthData = true;
+                        //    }
+                        //}
+                        //else
+                        //{
+                        //    mediaServer.IsInitRtspAuthData = true;
+                        //}
                     }
 
 

@@ -639,10 +639,12 @@ namespace AKStreamWeb
                             if (transcodeConfig.EncoderType == 0)
                             {
                                 SetVideoCodecPriority("H265/103", 0);
+                                GCommon.Logger.Warn("sipincoming transcode encoder 264");
                             }
                             else
                             {
                                 SetVideoCodecPriority("H265/103", 254);
+                                GCommon.Logger.Warn("sipincoming transcode encoder 265");
                             }
 
                             if (!string.IsNullOrEmpty(transcodeConfig.reslution))

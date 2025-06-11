@@ -352,7 +352,14 @@ namespace AKStreamWeb
             ORMHelper.Db.Select<DevicePlus>().Count();
             ORMHelper.Db.Select<VideoChannel>().Count();
             var orgChannels = ORMHelper.Db.Select<VideoChannel>();
-            int count =ORMHelper.Db.Update<VideoChannel>().Set(x => x.AutoVideo, false).Set(x => x.NoPlayerBreak, true).Where(x=>1==1).ExecuteAffrows() ;
+            if (Common.AkStreamWebConfig.DbType == "MySql")
+            {
+                int count = ORMHelper.Db.Update<VideoChannel>().Set(x => x.AutoVideo, false).Set(x => x.NoPlayerBreak, true).Where(x => 1 == 1).ExecuteAffrows();
+            }
+            else
+            {
+                var count = ORMHelper.Db.Ado.ExecuteNonQuery("UPDATE videochannels SET AutoVideo = 0, NoPlayerBreak = 1 WHERE(1 = 1)");
+            }
             ORMHelper.Db.Update<MediaStream>().Set(x => x.state, 0).Where(x => 1 == 1).ExecuteAffrows();
             ORMHelper.Db.Update<Device281Plat>().Set(x => x.registestate, 0).Where(x => 1 == 1).ExecuteAffrows();
 

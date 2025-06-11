@@ -346,17 +346,28 @@ x.platid == sipDevice.DeviceId).Set(x=>x.registestate,state).ExecuteAffrowsAsync
                         {
                             #region debug sql output
 
-                            if (Common.IsDebug)
-                            {
+                            //if (Common.IsDebug)
+                            //{
                                 var sql = ORMHelper.Db.Insert(videoChannel).ToSql();
 
                                 GCommon.Logger.Debug(
                                     $"[{Common.LoggerHead}]->OnCatalogReceived->执行SQL:->{sql}");
-                            }
+                            //}
 
                             #endregion
+                            var ret = 0;
+                            if (Common.AkStreamWebConfig.DbType == "MySql")
+                            {
+                                ret = ORMHelper.Db.Insert(videoChannel).ExecuteAffrows();
+                            }
+                            else
+                            {
+                                sql = sql.Replace("'f'", "0");
+                                sql = sql.Replace("'t'", "1");
 
-                            var ret = ORMHelper.Db.Insert(videoChannel).ExecuteAffrows();
+                                ret = ORMHelper.Db.Ado.ExecuteNonQuery(sql);
+                            }
+                            
                             if (ret > 0)
                             {
                                 GCommon.Logger.Debug(
@@ -636,7 +647,8 @@ x.dev.Equals(device.dev)).First();
             }
             GCommon.Logger.Debug("UpdateCatelogToDB6");
 
-            var result = ORMHelper.Db.Delete<DeviceNumber>().Where(a =>a.plat_id == SsyncState.PlatId).Where(a =>a.modify_time!=modifyTime).ExecuteAffrows();
+            //var result = ORMHelper.Db.Delete<DeviceNumber>().Where(a =>a.plat_id == SsyncState.PlatId).Where(a =>a.modify_time!=modifyTime).ExecuteAffrows();
+            var result = ORMHelper.Db.Select<DeviceNumber>().Where(a => a.plat_id == SsyncState.PlatId).Where(a => modifyTime.Subtract(a.modify_time).Seconds > 1).First();
             GCommon.Logger.Debug("UpdateCatelogToDB7");
 
             SsyncState.State.IsProcessing = false;

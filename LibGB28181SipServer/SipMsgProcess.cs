@@ -971,16 +971,18 @@ namespace LibGB28181SipServer
             public string DeviceType { get; set; }
             public string DeviceInfo { get; set; }
             public int status { get; set; }
+            public string sipnum { get; set; }
+
 
         }
 
 
-    /// <summary>
-    /// 处理心跳检测失败的设备，认为这类设备已经离线，需要踢除
-    /// </summary>
-    /// <param name="guid"></param>
-    /// <returns></returns>
-    public static void DoKickSipDevice(SipDevice sipDevice)
+        /// <summary>
+        /// 处理心跳检测失败的设备，认为这类设备已经离线，需要踢除
+        /// </summary>
+        /// <param name="guid"></param>
+        /// <returns></returns>
+        public static void DoKickSipDevice(SipDevice sipDevice)
         {
             string tmpSipDeviceStr = JsonHelper.ToJson(sipDevice);
             try

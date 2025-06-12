@@ -87,6 +87,42 @@ x.platid == sipDeviceId).First();
             if (plate != null && plate.plat_type == 1)
             {
                 ORMHelper.Db.Update<DeviceNumber>().Where(x => x.fatherid == sipDevice.DeviceId).Set(x => x.status, 1).ExecuteAffrows();
+                
+                var config1 = ORMHelper.Db.Select<SysAdvancedConfig>().First();
+                if (config1 != null)
+                {
+                    var devices = ORMHelper.Db.Select<DeviceNumber>().Where(x => x.fatherid == sipDevice.DeviceId).ToList();
+                    foreach (var item in devices)
+                    {
+                        using (HttpClient client = new HttpClient())
+                        {
+                            var formData = new MultipartFormDataContent();
+                            // 添加表单数据
+                            formData.Add(new StringContent(config1.PushGisType), "mqType");
+
+                            formData.Add(new StringContent(config1.PushRegistStateTopic), "topic");
+                            info1 info1 = new info1();
+                            info1.user = item.dev;
+                            info1.name = "2";
+                            info1.type = "3";
+                            info1.subtype = "213";
+                            info1.status = 1;
+
+                            var deviceinfo = ORMHelper.Db.Select<DevicePlus>().Where(a => a.id == info1.user).First();
+                            if (deviceinfo != null)
+                            {
+                                info1.DeviceType = deviceinfo.type;
+                                info1.DeviceInfo = deviceinfo.info;
+                            }
+                            info1.sipnum = item.num;
+                            var data = JsonHelper.ToJson(info1, Formatting.None, MissingMemberHandling.Error);
+                            formData.Add(new StringContent(data), "body");
+
+                            var httpRet = client.PostAsync(config1.PushGisUrl, formData).Result.Content.ReadAsStringAsync();
+                            GCommon.Logger.Warn("catalognotify send http regist " + info1.ToJson() + ", " + httpRet);
+                        }
+                    }
+                }
             }
 
         //SipMethodProxy sipMethodProxy = new SipMethodProxy(Common.AkStreamWebConfig.WaitSipRequestTimeOutMSec);
@@ -120,59 +156,41 @@ x.fatherid == sipDevice.DeviceId).Set(x => x.status, 0).ExecuteAffrows();
             GCommon.Logger.Info(
                 $"[{Common.LoggerHead}]->设备注销->{sipDevice.RemoteEndPoint.Address.MapToIPv4().ToString()}-{sipDevice.DeviceId}->所有通道-->注销成功");
 
-            //var config1 = ORMHelper.Db.Select<SysAdvancedConfig>().First();
-            //if (config1 != null)
-            //{
-            //    using (HttpClient client = new HttpClient())
-            //    {
-            //        var formData = new MultipartFormDataContent();
-            //        // 添加表单数据
-            //        formData.Add(new StringContent(config1.PushGisType), "mqType");
-            //        //formData.Add(new StringContent("queue.gis.third"), "topic");
+            var config1 = ORMHelper.Db.Select<SysAdvancedConfig>().First();
+            if (config1 != null)
+            {
+                var devices = ORMHelper.Db.Select<DeviceNumber>().Where(x=>x.fatherid == sipDevice.DeviceId).ToList();
+                foreach (var item in devices)
+                {
+                    using (HttpClient client = new HttpClient())
+                    {
+                        var formData = new MultipartFormDataContent();
+                        // 添加表单数据
+                        formData.Add(new StringContent(config1.PushGisType), "mqType");
 
-            //        formData.Add(new StringContent(config1.PushRegistStateTopic), "topic");
-            //        //string time1 = bodyXml.Element("Time")?.Value;
-            //        info1 info1 = new info1();
-            //        info1.user = item.DeviceID;
-            //        info1.name = "2";
-            //        //info1.lat = bodyXml.Element("Latitude")?.Value;
-            //        //info1.lon = bodyXml.Element("Longitude")?.Value;
-            //        //info1.time = time1;
-            //        info1.type = "3";
-            //        info1.subtype = "213";
-            //        if (item.Status == LibCommon.Structs.GB28181.Sys.DevStatus.OFF)
-            //        {
-            //            info1.status = 0;
-            //        }
-            //        else
-            //        {
-            //            info1.status = 1;
-            //        }
+                        formData.Add(new StringContent(config1.PushRegistStateTopic), "topic");
+                        info1 info1 = new info1();
+                        info1.user = item.dev;
+                        info1.name = "2";
+                        info1.type = "3";
+                        info1.subtype = "213";
+                        info1.status = 0;
 
-            //        ORMHelper.Db.Update<DeviceNumber>().Where(x =>
-            //        x.dev == item.DeviceID).Set(x => x.status, info1.status).ExecuteAffrowsAsync();
+                        var deviceinfo = ORMHelper.Db.Select<DevicePlus>().Where(a => a.id == info1.user).First();
+                        if (deviceinfo != null)
+                        {
+                            info1.DeviceType = deviceinfo.type;
+                            info1.DeviceInfo = deviceinfo.info;
+                        }
+                        info1.sipnum = item.num;
+                        var data = JsonHelper.ToJson(info1, Formatting.None, MissingMemberHandling.Error);
+                        formData.Add(new StringContent(data), "body");
 
-            //        var deviceinfo = ORMHelper.Db.Select<DevicePlus>().Where(a => a.id == info1.user).First();
-            //        if (deviceinfo != null)
-            //        {
-            //            info1.DeviceType = deviceinfo.type;
-            //            info1.DeviceInfo = deviceinfo.info;
-            //        }
-            //        var deviceNum = ORMHelper.Db.Select<DeviceNumber>().Where(a => a.dev == info1.user).First();
-            //        if (deviceNum != null)
-            //        {
-            //            info1.sipnum = deviceNum.num;
-            //        }
-            //        var data = JsonHelper.ToJson(info1, Formatting.None, MissingMemberHandling.Error);
-            //        formData.Add(new StringContent(data), "body");
-
-            //        //var httpRet = client.PostAsync("http://65.176.4.95:58080/api/ice/sendMsgByMQ", formData).Result.Content.ReadAsStringAsync();
-            //        var httpRet = client.PostAsync(config1.PushGisUrl, formData).Result.Content.ReadAsStringAsync();
-            //        GCommon.Logger.Warn("catalognotify send http " + info1.ToJson() + ", " + httpRet);
-            //    }
-            //}
-
-
+                        var httpRet = client.PostAsync(config1.PushGisUrl, formData).Result.Content.ReadAsStringAsync();
+                        GCommon.Logger.Warn("catalognotify send http unregist " + info1.ToJson() + ", " + httpRet);
+                    }
+                }
+            }
         }
 
         class info1

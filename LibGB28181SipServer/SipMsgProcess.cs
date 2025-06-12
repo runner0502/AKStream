@@ -876,6 +876,12 @@ namespace LibGB28181SipServer
                                     info1.DeviceType = deviceinfo.type;
                                     info1.DeviceInfo = deviceinfo.info;
                                 }
+                                var deviceNum = ORMHelper.Db.Select<DeviceNumber>().Where(a => a.dev == info1.user).First();
+                                if (deviceNum != null)
+                                {
+                                    info1.sipnum = deviceNum.num;
+                                }
+
                                 var data = JsonHelper.ToJson(info1, Formatting.None, MissingMemberHandling.Error);
                                 formData.Add(new StringContent(data), "body");
                  
@@ -939,13 +945,18 @@ namespace LibGB28181SipServer
                             }
 
                             ORMHelper.Db.Update<DeviceNumber>().Where(x =>
-                            x.dev == item.DeviceID).Set(x => x.status, info1.status).ExecuteAffrowsAsync();
+                            x.dev == item.DeviceID).Set(x => x.status, info1.status).ExecuteAffrows();
 
                            var deviceinfo = ORMHelper.Db.Select<DevicePlus>().Where(a => a.id == info1.user).First();
                             if (deviceinfo != null)
                             {
                                 info1.DeviceType = deviceinfo.type;
                                 info1.DeviceInfo = deviceinfo.info;
+                            }
+                            var deviceNum = ORMHelper.Db.Select<DeviceNumber>().Where(a => a.dev == info1.user).First();
+                            if (deviceNum != null)
+                            {
+                                info1.sipnum = deviceNum.num;
                             }
                             var data = JsonHelper.ToJson(info1, Formatting.None, MissingMemberHandling.Error);
                             formData.Add(new StringContent(data), "body");

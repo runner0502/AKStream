@@ -362,6 +362,7 @@ namespace AKStreamWeb
             }
             ORMHelper.Db.Update<MediaStream>().Set(x => x.state, 0).Where(x => 1 == 1).ExecuteAffrows();
             ORMHelper.Db.Update<Device281Plat>().Set(x => x.registestate, 0).Where(x => 1 == 1).ExecuteAffrows();
+            ORMHelper.Db.Update<DeviceNumber>().Set(x => x.status, 0).Where(x => 1 == 1).ExecuteAffrows();
 
             var config = ORMHelper.Db.Select<SysBasicConfig>().First();
             if (config != null)

@@ -1005,8 +1005,14 @@ namespace LibGB28181SipServer
             {
             }
 
-            Task.Run(() => { OnUnRegisterReceived?.Invoke(tmpSipDeviceStr); }); //抛线程出去处理
-
+            try
+            {
+                OnUnRegisterReceived?.Invoke(tmpSipDeviceStr); //抛线程出去处理
+            }
+            catch (Exception ex)
+            {
+                GCommon.Logger.Warn("unregist callback ex: " + ex.ToString());
+            }
             lock (Common.SipDevicesLock)
             {
                 Common.SipDevices.Remove(sipDevice);

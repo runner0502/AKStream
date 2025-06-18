@@ -74,7 +74,9 @@ namespace LibCommon.Structs.DBModels
         private DateTime _modify_time;
         [Column(IsNullable =true)]
         public DateTime modify_time { get => _modify_time; set => _modify_time = value; }
-
+        /// <summary>
+        /// 
+        /// </summary>
         public int status { get; set; }
 
         public string plat_id { get; set; }

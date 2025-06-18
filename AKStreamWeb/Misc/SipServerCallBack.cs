@@ -140,6 +140,7 @@ x.platid == sipDeviceId).First();
 
         public static void OnUnRegister(string sipDeviceJson)
         {
+            GCommon.Logger.Warn($"Unregister {sipDeviceJson}");
             //设备注销时，要清掉在线流
             var sipDevice = JsonHelper.FromJson<SipDevice>(sipDeviceJson);
             var obj1 = ORMHelper.Db.Update<Device281Plat>().Where(x =>
@@ -154,7 +155,7 @@ x.fatherid == sipDevice.DeviceId).Set(x => x.status, 0).ExecuteAffrows();
             }
 
             GCommon.Logger.Info(
-                $"[{Common.LoggerHead}]->设备注销->{sipDevice.RemoteEndPoint.Address.MapToIPv4().ToString()}-{sipDevice.DeviceId}->所有通道-->注销成功");
+                $"[{Common.LoggerHead}]->设备注销->{sipDevice.DeviceId}->所有通道-->注销成功");
 
             var config1 = ORMHelper.Db.Select<SysAdvancedConfig>().First();
             if (config1 != null)

@@ -358,6 +358,7 @@ namespace AKStreamWeb
             }
             else
             {
+                GCommon.Logger.Info("web common init dbtype not mysql update videochannels");
                 var count = ORMHelper.Db.Ado.ExecuteNonQuery("UPDATE videochannels SET AutoVideo = 0, NoPlayerBreak = 1 WHERE(1 = 1)");
             }
             ORMHelper.Db.Update<MediaStream>().Set(x => x.state, 0).Where(x => 1 == 1).ExecuteAffrows();

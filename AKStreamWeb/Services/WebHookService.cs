@@ -748,6 +748,25 @@ namespace AKStreamWeb.Services
                                 $"[{Common.LoggerHead}]->WebHookNeedReturnTask异常->没有找到{videoChannel.MainId}的推拉流信息，任务异常");
                         }
                     }
+         //           else
+         //           {
+         //               var sipDevice =
+         //LibGB28181SipServer.Common.SipDevices.FindLast(
+         //    x => x.DeviceId.Equals(videoChannel.DeviceId));
+
+         //               if (sipDevice != null && sipDevice.SipChannels != null && sipDevice.SipChannels.Count > 0)
+         //               {
+         //                   var channel =
+         //                       sipDevice.SipChannels.FindLast(x => x.DeviceId.Equals(videoChannel.ChannelId));
+         //                   if (channel != null)
+         //                   {
+         //                       GCommon.Logger.Info(
+         //              $"[{Common.LoggerHead}]->收到WebHook-OnStreamChanged回调(流接入)1->{JsonHelper.ToJson(req)}");
+         //                       channel.DisconnectTime = DateTime.MinValue;
+         //                       channel.PushStatus = PushStatus.PUSHON;
+         //                   }
+         //               }
+         //           }
                 }
                 else
                 {
@@ -780,6 +799,9 @@ namespace AKStreamWeb.Services
                                 sipDevice.SipChannels.FindLast(x => x.DeviceId.Equals(videoChannel.ChannelId));
                             if (channel != null)
                             {
+                                GCommon.Logger.Info(
+                       $"[{Common.LoggerHead}]->收到WebHook-OnStreamChanged回调(流移除)1->{JsonHelper.ToJson(req)}");
+                                channel.DisconnectTime = DateTime.Now;
                                 channel.PushStatus = PushStatus.IDLE;
                             }
                         }

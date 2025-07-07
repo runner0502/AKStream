@@ -1272,7 +1272,7 @@ namespace LibGB28181SipServer
                         else
                         {
                             GCommon.Logger.Debug(
-                                $"[{Common.LoggerHead}]->收到来自{remoteEndPoint}的Sip设备异常注册请求->已忽略，当前Sip设备数量:{Common.SipDevices.Count}个");
+                                $"[{Common.LoggerHead}]->收到来自{remoteEndPoint}的Sip设备异常注册请求注册时间间隔太短->已忽略，当前Sip设备数量:{Common.SipDevices.Count}个");
                         }
                     }
                 }

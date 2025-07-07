@@ -1716,7 +1716,7 @@ namespace LibGB28181SipServer
                     Code = ErrorNumber.None,
                     Message = ErrorMessage.ErrorDic![ErrorNumber.None],
                 };
-                CheckInviteParam(sipChannel, PushStatus.PUSHON, out rs); //检测各参数是否正常
+                CheckInviteParam(sipChannel, PushStatus.IGNORE, out rs); //检测各参数是否正常
                 if (!rs.Code.Equals(ErrorNumber.None))
                 {
                     try

@@ -33,5 +33,6 @@ namespace LibCommon.Enums
         /// 忽略，不做处理
         /// </summary>
         IGNORE,
+        //JUSTDISCONNECT
     }
 }

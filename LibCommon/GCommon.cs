@@ -195,6 +195,8 @@ namespace LibCommon
         public delegate bool DeInviteChannel(string fromTag, string toTag, string callid, out ResponseStruct rs,
             out ShareInviteInfo info);
 
+        public delegate void ReconnectStream(SipChannel channel);
+
         #endregion
     }
 }

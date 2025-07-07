@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using LibCommon.Enums;
 using LibCommon.Structs.GB28181.Sys;
 using LibCommon.Structs.GB28181.XML;
@@ -7,6 +5,10 @@ using LiteDB;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using SIPSorcery.SIP;
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using static LibCommon.GCommon;
 
 namespace LibCommon.Structs.GB28181
 {
@@ -35,6 +37,8 @@ namespace LibCommon.Structs.GB28181
         private string? _app;
         private ushort? _rtpPort;
         private string? _vhost;
+
+        private DateTime _disconnectTime = DateTime.MinValue;
 
         public SipChannel()
         {
@@ -141,7 +145,15 @@ namespace LibCommon.Structs.GB28181
         public PushStatus PushStatus
         {
             get => _pushStatus;
-            set => _pushStatus = value;
+            set
+            {
+                //if (value == PushStatus.IDLE && DisconnectTime != DateTime.MinValue)
+                //{
+                //    GCommon.Logger.Debug("stream reconnect justDisconnect not set pushstatus");
+                //    return;
+                //}
+                _pushStatus = value;
+            }
         }
 
 
@@ -272,6 +284,45 @@ namespace LibCommon.Structs.GB28181
         {
             get;set;
         }
+        public DateTime DisconnectTime 
+        {
+            get => _disconnectTime;
+            set
+            {
+                _disconnectTime = value;
+                //if (_disconnectTime != DateTime.MinValue)
+                //{
+                //    _tryConnectTimer = new System.Timers.Timer(20 * 1000);
+                //    _tryConnectTimer.Enabled = true; //启动Elapsed事件触发
+                //    _tryConnectTimer.Elapsed += _tryConnectTimer_Elapsed; ; //添加触发事件的函数
+                //    _tryConnectTimer.AutoReset = true; //需要自动reset
+                //    _tryConnectTimer.Start(); //启动计时器
+                //}
+            }
+        }
+
+        private void _tryConnectTimer_Elapsed(object? sender, System.Timers.ElapsedEventArgs e)
+        {
+            GCommon.Logger.Debug("stream reconnect _tryConnectTimer_Elapsed");
+            if (_disconnectTime!=DateTime.MinValue && DateTime.Now.Subtract(_disconnectTime).TotalMinutes >=5)
+            {
+                GCommon.Logger.Debug("stream reconnect _tryConnectTimer_Elapsed timeout set idle");
+                DisconnectTime = DateTime.MinValue;
+                _tryConnectTimer.Stop();
+                _tryConnectTimer.Enabled =false;
+                this.PushStatus = PushStatus.IDLE;
+                return;
+            }
+
+            if (OnReconnectStream != null)
+            {
+                OnReconnectStream(this);
+            }
+
+        }
+
+        private System.Timers.Timer _tryConnectTimer;
+        public event ReconnectStream OnReconnectStream;
 
         public void Dispose()
         {

@@ -351,6 +351,8 @@ namespace AKStreamWeb
             ORMHelper.Db.Select<MediaStream>().Count();
             ORMHelper.Db.Select<DevicePlus>().Count();
             ORMHelper.Db.Select<VideoChannel>().Count();
+           // ORMHelper.Db.Select<DeviceName>().Count();
+
             var orgChannels = ORMHelper.Db.Select<VideoChannel>();
             if (Common.AkStreamWebConfig.DbType == "MySql")
             {
@@ -414,11 +416,6 @@ namespace AKStreamWeb
             //_autoLive = new AutoLive();
             // _autoRecord = new AutoRecord();
             // _autoTaskOther = new AutoTaskOther();
-
-
-
-
-
 
         }
 

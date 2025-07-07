@@ -1,36 +1,37 @@
 ﻿using AKStreamWeb.Services;
-using LibCommon.Structs.WebRequest;
 using LibCommon;
-using XyCallLayer;
-using static XyCallLayer.SPhoneSDK;
-using System.Collections.Generic;
 using LibCommon.Structs.DBModels;
 using LibCommon.Structs.GB28181;
-using LibZLMediaKitMediaServer;
-using System.Threading.Channels;
-using WebSocketSharp;
 using LibCommon.Structs.GB28181.XML;
-using System.Threading;
-using SIPSorcery.SIP;
-using LinCms.Core.Entities;
-using System.Runtime.InteropServices;
-using LibGB28181SipServer;
-using System.Linq;
-using System;
-using System.ComponentModel;
-using System.Security.Policy;
-using System.Xml.Linq;
-using SIPSorcery.Net;
+using LibCommon.Structs.WebRequest;
 using LibCommon.Structs.WebResponse;
+using LibGB28181SipServer;
+using LibZLMediaKitMediaServer;
 using LibZLMediaKitMediaServer.Structs.WebRequest.ZLMediaKit;
-using System.IO;
 using LibZLMediaKitMediaServer.Structs.WebResponse.ZLMediaKit;
+using LinCms.Core.Entities;
+using Org.BouncyCastle.Asn1.Ocsp;
+using SIPSorcery.Net;
+using SIPSorcery.SIP;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices;
+using System.Security.Policy;
+using System.Threading;
+using System.Threading.Channels;
+using System.Timers;
+using System.Xml.Linq;
+using WebSocketSharp;
+using XyCallLayer;
+using static XyCallLayer.SPhoneSDK;
 
 namespace AKStreamWeb
 {
     public class Bridge
     {
-
         private static Bridge s_instance;
         public static Bridge GetInstance()
         {
@@ -57,7 +58,7 @@ namespace AKStreamWeb
             //XElement bodyXml = XElement.Parse(str);
             //UtilsHelper.XMLToObject<Catalog>(bodyXml);
 
-            SPhoneSDK.SDKInit( Common.AkStreamWebConfig.SipIp, Common.AkStreamWebConfig.SipPort, 5, System.AppContext.BaseDirectory + "pjsip.log");
+            SPhoneSDK.SDKInit( Common.AkStreamWebConfig.SipIp, Common.AkStreamWebConfig.SipPort, 7, System.AppContext.BaseDirectory + "pjsip.log");
             //SPhoneSDK.SDKInit("172.19.6.41", 5066, 5, System.AppContext.BaseDirectory +  "pjsip.log");
             SPhoneSDK.Regist("1.1.1.1", "admin", "admin", Common.AkStreamWebConfig.PublicMediaIp, false, true);
             _onIncoming = OnIncomingCall_WithMsg;
@@ -91,7 +92,63 @@ namespace AKStreamWeb
 
             SipMsgProcess.OnReceiveInvite += SipMsgProcess_OnReceiveInvite;
             SipMsgProcess.OnReceiveBye += SipMsgProcess_OnReceiveBye;
+            _checkCallsStatTimer.Elapsed += _checkCallsStatTimer_Elapsed    ;
+            _checkCallsStatTimer.Enabled = true;
+            _checkCallsStatTimer.AutoReset = true;
+            _checkCallsStatTimer.Start();
+        }
 
+        private void _checkCallsStatTimer_Elapsed(object sender, ElapsedEventArgs e)
+        {
+            GCommon.Logger.Warn("SipChannel_OnReconnectStream1 calls count " + s_calls.Count);
+            lock (_lock)
+            {
+                foreach (var call in s_calls)
+                {
+                    GCommon.Logger.Warn("SipChannel_OnReconnectStream1 calls index: " + call.Key + ", pushstatus: " + call.Value.SipChannel.PushStatus);
+
+                    if (call.Value.SipChannel.PushStatus != LibCommon.Enums.PushStatus.PUSHON)
+                    {
+                        var channel = call.Value.SipChannel;
+                        ResponseStruct rs = new ResponseStruct()
+                        {
+                            Code = ErrorNumber.None,
+                            Message = ErrorMessage.ErrorDic![ErrorNumber.None],
+                        };
+                        GCommon.Logger.Warn("SipChannel_OnReconnectStream1 before livevideo " + channel);
+                        var ret = SipServerService.LiveVideo(channel.ParentId, channel.DeviceId, out rs);
+                        GCommon.Logger.Warn("SipChannel_OnReconnectStream1 end livevideo " + channel);
+
+                        if (ret == null)
+                        {
+                            GCommon.Logger.Warn("SipChannel_OnReconnectStream1 livevideo fail：" + channel);
+                            return;
+                        }
+                        string url = ret.PlayUrl.Find(a => a.StartsWith("rtsp"));
+                        if (!string.IsNullOrEmpty(url))
+                        {
+                            GCommon.Logger.Warn("SipChannel_OnReconnectStream1 before videocapture " + url);
+                            int deviceIdVideo = SetupCaptureVideoFile(url);
+                            GCommon.Logger.Warn("SipChannel_OnReconnectStream1 end videocapture deviceIdVideo: " + deviceIdVideo);
+
+                            if (deviceIdVideo > 0)
+                            {
+                                foreach (var item in s_calls)
+                                {
+                                    if (item.Value.Url == url)
+                                    {
+                                        GCommon.Logger.Warn("SipChannel_OnReconnectStream1 ChangeVideoDevice callid: " + item.Key);
+                                        SPhoneSDK.SetDefaultVideoDevice(deviceIdVideo);
+                                        var result = SPhoneSDK.ChangeVideoDevice(item.Key, deviceIdVideo);
+                                        GCommon.Logger.Warn("SipChannel_OnReconnectStream1 ChangeVideoDevice deviceIdVideo: " + deviceIdVideo + ", reslut: " + result);
+
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         private void SipMsgProcess_OnReceiveBye(SIPRequest req)
@@ -314,6 +371,8 @@ namespace AKStreamWeb
 
                         //TestBroadcastAudio();
 
+                        //TestAddStreamProxyRecord(callid);
+
                     }
                     catch (Exception e) 
                     {
@@ -321,6 +380,23 @@ namespace AKStreamWeb
                     }
                     break;
             }
+        }
+
+        private static void TestAddStreamProxyRecord(int callid)
+        {
+            var req = new ReqZLMediaKitAddStreamProxy();
+            req.App = "rtp";
+            req.Vhost = "__defaultVhost__";
+            req.Stream = "123";
+            //req.Url = s_calls[callid].Url;
+            req.Url = "rtsp://127.0.0.1/video/stream0";
+            req.Enable_Hls = 1; //转hls要开
+            req.Enable_Mp4 = 1; //录制mp4要关
+            req.Rtp_Type = 1; //rtsp拉流时，是否使用tcp,0为tcp,1为udp,2为组播
+            req.Timeout_Sec = Common.AkStreamWebConfig.WaitEventTimeOutMSec / 1000; //超时时间
+            req.Retry_Count = -1; //无限重试
+            ResponseStruct rs;
+            var ret = Common.MediaServerList[0].WebApiHelper.AddStreamProxy(req, out rs);
         }
 
         private static void TestBroadcastAudio()
@@ -403,7 +479,8 @@ namespace AKStreamWeb
             }
         }
 
-        private Timer _timer;
+        private System.Threading.Timer _timer;
+        private System.Timers.Timer _checkCallsStatTimer =new System.Timers.Timer(30000);
 
         private void TestTimerCB(object obj)
         {
@@ -433,10 +510,10 @@ namespace AKStreamWeb
 
         public void Subcribe()
         {
-            _timer = new Timer(TestTimerCB, null, 10000, 1000000000);
+            _timer = new System.Threading.Timer(TestTimerCB, null, 10000, 1000000000);
         }
 
-    public static Dictionary<int, CallInfoInternal> s_calls = new Dictionary<int, CallInfoInternal>();
+        public static Dictionary<int, CallInfoInternal> s_calls = new Dictionary<int, CallInfoInternal>();
 
         public static int s_callidIntercom = 0;
 
@@ -561,7 +638,7 @@ namespace AKStreamWeb
                 Hangup(callid);
                 return;
             }
-
+            //sipChannel.OnReconnectStream += SipChannel_OnReconnectStream1;
             GCommon.Logger.Warn("sipincoming before livevideo " + callid);
             var ret = SipServerService.LiveVideo(deviceId, channelId, out rs);
             GCommon.Logger.Warn("sipincoming end livevideo " + callid);
@@ -834,6 +911,43 @@ namespace AKStreamWeb
 
             GCommon.Logger.Warn("sipincoming end：" + callid);
         }
+
+        //private static void SipChannel_OnReconnectStream1(SipChannel channel)
+        //{
+        //    ResponseStruct rs = new ResponseStruct()
+        //    {
+        //        Code = ErrorNumber.None,
+        //        Message = ErrorMessage.ErrorDic![ErrorNumber.None],
+        //    };
+        //    GCommon.Logger.Warn("SipChannel_OnReconnectStream1 before livevideo " + channel);
+        //    var ret = SipServerService.LiveVideo(channel.ParentId, channel.DeviceId, out rs);
+        //    GCommon.Logger.Warn("SipChannel_OnReconnectStream1 end livevideo " + channel);
+
+        //    if (ret == null)
+        //    {
+        //        GCommon.Logger.Warn("SipChannel_OnReconnectStream1 livevideo fail：" + channel);
+        //        return;
+        //    }
+        //    string url = ret.PlayUrl.Find(a => a.StartsWith("rtsp"));
+        //    if (!string.IsNullOrEmpty(url))
+        //    {
+        //        GCommon.Logger.Warn("SipChannel_OnReconnectStream1 before videocapture " + channel);
+        //        int deviceIdVideo = SetupCaptureVideoFile(url);
+        //        GCommon.Logger.Warn("SipChannel_OnReconnectStream1 end videocapture " + channel);
+
+        //        if (deviceIdVideo > 0)
+        //        {
+        //            foreach (var item in s_calls)
+        //            {
+        //                if (item.Value.Url == url)
+        //                {
+        //                    SPhoneSDK.ChangeVideoDevice(item.Key, deviceIdVideo);
+
+        //                }
+        //            }
+        //        }
+        //    }
+        //}
 
         private static SDK_onIncomingCall_WithMsg _onIncoming;
         private static SDK_onReceiveDtmf _onReceiveDtmf;

@@ -603,7 +603,7 @@ x.platid == sipDevice.DeviceId).Set(x=>x.registestate,state).ExecuteAffrowsAsync
             {
                 isPlat = false;
             }
-            if (!isPlat || string.IsNullOrEmpty(sipChannel.SipChannelDesc.CivilCode))
+            if (!isPlat && string.IsNullOrEmpty(sipChannel.SipChannelDesc.CivilCode))
             {
                 deviceNumber.fatherid = sipChannel.ParentId;
             }
@@ -746,7 +746,7 @@ x.dev.Equals(device.dev)).First();
             GCommon.Logger.Debug("UpdateCatelogToDB6");
 
             //var result = ORMHelper.Db.Delete<DeviceNumber>().Where(a =>a.plat_id == SsyncState.PlatId).Where(a =>a.modify_time!=modifyTime).ExecuteAffrows();
-            var result = ORMHelper.Db.Select<DeviceNumber>().Where(a => a.plat_id == SsyncState.PlatId).Where(a => modifyTime.Subtract(a.modify_time).Seconds > 1).First();
+            var result = ORMHelper.Db.Delete<DeviceNumber>().Where(a => a.plat_id == SsyncState.PlatId).Where(a => modifyTime.Subtract(a.modify_time).Seconds > 1).First();
             GCommon.Logger.Debug("UpdateCatelogToDB7");
 
             SsyncState.State.IsProcessing = false;

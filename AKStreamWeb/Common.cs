@@ -599,7 +599,6 @@ namespace AKStreamWeb
         {
             if (License == null)
             {
-                GCommon.Logger.Warn("license timer1 ");
                 string _msg = string.Empty;
                 LicenseStatus _status = LicenseStatus.UNDEFINED;
                 try
@@ -607,7 +606,7 @@ namespace AKStreamWeb
                     //var licenseFile = Environment.CurrentDirectory + "/license";
 
 
-                    //License = new MyLicense();
+                    //License = new TestLicense();
                     //License.MaxDeviceCount = 100;
                     //License.MaxRunCount = 100;
                     //License.ExpireDateTime = DateTime.Now.AddYears(1);
@@ -643,7 +642,6 @@ namespace AKStreamWeb
                 }
             }
 
-            GCommon.Logger.Warn("license timer2 ");
             LicenseStatus result = LicenseStatus.INVALID;
             string msg = string.Empty;
             try
@@ -664,7 +662,10 @@ namespace AKStreamWeb
                 GCommon.Logger.Warn("license timer 3");
                 var licenceInDB = ORMHelper.Db.Select<biz_licence>().First();
                 var newLicence = new biz_licence();
-                newLicence.expire = License.ExpireDateTime;
+
+                DateTime timeOffset = new DateTime(License.ExpireDateTime.Year, License.ExpireDateTime.Month, License.ExpireDateTime.Day, License.ExpireDateTime.Hour, License.ExpireDateTime.Minute, License.ExpireDateTime.Second) ;
+                newLicence.expire = timeOffset;
+
                 newLicence.max_device_number = License.MaxDeviceCount;
                 newLicence.max_transcode_number = License.MaxRunCount;
                 newLicence.max_push_number = License.MaxPushNumber;
@@ -779,8 +780,14 @@ namespace AKStreamWeb
                 }
             }
         }
-    
 
-    
+        public class TestLicense : MyLicense
+        {
+            public override LicenseStatus DoExtraValidation(out string validationMsg)
+            {
+                validationMsg = "";
+                return LicenseStatus.VALID;
+            }
+        }
     }
 }

@@ -136,12 +136,13 @@ namespace AKStreamWeb.Controllers
             if (sipMethodProxy.DeviceCatalogQuery(sipDevice, out rs))
             {
                 GCommon.Logger.Debug(
-                $"[{Common.LoggerHead}]->设备目录获取成功(OnRegister)->{sipDevice.IpAddress.ToString()}-{sipDevice.DeviceId}\r\n{JsonHelper.ToJson(sipDevice.SipChannels, Formatting.Indented)}");
+                $"[{Common.LoggerHead}]->设备目录获取成功()->{sipDevice.IpAddress.ToString()}-{sipDevice.DeviceId}\r\n{JsonHelper.ToJson(sipDevice.SipChannels, Formatting.Indented)}");
             }
             else
             {
+                StopSyncInternal();
                 GCommon.Logger.Error(
-                    $"[{Common.LoggerHead}]->设备目录获取失败(OnRegister)->{sipDevice.IpAddress.ToString()}-{sipDevice.DeviceId}\r\n{JsonHelper.ToJson(rs, Formatting.Indented)}");
+                    $"[{Common.LoggerHead}]->设备目录获取失败()->{sipDevice.IpAddress.ToString()}-{sipDevice.DeviceId}\r\n{JsonHelper.ToJson(rs, Formatting.Indented)}");
             }
             return true;
         }
@@ -189,6 +190,11 @@ namespace AKStreamWeb.Controllers
         [HttpPost]
         public bool StopSync([FromHeader(Name = "AccessKey")] string AccessKey, string deviceId)
         {
+            return StopSyncInternal();
+        }
+
+        private static bool StopSyncInternal()
+        {
             if (SipServerCallBack.SsyncState != null && SipServerCallBack.SsyncState.State.IsProcessing)
             {
                 SipServerCallBack.SsyncState.State.IsProcessing = false;
@@ -202,6 +208,7 @@ namespace AKStreamWeb.Controllers
             }
             return false;
         }
+
         /// <summary>
         /// 获取同步状态
         /// </summary>

@@ -58,7 +58,7 @@ namespace AKStreamWeb
             //XElement bodyXml = XElement.Parse(str);
             //UtilsHelper.XMLToObject<Catalog>(bodyXml);
 
-            SPhoneSDK.SDKInit( Common.AkStreamWebConfig.SipIp, Common.AkStreamWebConfig.SipPort, 7, System.AppContext.BaseDirectory + "pjsip.log");
+            SPhoneSDK.SDKInit( Common.AkStreamWebConfig.SipIp, Common.AkStreamWebConfig.SipPort, 5, System.AppContext.BaseDirectory + "pjsip.log");
             //SPhoneSDK.SDKInit("172.19.6.41", 5066, 5, System.AppContext.BaseDirectory +  "pjsip.log");
             SPhoneSDK.Regist("1.1.1.1", "admin", "admin", Common.AkStreamWebConfig.PublicMediaIp, false, true);
             _onIncoming = OnIncomingCall_WithMsg;
@@ -716,11 +716,13 @@ namespace AKStreamWeb
                             if (transcodeConfig.EncoderType == 0)
                             {
                                 SetVideoCodecPriority("H265/103", 0);
+                                SetVideoCodecPriority("H264/98", 254);
                                 GCommon.Logger.Warn("sipincoming transcode encoder 264");
                             }
                             else
                             {
                                 SetVideoCodecPriority("H265/103", 254);
+                                SetVideoCodecPriority("H264/98", 0);
                                 GCommon.Logger.Warn("sipincoming transcode encoder 265");
                             }
 

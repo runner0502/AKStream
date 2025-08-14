@@ -416,7 +416,10 @@ namespace AKStreamWeb
             //_autoLive = new AutoLive();
             // _autoRecord = new AutoRecord();
             // _autoTaskOther = new AutoTaskOther();
-
+            if (SipServerCallBack.s_syncCatalogTimer != null)
+            {
+                GCommon.Logger.Debug("synccatalog");
+            }
         }
 
         public static string Version // 版本号
@@ -676,12 +679,16 @@ namespace AKStreamWeb
                 if (licenceInDB != null)
                 {
                     GCommon.Logger.Warn("license timer4 ");
-                    //ORMHelper.Db.Update<biz_licence>(newLicence).Where(a=>a.id == newLicence.id).ExecuteAffrows();
-                    ORMHelper.Db.Delete<biz_licence>().Where(a => a.id.Equals("0")).ExecuteAffrows();
+                    ORMHelper.Db.Update<biz_licence>(newLicence).Where(a=>a.id == newLicence.id).ExecuteAffrows();
+                    //ORMHelper.Db.Delete<biz_licence>().Where(a => a.id.Equals("0")).ExecuteAffrows();
                     GCommon.Logger.Warn("license timer 5");
                 }
+                else
+                {
+                    ORMHelper.Db.Insert<biz_licence>(newLicence).ExecuteAffrows();
+                }
 
-                ORMHelper.Db.Insert<biz_licence>(newLicence).ExecuteAffrows();
+                //ORMHelper.Db.InsertOrUpdate<biz_licence>().UpdateSet(a =>a.id == newLicence.id).ExecuteAffrows();
                 s_licenceVaid = true;
                 GCommon.Logger.Warn("license success ");
 

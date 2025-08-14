@@ -258,12 +258,11 @@ namespace LibGB28181SipServer
 
                                     Task.Run(() => { OnCatalogReceived?.Invoke(sipChannelInList); }); //抛线程出去处理
                                     GCommon.Logger.Info(
-                                        $"[{Common.LoggerHead}]->Sip设备通道信息->{tmpSipDevice.DeviceId}->增加Sip通道成功->({sipChannelInList.SipChannelType.ToString()})->{sipChannelInList.SipChannelDesc.DeviceID}->此设备当前通道数量:{tmpSipDevice.SipChannels.Count}条");
+                                        $"[{Common.LoggerHead}]->Sip设备通道信息->{tmpSipDevice.DeviceId}->更新Sip通道成功->({sipChannelInList.SipChannelType.ToString()})->{sipChannelInList.SipChannelDesc.DeviceID}->此设备当前通道数量:{tmpSipDevice.SipChannels.Count}条");
                                 }
                             }
 
-                            if (tmpSipDevice.SipChannels.Count > 0
-                               ) //当正确收到过一次以后就返回成功
+                            if (tmpSipDevice.SipChannels.Count > 0) //当正确收到过一次以后就返回成功
                             {
                                 var _taskTag = $"CATALOG:{tmpSipDevice.DeviceId}";
                                 var ret = Common.NeedResponseRequests.TryRemove(_taskTag,
@@ -902,11 +901,9 @@ namespace LibGB28181SipServer
 
         private static void NewMethod(XElement bodyXml)
         {
-            GCommon.Logger.Debug(
-                                        $"[{Common.LoggerHead}]->MessageProcess2 notifycatalog->");
+            GCommon.Logger.Debug($"[{Common.LoggerHead}]->MessageProcess2 notifycatalog->");
             var notifyCata = (UtilsHelper.XMLToObject<NotifyCatalog>(bodyXml));
-            GCommon.Logger.Debug(
-            $"[{Common.LoggerHead}]->MessageProcess3 notifycatalog->");
+            GCommon.Logger.Debug($"[{Common.LoggerHead}]->MessageProcess3 notifycatalog->");
 
             var config1 = ORMHelper.Db.Select<SysAdvancedConfig>().First();
             if (config1 != null)
@@ -1290,7 +1287,7 @@ namespace LibGB28181SipServer
             retResponse.Header.Expires = sipRequest.Header.Expires;
             retResponse.Header.SetDateHeader();
             /*增加tplink 摄像头支持*/
-            retResponse.Header.Date = DateTime.Now.ToString("yyyy-MM-dd’T’HH: mm:ss.SSS"); //增加与服务器授时
+            retResponse.Header.Date = DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss.fff"); //增加与服务器授时
             registerTransaction.SendResponse(retResponse);
         }
 

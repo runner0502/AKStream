@@ -109,7 +109,8 @@ namespace AKStreamWeb.Controllers
             }
             if (SipServerCallBack.SsyncState.State.IsProcessing)
             {
-                GCommon.Logger.Warn("catalog startsync isProcessing");
+                GCommon.Logger.Warn("sync catalog startsync isProcessing");
+                GCommon.Logger.Warn("同步目录异常： 当前正在同步，请等待当前同步完成或者停止当前同步后，再发起同步");
                 return false;
             }
             SipServerCallBack.SsyncState.PlatId = deviceId;
@@ -130,6 +131,7 @@ namespace AKStreamWeb.Controllers
             {
                 SipServerCallBack.SsyncState.SyncStartIndex = 0;
                 SipServerCallBack.SsyncState.State.IsProcessing = false;
+                GCommon.Logger.Warn("同步目录异常： 设备不存在或者不在线");
                 return false;
             }
             SipServerCallBack.SsyncState.StartTime = DateTime.Now;
@@ -141,6 +143,7 @@ namespace AKStreamWeb.Controllers
             else
             {
                 StopSyncInternal();
+                GCommon.Logger.Warn("同步目录异常： 设备没有发送目录信息");
                 GCommon.Logger.Error(
                     $"[{Common.LoggerHead}]->设备目录获取失败()->{sipDevice.IpAddress.ToString()}-{sipDevice.DeviceId}\r\n{JsonHelper.ToJson(rs, Formatting.Indented)}");
             }
@@ -195,6 +198,8 @@ namespace AKStreamWeb.Controllers
 
         private static bool StopSyncInternal()
         {
+            //SipServerCallBack.UpdateCatelogToDB();
+
             if (SipServerCallBack.SsyncState != null && SipServerCallBack.SsyncState.State.IsProcessing)
             {
                 SipServerCallBack.SsyncState.State.IsProcessing = false;

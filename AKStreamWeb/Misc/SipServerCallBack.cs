@@ -17,6 +17,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Net.Http;
 using System.Numerics;
+using System.Threading;
 using System.Threading.Tasks;
 using static Org.BouncyCastle.Math.EC.ECCurve;
 
@@ -361,6 +362,8 @@ x.platid == sipDevice.DeviceId).Set(x=>x.registestate,state).ExecuteAffrowsAsync
         }
         public static SyncStateFull SsyncState;
         private static object s_catelogLock = new object();
+        public static Timer s_syncCatalogTimer = new Timer(CheckSyncCatalogTimerCallback, null, 0, 10000);
+        
         /// <summary>
         /// 收到设备目录时
         /// </summary>
@@ -372,6 +375,11 @@ x.platid == sipDevice.DeviceId).Set(x=>x.registestate,state).ExecuteAffrowsAsync
                 GCommon.Logger.Debug(
                     $"[{Common.LoggerHead}]->收到一条设备目录通知->{sipChannel.RemoteEndPoint.Address.MapToIPv4().ToString()}-{sipChannel.ParentId}:{sipChannel.DeviceId}");
 
+                if (SsyncState == null || !SsyncState.State.IsProcessing)
+                {
+                    GCommon.Logger.Warn("同步目录异常： 当前没有发起同步，忽略这条目录消息");
+                    return;
+                }
 
                 if (sipChannel.SipChannelType.Equals(SipChannelType.VideoChannel))
                 //&& sipChannel.SipChannelStatus != DevStatus.OFF) //只有视频设备并且是可用状态的进数据库
@@ -394,8 +402,15 @@ x.platid == sipDevice.DeviceId).Set(x=>x.registestate,state).ExecuteAffrowsAsync
                     //      ORMHelper.Db.Delete<DeviceNumber>().Where(x =>
                     //x.dev.Equals(sipChannel.DeviceId)).ExecuteAffrows();
                     GCommon.Logger.Debug("OnCatalogReceived: CreateDevice");
-                    CreateDevice(sipChannel);
-                    GCommon.Logger.Debug("OnCatalogReceived: CreateDevice1");
+                    try
+                    {
+                        CreateDevice(sipChannel);
+                        GCommon.Logger.Debug("OnCatalogReceived: CreateDevice1");
+                    }
+                    catch (Exception ex)
+                    {
+                        GCommon.Logger.Error("同步目录异常：创建设备目录失败， "+ ex.ToString());
+                    }
 
                     var obj = ORMHelper.Db.Select<VideoChannel>().Where(x =>
                         x.ChannelId.Equals(sipChannel.DeviceId) && x.DeviceId.Equals(sipChannel.ParentId) &&
@@ -598,22 +613,33 @@ x.platid == sipDevice.DeviceId).Set(x=>x.registestate,state).ExecuteAffrowsAsync
         {
             var deviceNumber = new DeviceNumber();
 
-            bool isPlat = true;
-            if (!sipChannel.SipChannelDesc.ParentID.Contains(sipChannel.ParentId))
+            //bool isPlat = true;
+            //if (!sipChannel.SipChannelDesc.ParentID.Contains(sipChannel.ParentId))
+            //{
+            //    isPlat = false;
+            //}
+            //if (!isPlat && string.IsNullOrEmpty(sipChannel.SipChannelDesc.CivilCode))
+            //{
+            //    deviceNumber.fatherid = sipChannel.ParentId;
+            //}
+            //else
+            //{
+            //    deviceNumber.fatherid = sipChannel.SipChannelDesc.CivilCode;
+            //}
+
+            string parentId = sipChannel.SipChannelDesc.CivilCode;
+            if (string.IsNullOrWhiteSpace(parentId))
             {
-                isPlat = false;
+                parentId = sipChannel.SipChannelDesc.ParentID;
             }
-            if (!isPlat && string.IsNullOrEmpty(sipChannel.SipChannelDesc.CivilCode))
+            if (string.IsNullOrWhiteSpace(parentId))
             {
-                deviceNumber.fatherid = sipChannel.ParentId;
+                parentId = sipChannel.ParentId;
             }
-            else
-            {
-                deviceNumber.fatherid = sipChannel.SipChannelDesc.CivilCode;
-            }
+            deviceNumber.fatherid = parentId;
 
             //dahua 
-            if (sipChannel.SipChannelDesc.ParentID.Contains("/"))
+            if (!string.IsNullOrWhiteSpace(sipChannel.SipChannelDesc.ParentID) && sipChannel.SipChannelDesc.ParentID.Contains("/"))
             {
                 var ids = sipChannel.SipChannelDesc.ParentID.Split("/");
                 if (ids != null && ids.Length > 0)
@@ -653,7 +679,7 @@ x.platid == sipDevice.DeviceId).Set(x=>x.registestate,state).ExecuteAffrowsAsync
             SsyncState.Devices.Add(deviceNumber);
         }
 
-        private static void UpdateCatelogToDB()
+        public static void UpdateCatelogToDB()
         {
             GCommon.Logger.Debug("UpdateCatelogToDB");
             ORMHelper.Db.Delete<organization>().Where(x =>
@@ -759,6 +785,19 @@ x.dev.Equals(device.dev)).First();
             //SsyncState.Orgs.Clear();
             //SsyncState.PlatId = "";
         }
+
+        static void CheckSyncCatalogTimerCallback(object state)
+        {
+            if (SsyncState == null || !SsyncState.State.IsProcessing)
+            {
+                return;
+            }
+            if (DateTime.Now.Subtract( SsyncState.StartTime).Minutes >= 5)
+            {
+                GCommon.Logger.Warn("同步目录异常：超时5分钟没有全部同步完成， 部分同步写入数据库, 共同步到的目录个数是 " + SsyncState.State.DeviceCount + SsyncState.State.orgCount );
+                UpdateCatelogToDB();
+            }
+        }
     }
 
     public class SyncStateFull
@@ -791,4 +830,6 @@ x.dev.Equals(device.dev)).First();
         KeepOrg,
         StartFromIndex
     }
+
+    
 }

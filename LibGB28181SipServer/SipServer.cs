@@ -2030,15 +2030,19 @@ namespace LibGB28181SipServer
                 GCommon.Logger.Debug($"[{Common.LoggerHead}]->发送终止时实流请求->{req}");
                 _sipTransport.SendRequestAsync(tmpSipDevice.RemoteEndPoint, req);
                 var req1= req.Copy();
-                
-                req1.Header.CallId = sipChannel.InviteSipRequestBroadcast.Header.CallId;
-                req1.Header.From =new SIPFromHeader(null, fromSipUri, sipChannel.InviteSipRequestBroadcast.Header.From.FromTag);
-                req1.Header.To = new SIPToHeader(null, toSipUri, sipChannel.InviteSipResponseBroadcast.Header.To.ToTag);
-                req1.Header.Vias.TopViaHeader.Branch = sipChannel.InviteSipResponseBroadcast.Header.Vias.TopViaHeader.Branch;
-                _sipTransport.SendRequestAsync(tmpSipDevice.RemoteEndPoint, req1);
-                sipChannel.InviteSipRequestBroadcast = null;
-                sipChannel.InviteSipResponseBroadcast = null;
-                sipChannel.AudioPortConf = -1;
+
+                if (sipChannel.InviteSipRequestBroadcast != null)
+                {
+                    req1.Header.CallId = sipChannel.InviteSipRequestBroadcast.Header.CallId;
+                    req1.Header.From = new SIPFromHeader(null, fromSipUri, sipChannel.InviteSipRequestBroadcast.Header.From.FromTag);
+                    req1.Header.To = new SIPToHeader(null, toSipUri, sipChannel.InviteSipResponseBroadcast.Header.To.ToTag);
+                    req1.Header.Vias.TopViaHeader.Branch = sipChannel.InviteSipResponseBroadcast.Header.Vias.TopViaHeader.Branch;
+                    _sipTransport.SendRequestAsync(tmpSipDevice.RemoteEndPoint, req1);
+                    sipChannel.InviteSipRequestBroadcast = null;
+                    sipChannel.InviteSipResponseBroadcast = null;
+                    sipChannel.AudioPortConf = -1;
+                }
+
             }
             catch (Exception ex)
             {

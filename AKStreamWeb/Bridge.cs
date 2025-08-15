@@ -58,9 +58,22 @@ namespace AKStreamWeb
             //XElement bodyXml = XElement.Parse(str);
             //UtilsHelper.XMLToObject<Catalog>(bodyXml);
 
+            int sipRtpStartPort = 4000;
+            int sipRtpPortRange = 1000;
+            var sipRtpStartPortConfig = ORMHelper.Db.Select<ConfigItem>().Where(a=>a.Key.Equals("sipRtpStartPort")).First();
+            if (sipRtpStartPortConfig != null)
+            {
+                sipRtpStartPort = int.Parse(sipRtpStartPortConfig.Value);
+            }
+            var sipRtpPortRangeConfig = ORMHelper.Db.Select<ConfigItem>().Where(a => a.Key.Equals("sipRtpPortRange")).First();
+            if (sipRtpPortRangeConfig != null)
+            {
+                sipRtpPortRange = int.Parse(sipRtpPortRangeConfig.Value);
+            }
+
             SPhoneSDK.SDKInit( Common.AkStreamWebConfig.SipIp, Common.AkStreamWebConfig.SipPort, 5, System.AppContext.BaseDirectory + "pjsip.log");
             //SPhoneSDK.SDKInit("172.19.6.41", 5066, 5, System.AppContext.BaseDirectory +  "pjsip.log");
-            SPhoneSDK.Regist("1.1.1.1", "admin", "admin", Common.AkStreamWebConfig.PublicMediaIp, false, true);
+            SPhoneSDK.Regist1("1.1.1.1", "admin", "admin", Common.AkStreamWebConfig.PublicMediaIp, sipRtpStartPort, sipRtpPortRange, false, true);
             _onIncoming = OnIncomingCall_WithMsg;
             SPhoneSDK.SetCallback_IncomingCall_WithMsg(_onIncoming);
             _onReceiveDtmf = OnReceiveDtmf;
@@ -613,10 +626,9 @@ namespace AKStreamWeb
                     }
                 }
             }
-
-            if (deviceId.IsNullOrEmpty() || channelId.IsNullOrEmpty())
+            if (deviceId.IsNullOrEmpty())
             {
-                GCommon.Logger.Warn($"[{Common.LoggerHead}]->SIP来电号码信息错误sipincoming->{deviceId}-{channelId}");
+                GCommon.Logger.Warn("sipincoming 设备不在线：" + deviceId);
                 Hangup(callid);
                 return;
             }

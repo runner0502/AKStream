@@ -546,6 +546,9 @@ namespace XyCallLayer
         public extern static int ConnectSoundportToCall(int captureId, int playId, int callid);
         [DllImport(@"./nativesip/libsphone.so")]
         public extern static bool VerifyLicense(ref LicenseResult licenseResult);
+        [DllImport(@"./nativesip/libsphone.so")]
+        public extern static bool Regist1(string host, string uname, string pwd, string mediaPublicIP, int rtpStartPort, int rtpPortRange, bool mobile = false, bool localMode = false,
+    int regTimeout = 60, QosType qos = QosType.BEST_EFFORT);
 
     }
 }

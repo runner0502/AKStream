@@ -343,6 +343,18 @@ namespace AKStreamWeb
                 basicconfig.UpdateTime = DateTime.Now;
                 ORMHelper.Db.Insert(basicconfig).ExecuteAffrows();
             }
+            var configItemCount = ORMHelper.Db.Select<ConfigItem>().Count();
+            if (configItemCount ==0)
+            {
+                ConfigItem item = new ConfigItem();
+                item.Key = "sipRtpStartPort";
+                item.Value = "4000";
+                ORMHelper.Db.Insert(item).ExecuteAffrows();
+                ConfigItem sipRtpPortRange = new ConfigItem();
+                sipRtpPortRange.Key = "sipRtpPortRange";
+                sipRtpPortRange.Value = "1000";
+                ORMHelper.Db.Insert(sipRtpPortRange).ExecuteAffrows();
+            }
             ORMHelper.Db.Select<Device281Plat>().Count();
             ORMHelper.Db.Select<biz_licence>().Count();
             ORMHelper.Db.Select<biz_transcode>().Count();

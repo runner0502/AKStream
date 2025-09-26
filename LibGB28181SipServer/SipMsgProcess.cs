@@ -847,55 +847,66 @@ namespace LibGB28181SipServer
                     case "BROADCAST":
                         await SendOkMessage(sipRequest);
                         break;
-                    case "MOBILEPOSITION":
-                        var config = ORMHelper.Db.Select<SysAdvancedConfig>().First();
-                        if (config != null && config.PushGisEnable == 1)
-                        {
-                            using (HttpClient client = new HttpClient())
-                            {
-                                var formData = new MultipartFormDataContent();
-                                // 添加表单数据
-                                formData.Add(new StringContent(config.PushGisType), "mqType");
-                                //formData.Add(new StringContent("queue.gis.third"), "topic");
-
-                                formData.Add(new StringContent(config.PushPositionTopic), "topic");
-                                string time1 = bodyXml.Element("Time")?.Value;
-                                info1 info1 = new info1();
-                                info1.user = bodyXml.Element("DeviceID")?.Value;
-                                info1.name = "2";
-                                info1.lat = bodyXml.Element("Latitude")?.Value;
-                                info1.lon = bodyXml.Element("Longitude")?.Value;
-                                info1.time = time1;
-                                info1.type = "3";
-                                info1.subtype = "213";
-                                info1.status = 1;
-                                var deviceinfo = ORMHelper.Db.Select<DevicePlus>().Where(a => a.id == info1.user).First();
-                                if (deviceinfo != null)
-                                {
-                                    info1.DeviceType = deviceinfo.type;
-                                    info1.DeviceInfo = deviceinfo.info;
-                                }
-                                var deviceNum = ORMHelper.Db.Select<DeviceNumber>().Where(a => a.dev == info1.user).First();
-                                if (deviceNum != null)
-                                {
-                                    info1.sipnum = deviceNum.num;
-                                }
-
-                                var data = JsonHelper.ToJson(info1, Formatting.None, MissingMemberHandling.Error);
-                                formData.Add(new StringContent(data), "body");
-                 
-                                //var httpRet = client.PostAsync("http://65.176.4.95:58080/api/ice/sendMsgByMQ", formData).Result.Content.ReadAsStringAsync();
-                                var httpRet = client.PostAsync(config.PushGisUrl, formData).Result.Content.ReadAsStringAsync();
-                                GCommon.Logger.Warn("MOBILEPOSITION send http " + info1.ToJson() + ", " + httpRet);
-                            }
-                        }
-                        else
-                        {
-                            GCommon.Logger.Warn("mobileposition config is null");
-                        }
+                    case "ALARM":
                         await SendOkMessage(sipRequest);
-                                                break;
+                        break;
+                    case "MOBILEPOSITION":
+                        await SendOkMessage(sipRequest);
+                        Task.Run(() =>
+                        {
+                            ProcessMobilePositionMsg(bodyXml);
+                        });
+                        break;
                 }
+            }
+        }
+
+        private static void ProcessMobilePositionMsg(XElement bodyXml)
+        {
+            var config = ORMHelper.Db.Select<SysAdvancedConfig>().First();
+            if (config != null && config.PushGisEnable == 1 && !string.IsNullOrWhiteSpace(config.PushPositionTopic))
+            {
+                using (HttpClient client = new HttpClient())
+                {
+                    var formData = new MultipartFormDataContent();
+                    // 添加表单数据
+                    formData.Add(new StringContent(config.PushGisType), "mqType");
+                    //formData.Add(new StringContent("queue.gis.third"), "topic");
+
+                    formData.Add(new StringContent(config.PushPositionTopic), "topic");
+                    string time1 = bodyXml.Element("Time")?.Value;
+                    info1 info1 = new info1();
+                    info1.user = bodyXml.Element("DeviceID")?.Value;
+                    info1.name = "2";
+                    info1.lat = bodyXml.Element("Latitude")?.Value;
+                    info1.lon = bodyXml.Element("Longitude")?.Value;
+                    info1.time = time1;
+                    info1.type = "3";
+                    info1.subtype = "213";
+                    info1.status = 1;
+                    var deviceinfo = ORMHelper.Db.Select<DevicePlus>().Where(a => a.id == info1.user).First();
+                    if (deviceinfo != null)
+                    {
+                        info1.DeviceType = deviceinfo.type;
+                        info1.DeviceInfo = deviceinfo.info;
+                    }
+                    var deviceNum = ORMHelper.Db.Select<DeviceNumber>().Where(a => a.dev == info1.user).First();
+                    if (deviceNum != null)
+                    {
+                        info1.sipnum = deviceNum.num;
+                    }
+
+                    var data = JsonHelper.ToJson(info1, Formatting.None, MissingMemberHandling.Error);
+                    formData.Add(new StringContent(data), "body");
+
+                    //var httpRet = client.PostAsync("http://65.176.4.95:58080/api/ice/sendMsgByMQ", formData).Result.Content.ReadAsStringAsync();
+                    var httpRet = client.PostAsync(config.PushGisUrl, formData).Result.Content.ReadAsStringAsync();
+                    GCommon.Logger.Warn("MOBILEPOSITION send http " + info1.ToJson() + ", " + httpRet);
+                }
+            }
+            else
+            {
+                GCommon.Logger.Warn("mobileposition config is null");
             }
         }
 

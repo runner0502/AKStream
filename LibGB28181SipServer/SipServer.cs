@@ -441,7 +441,7 @@ namespace LibGB28181SipServer
                 };
                 //string xmlBody1 = CatalogQuery.Instance.Save<CatalogQuery>(catalogQuery);
                 string xmlBody1 = MobilePositionQuery.Instance.Save<MobilePositionQuery>(catalogQuery);
-                SIPNotifierClient mwiSubscriber = new SIPNotifierClient(_sipTransport, null, SIPEventPackagesEnum.MessageSummary, mwiURI, sipDevice.SipServerConfig.ServerSipDeviceId, Common.SipServerConfig.SipIpAddress , sipDevice.Password, 3600, xmlBody1);
+                SIPNotifierClient mwiSubscriber = new SIPNotifierClient(_sipTransport, null, SIPEventPackagesEnum.MessageSummary, mwiURI, Common.SipServerConfig.ServerSipDeviceId, Common.SipServerConfig.SipIpAddress , sipDevice.Password, 3600, xmlBody1);
                 mwiSubscriber.SubscriptionFailed += (uri, failureStatus, errorMessage) => GCommon.Logger.Debug($"MWI failed for {uri}, {errorMessage}");
                 mwiSubscriber.SubscriptionSuccessful += (uri) => GCommon.Logger.Debug($"MWI subscription successful for {uri}");
                 mwiSubscriber.NotificationReceived += (evt, msg) => GCommon.Logger.Debug($"MWI notification, type {evt}, message {msg}.");
@@ -535,7 +535,7 @@ namespace LibGB28181SipServer
                 };
                 //string xmlBody1 = CatalogQuery.Instance.Save<CatalogQuery>(catalogQuery);
                 string xmlBody1 = CatalogQuery.Instance.Save<CatalogQuery>(catalogQuery);
-                SIPNotifierClient mwiSubscriber = new SIPNotifierClient(_sipTransport, null, SIPEventPackagesEnum.MessageSummary, mwiURI, sipDevice.SipServerConfig.ServerSipDeviceId, Common.SipServerConfig.SipIpAddress, sipDevice.Password, 3600, xmlBody1);
+                SIPNotifierClient mwiSubscriber = new SIPNotifierClient(_sipTransport, null, SIPEventPackagesEnum.MessageSummary, mwiURI, Common.SipServerConfig.ServerSipDeviceId, Common.SipServerConfig.SipIpAddress, sipDevice.Password, 3600, xmlBody1);
                 mwiSubscriber.SubscriptionFailed += (uri, failureStatus, errorMessage) => GCommon.Logger.Debug($"MWI failed for {uri}, {errorMessage}");
                 mwiSubscriber.SubscriptionSuccessful += (uri) => GCommon.Logger.Debug($"MWI subscription successful for {uri}");
                 mwiSubscriber.NotificationReceived += (evt, msg) => GCommon.Logger.Debug($"MWI notification, type {evt}, message {msg}.");

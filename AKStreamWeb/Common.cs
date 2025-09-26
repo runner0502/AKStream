@@ -624,6 +624,7 @@ namespace AKStreamWeb
                     //License = new TestLicense();
                     //License.MaxDeviceCount = 100;
                     //License.MaxRunCount = 100;
+                    //License.MaxPushNumber = 100;
                     //License.ExpireDateTime = DateTime.Now.AddYears(1);
 
                     License = new LicenseNative();

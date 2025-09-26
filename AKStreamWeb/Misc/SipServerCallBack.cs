@@ -15,8 +15,10 @@ using SIPSorcery.Net;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Net.Http;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using static Org.BouncyCastle.Math.EC.ECCurve;
@@ -55,7 +57,7 @@ x.platid == sipDeviceId).First();
             GCommon.Logger.Debug(
                 $"[{Common.LoggerHead}]->设备就绪(OnRegister)->{sipDevice.IpAddress.ToString()}-{sipDevice.DeviceId}");
 
-            Bridge.GetInstance().Subcribe();
+            //Bridge.GetInstance().Subcribe();
 
             ResponseStruct rs;
             SipMethodProxy sipMethodProxy2 = new SipMethodProxy(Common.AkStreamWebConfig.WaitSipRequestTimeOutMSec);
@@ -82,62 +84,86 @@ x.platid == sipDeviceId).First();
                     $"[{Common.LoggerHead}]->获取设备状态信息失败(OnRegister)->{sipDevice.IpAddress.ToString()}-{sipDevice.DeviceId}\r\n{JsonHelper.ToJson(rs, Formatting.Indented)}");
             }
 
-            var obj1 = ORMHelper.Db.Update<Device281Plat>().Where(x =>
-            x.platid == sipDevice.DeviceId).Set(x => x.registestate, 1).ExecuteAffrows();
-            var plate = ORMHelper.Db.Select<Device281Plat>().Where(x => x.platid == sipDevice.DeviceId).First();
-            if (plate != null && plate.plat_type == 1)
+            Task.Run(() =>
             {
-                ORMHelper.Db.Update<DeviceNumber>().Where(x => x.fatherid == sipDevice.DeviceId).Set(x => x.status, 1).ExecuteAffrows();
-                
-                var config1 = ORMHelper.Db.Select<SysAdvancedConfig>().First();
-                if (config1 != null)
+                Common.SipServer.Subscribe(sipDevice, null, SIPSorcery.SIP.SIPMethodsEnum.OPTIONS, "", "", "", LibCommon.Structs.GB28181.XML.CommandType.MobilePosition, false, null, null, null, 2000);
+                Thread.Sleep(200);
+                Common.SipServer.SubscribeCatalog(sipDevice, null, SIPSorcery.SIP.SIPMethodsEnum.OPTIONS, "", "", "", LibCommon.Structs.GB28181.XML.CommandType.Catalog, false, null, null, null, 2000);
+            });
+
+            Task.Run(() =>
+            {
+                UpdateRegistState(sipDevice);
+            });
+
+            //SipMethodProxy sipMethodProxy = new SipMethodProxy(Common.AkStreamWebConfig.WaitSipRequestTimeOutMSec);
+            //if (sipMethodProxy.DeviceCatalogQuery(sipDevice, out rs))
+            //{
+            //    GCommon.Logger.Debug(
+            //        $"[{Common.LoggerHead}]->设备目录获取成功(OnRegister)->{sipDevice.IpAddress.ToString()}-{sipDevice.DeviceId}\r\n{JsonHelper.ToJson(sipDevice.SipChannels, Formatting.Indented)}");
+            //}
+            //else
+            //{
+            //    GCommon.Logger.Error(
+            //        $"[{Common.LoggerHead}]->设备目录获取失败(OnRegister)->{sipDevice.IpAddress.ToString()}-{sipDevice.DeviceId}\r\n{JsonHelper.ToJson(rs, Formatting.Indented)}");
+            //}
+
+           
+        }
+
+        private static void UpdateRegistState(SipDevice sipDevice)
+        {
+            try
+            {
+                var obj1 = ORMHelper.Db.Update<Device281Plat>().Where(x =>
+                            x.platid == sipDevice.DeviceId).Set(x => x.registestate, 1).ExecuteAffrows();
+                var plate = ORMHelper.Db.Select<Device281Plat>().Where(x => x.platid == sipDevice.DeviceId).First();
+                if (plate != null && plate.plat_type == 1)
                 {
-                    var devices = ORMHelper.Db.Select<DeviceNumber>().Where(x => x.fatherid == sipDevice.DeviceId).ToList();
-                    foreach (var item in devices)
+                    ORMHelper.Db.Update<DeviceNumber>().Where(x => x.fatherid == sipDevice.DeviceId).Set(x => x.status, 1).ExecuteAffrows();
+
+                    var config1 = ORMHelper.Db.Select<SysAdvancedConfig>().First();
+                    if (config1 != null)
                     {
-                        using (HttpClient client = new HttpClient())
+                        var devices = ORMHelper.Db.Select<DeviceNumber>().Where(x => x.fatherid == sipDevice.DeviceId).ToList();
+                        foreach (var item in devices)
                         {
-                            var formData = new MultipartFormDataContent();
-                            // 添加表单数据
-                            formData.Add(new StringContent(config1.PushGisType), "mqType");
-
-                            formData.Add(new StringContent(config1.PushRegistStateTopic), "topic");
-                            info1 info1 = new info1();
-                            info1.user = item.dev;
-                            info1.name = "2";
-                            info1.type = "3";
-                            info1.subtype = "213";
-                            info1.status = 1;
-
-                            var deviceinfo = ORMHelper.Db.Select<DevicePlus>().Where(a => a.id == info1.user).First();
-                            if (deviceinfo != null)
+                            using (HttpClient client = new HttpClient())
                             {
-                                info1.DeviceType = deviceinfo.type;
-                                info1.DeviceInfo = deviceinfo.info;
-                            }
-                            info1.sipnum = item.num;
-                            var data = JsonHelper.ToJson(info1, Formatting.None, MissingMemberHandling.Error);
-                            formData.Add(new StringContent(data), "body");
+                                var formData = new MultipartFormDataContent();
+                                // 添加表单数据
+                                formData.Add(new StringContent(config1.PushGisType), "mqType");
 
-                            var httpRet = client.PostAsync(config1.PushGisUrl, formData).Result.Content.ReadAsStringAsync();
-                            GCommon.Logger.Warn("catalognotify send http regist " + info1.ToJson() + ", " + httpRet);
+                                formData.Add(new StringContent(config1.PushRegistStateTopic), "topic");
+                                info1 info1 = new info1();
+                                info1.user = item.dev;
+                                info1.name = "2";
+                                info1.type = "3";
+                                info1.subtype = "213";
+                                info1.status = 1;
+
+                                var deviceinfo = ORMHelper.Db.Select<DevicePlus>().Where(a => a.id == info1.user).First();
+                                if (deviceinfo != null)
+                                {
+                                    info1.DeviceType = deviceinfo.type;
+                                    info1.DeviceInfo = deviceinfo.info;
+                                }
+                                info1.sipnum = item.num;
+                                var data = JsonHelper.ToJson(info1, Formatting.None, MissingMemberHandling.Error);
+                                formData.Add(new StringContent(data), "body");
+
+                                var httpRet = client.PostAsync(config1.PushGisUrl, formData).Result.Content.ReadAsStringAsync();
+                                GCommon.Logger.Warn("regist send http regist " + info1.ToJson() + ", " + httpRet);
+                            }
                         }
                     }
                 }
             }
-
-        //SipMethodProxy sipMethodProxy = new SipMethodProxy(Common.AkStreamWebConfig.WaitSipRequestTimeOutMSec);
-        //if (sipMethodProxy.DeviceCatalogQuery(sipDevice, out rs))
-        //{
-        //    GCommon.Logger.Debug(
-        //        $"[{Common.LoggerHead}]->设备目录获取成功(OnRegister)->{sipDevice.IpAddress.ToString()}-{sipDevice.DeviceId}\r\n{JsonHelper.ToJson(sipDevice.SipChannels, Formatting.Indented)}");
-        //}
-        //else
-        //{
-        //    GCommon.Logger.Error(
-        //        $"[{Common.LoggerHead}]->设备目录获取失败(OnRegister)->{sipDevice.IpAddress.ToString()}-{sipDevice.DeviceId}\r\n{JsonHelper.ToJson(rs, Formatting.Indented)}");
-        //}
-    }
+            catch (Exception ex)
+            {
+                GCommon.Logger.Error("UpdateRegistState fail : " + ex);
+            }
+        }
 
         public static void OnUnRegister(string sipDeviceJson)
         {
@@ -631,6 +657,27 @@ x.platid == sipDevice.DeviceId).Set(x=>x.registestate,state).ExecuteAffrowsAsync
             if (string.IsNullOrWhiteSpace(parentId))
             {
                 parentId = sipChannel.SipChannelDesc.ParentID;
+            }
+            else
+            {
+                if (SipServerCallBack.SsyncState != null)
+                {
+                    organization org = null;
+                    try
+                    {
+                        org = SipServerCallBack.SsyncState.Orgs.First(a => a.id.Equals(parentId));
+                    }
+                    catch (Exception)
+                    {
+
+                    }    
+                    if (org == null)
+                    {
+                        GCommon.Logger.Warn("sync catalog : civicode not define " + parentId);
+                        //parentId = null;
+                        parentId = sipChannel.SipChannelDesc.ParentID;
+                    }
+                }
             }
             if (string.IsNullOrWhiteSpace(parentId))
             {

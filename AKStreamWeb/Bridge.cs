@@ -71,9 +71,10 @@ namespace AKStreamWeb
                 sipRtpPortRange = int.Parse(sipRtpPortRangeConfig.Value);
             }
 
-            SPhoneSDK.SDKInit( Common.AkStreamWebConfig.SipIp, Common.AkStreamWebConfig.SipPort, 5, System.AppContext.BaseDirectory + "pjsip.log");
+            SPhoneSDK.SDKInit( Common.AkStreamWebConfig.SipIp, Common.AkStreamWebConfig.SipPort, 3, System.AppContext.BaseDirectory + "pjsip.log");
             //SPhoneSDK.SDKInit("172.19.6.41", 5066, 5, System.AppContext.BaseDirectory +  "pjsip.log");
             SPhoneSDK.Regist1("1.1.1.1", "admin", "admin", Common.AkStreamWebConfig.PublicMediaIp, sipRtpStartPort, sipRtpPortRange, false, true);
+            //SPhoneSDK.Regist("1.1.1.1", "admin", "admin", Common.AkStreamWebConfig.PublicMediaIp, false, true);
             _onIncoming = OnIncomingCall_WithMsg;
             SPhoneSDK.SetCallback_IncomingCall_WithMsg(_onIncoming);
             _onReceiveDtmf = OnReceiveDtmf;
@@ -522,6 +523,7 @@ namespace AKStreamWeb
         }
 
         public void Subcribe()
+
         {
             _timer = new System.Threading.Timer(TestTimerCB, null, 10000, 1000000000);
         }

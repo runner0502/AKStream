@@ -22,6 +22,7 @@ using System.Runtime.InteropServices;
 using System.Security.Policy;
 using System.Threading;
 using System.Threading.Channels;
+using System.Threading.Tasks;
 using System.Timers;
 using System.Xml.Linq;
 using WebSocketSharp;
@@ -71,7 +72,7 @@ namespace AKStreamWeb
                 sipRtpPortRange = int.Parse(sipRtpPortRangeConfig.Value);
             }
 
-            SPhoneSDK.SDKInit( Common.AkStreamWebConfig.SipIp, Common.AkStreamWebConfig.SipPort, 3, System.AppContext.BaseDirectory + "pjsip.log");
+            SPhoneSDK.SDKInit( Common.AkStreamWebConfig.SipIp, Common.AkStreamWebConfig.SipPort, 4, System.AppContext.BaseDirectory + "pjsip.log");
             //SPhoneSDK.SDKInit("172.19.6.41", 5066, 5, System.AppContext.BaseDirectory +  "pjsip.log");
             SPhoneSDK.Regist1("1.1.1.1", "admin", "admin", Common.AkStreamWebConfig.PublicMediaIp, sipRtpStartPort, sipRtpPortRange, false, true);
             //SPhoneSDK.Regist("1.1.1.1", "admin", "admin", Common.AkStreamWebConfig.PublicMediaIp, false, true);
@@ -1042,21 +1043,23 @@ namespace AKStreamWeb
 
         public static void OnReceiveKeyframeRequest(int callid)
         {
-            GCommon.Logger.Warn("OnReceiveKeyframeRequest callid: " + callid);
-            try
+            Task.Run(() =>
             {
-                SipChannel sipChannel = null;
-                lock (_lock)
+                GCommon.Logger.Warn("OnReceiveKeyframeRequest callid: " + callid);
+                try
                 {
-                    if (s_calls != null && s_calls.Count > 0)
+                    SipChannel sipChannel = null;
+                    lock (_lock)
                     {
-                        var info = s_calls[callid];
-                        if (info != null)
+                        if (s_calls != null && s_calls.Count > 0)
                         {
-                            sipChannel = info.SipChannel;
+                            var info = s_calls[callid];
+                            if (info != null)
+                            {
+                                sipChannel = info.SipChannel;
+                            }
                         }
                     }
-                }
                     if (sipChannel == null)
                     {
                         GCommon.Logger.Warn("OnReceiveKeyframeRequest not find sipchannel callid: " + callid);
@@ -1065,11 +1068,12 @@ namespace AKStreamWeb
                     ResponseStruct rs;
 
                     var ret = SipServerService.ForceKeyframe(sipChannel.ParentId, sipChannel.DeviceId, out rs);
-            }
-            catch (Exception ex)
-            {
-                GCommon.Logger.Warn("OnReceiveKeyframeRequest callid: " + callid + ", fail :" +ex.Message);
-            }
+                }
+                catch (Exception ex)
+                {
+                    GCommon.Logger.Warn("OnReceiveKeyframeRequest callid: " + callid + ", fail :" + ex.Message);
+                }
+            });
             //if (!rs.Code.Equals(ErrorNumber.None))
             //{
             //    throw new AkStreamException(rs);

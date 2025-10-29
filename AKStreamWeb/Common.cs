@@ -623,9 +623,11 @@ namespace AKStreamWeb
 
                     //License = new TestLicense();
                     //License.MaxDeviceCount = 100;
-                    //License.MaxRunCount = 100;
+                    //License.MaxRunCount = 14;
                     //License.MaxPushNumber = 100;
-                    //License.ExpireDateTime = DateTime.Now.AddYears(1);
+                    //var time = DateTime.Parse("2025-12-12");
+
+                    //License.ExpireDateTime = time;
 
                     License = new LicenseNative();
 
@@ -671,7 +673,7 @@ namespace AKStreamWeb
                 GCommon.Logger.Warn("license fail: " + ex.Message);
                 throw;
             }
-            GCommon.Logger.Warn("license timer21 ");
+            GCommon.Logger.Info($"[{LoggerHead}]->程序版本标识:{Version} akversion {Assembly.GetExecutingAssembly().GetName().Version}");
 
             if (result == LicenseStatus.VALID)
             {

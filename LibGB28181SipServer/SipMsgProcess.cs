@@ -1270,6 +1270,9 @@ namespace LibGB28181SipServer
                             Common.SIP_REGISTER_MIN_INTERVAL_SEC)
                         {
                             tmpSipDevice.RegisterTime = DateTime.Now;
+                            tmpSipDevice.RemoteEndPoint = remoteEndPoint;
+                            tmpSipDevice.IpAddress = remoteEndPoint.Address;
+                            tmpSipDevice.Port = remoteEndPoint.Port;
 
                             Task.Run(() => { OnRegisterReceived?.Invoke(JsonHelper.ToJson(tmpSipDevice)); }); //抛线程出去处理
 

@@ -622,7 +622,7 @@ namespace AKStreamWeb
 
 
                     //License = new TestLicense();
-                    //License.MaxDeviceCount = 100;
+                    //License.MaxDeviceCount = 101;
                     //License.MaxRunCount = 14;
                     //License.MaxPushNumber = 100;
                     //var time = DateTime.Parse("2025-12-12");
@@ -666,7 +666,6 @@ namespace AKStreamWeb
             {
                 result = License.DoExtraValidation(out msg);
                 //result = LicenseStatus.VALID;
-
             }
             catch (Exception ex)
             {
@@ -694,7 +693,10 @@ namespace AKStreamWeb
                 if (licenceInDB != null)
                 {
                     GCommon.Logger.Warn("license timer4 ");
-                    ORMHelper.Db.Update<biz_licence>(newLicence).Where(a=>a.id == newLicence.id).ExecuteAffrows();
+                    ORMHelper.Db.Update<biz_licence>().Set(x=>x.max_device_number, License.MaxDeviceCount ).Set(x=>x.max_push_number, License.MaxPushNumber)
+                        .Set(x=>x.max_transcode_number, License.MaxRunCount)
+                        .Set(x=>x.UpdateTime, DateTime.Now)
+                        .Set(x=>x.expire, License.ExpireDateTime).Where(a=>a.id.Equals( newLicence.id )).ExecuteAffrows();
                     //ORMHelper.Db.Delete<biz_licence>().Where(a => a.id.Equals("0")).ExecuteAffrows();
                     GCommon.Logger.Warn("license timer 5");
                 }

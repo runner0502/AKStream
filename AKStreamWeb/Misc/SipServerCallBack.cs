@@ -12,6 +12,7 @@ using NetTopologySuite.Triangulate;
 using Newtonsoft.Json;
 using Org.BouncyCastle.Ocsp;
 using SIPSorcery.Net;
+using SIPSorcery.SIP;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -596,7 +597,7 @@ x.platid == sipDevice.DeviceId).Set(x=>x.registestate,state).ExecuteAffrowsAsync
                 //{
                 //    org.super_id = sipChannel.ParentId;
                 //}
-                if (string.IsNullOrEmpty(sipChannel.SipChannelDesc.CivilCode))
+                if (string.IsNullOrEmpty(sipChannel.SipChannelDesc.CivilCode) || sipChannel.SipChannelDesc.CivilCode.ToUpper() == "NULL")
                 {
                     if (!string.IsNullOrEmpty(sipChannel.SipChannelDesc.ParentID))
                     {
@@ -653,48 +654,43 @@ x.platid == sipDevice.DeviceId).Set(x=>x.registestate,state).ExecuteAffrowsAsync
             //    deviceNumber.fatherid = sipChannel.SipChannelDesc.CivilCode;
             //}
 
-            string parentId = sipChannel.SipChannelDesc.CivilCode;
-            if (string.IsNullOrWhiteSpace(parentId))
+            string parentId = "";
+            if (CheckParentId(sipChannel.SipChannelDesc.CivilCode) == false)
             {
-                parentId = sipChannel.SipChannelDesc.ParentID;
+                bool vaid = CheckParentId(sipChannel.SipChannelDesc.ParentID);
+                if (!vaid)
+                {
+                    //dahua 
+                    if (!string.IsNullOrWhiteSpace(sipChannel.SipChannelDesc.ParentID) && sipChannel.SipChannelDesc.ParentID.Contains("/"))
+                    {
+                        var ids = sipChannel.SipChannelDesc.ParentID.Split("/");
+                        if (ids != null && ids.Length > 0)
+                        {
+                            var tmpParentId = ids[ids.Length - 1];
+                            vaid = CheckParentId(tmpParentId);
+                            if (vaid)
+                            {
+                                parentId = tmpParentId;
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    parentId = sipChannel.SipChannelDesc.ParentID;
+                }
             }
             else
             {
-                if (SipServerCallBack.SsyncState != null)
-                {
-                    organization org = null;
-                    try
-                    {
-                        org = SipServerCallBack.SsyncState.Orgs.First(a => a.id.Equals(parentId));
-                    }
-                    catch (Exception)
-                    {
-
-                    }    
-                    if (org == null)
-                    {
-                        GCommon.Logger.Warn("sync catalog : civicode not define " + parentId);
-                        //parentId = null;
-                        parentId = sipChannel.SipChannelDesc.ParentID;
-                    }
-                }
+                parentId = sipChannel.SipChannelDesc.CivilCode;
             }
+
             if (string.IsNullOrWhiteSpace(parentId))
             {
                 parentId = sipChannel.ParentId;
             }
+
             deviceNumber.fatherid = parentId;
-
-            //dahua 
-            if (!string.IsNullOrWhiteSpace(sipChannel.SipChannelDesc.ParentID) && sipChannel.SipChannelDesc.ParentID.Contains("/"))
-            {
-                var ids = sipChannel.SipChannelDesc.ParentID.Split("/");
-                if (ids != null && ids.Length > 0)
-                {
-                    deviceNumber.fatherid = ids[ids.Length - 1];
-                }
-            }
-
 
             //deviceNumber.dev = sipChannel.DeviceId;
             deviceNumber.dev = sipChannel.SipChannelDesc.DeviceID;
@@ -845,7 +841,37 @@ x.dev.Equals(device.dev)).First();
                 UpdateCatelogToDB();
             }
         }
+
+        private static bool CheckParentId(string parentId)
+        {
+            if (string.IsNullOrWhiteSpace(parentId))
+            {
+                return false;
+            }
+            else
+            {
+                if (SipServerCallBack.SsyncState != null)
+                {
+                    organization org = null;
+                    try
+                    {
+                        org = SipServerCallBack.SsyncState.Orgs.First(a => a.id.Equals(parentId));
+                    }
+                    catch (Exception)
+                    {
+
+                    }
+                    if (org == null)
+                    {
+                        GCommon.Logger.Warn("sync catalog : CheckParentId fail parentid not define in orgs: " + parentId);
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
     }
+
 
     public class SyncStateFull
     {

@@ -32,12 +32,12 @@ namespace LibCommon.Structs.DBModels
         /// <summary>
         /// 最大转码并发数量
         /// </summary>
-        [Column(DbType = "int(32)")]
+        //[Column(DbType = "int(32)")]
         public int max_transcode_number { get; set; }
         /// <summary>
         /// 最大设备接入数量
         /// </summary>
-        [Column(DbType = "int(32)")]
+        //[Column(DbType = "int(32)")]
         public int max_device_number { get; set; }
         /// <summary>
         /// 有效授权期
@@ -76,7 +76,7 @@ namespace LibCommon.Structs.DBModels
         /// <summary>
         /// 最大推流并发数量
         /// </summary>
-        [Column(DbType = "int(32)")]
+        //[Column(DbType = "int(32)")]
         public int max_push_number { get; set; }
 
     }

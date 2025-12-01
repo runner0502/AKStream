@@ -64,11 +64,11 @@ namespace LibCommon.Structs.DBModels
         public string place { get => _place; set => _place = value; }
 
         private int _ptz_type;
-        [Column(DbType = "int(11)", IsNullable =true)]
+        //[Column(DbType = "int(11)", IsNullable =true)]
         public int ptz_type { get => _ptz_type; set => _ptz_type = value; }
 
         private int _period;
-        [Column(DbType = "int(11)", IsNullable =true) ]
+        //[Column(DbType = "int(11)", IsNullable =true) ]
         public int period { get => _period; set => _period = value; }
 
         private DateTime _modify_time;

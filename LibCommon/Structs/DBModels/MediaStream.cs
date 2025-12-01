@@ -50,7 +50,7 @@ namespace LibCommon.Structs.DBModels
         /// <summary>
         /// 状态（0：停止， 1： 正在推流）
         /// </summary>
-        [Column(DbType = "int(11)", IsNullable = true)]
+        //[Column(DbType = "int(11)", IsNullable = true)]
         public int state { get; set; }
 
         /// <summary>
@@ -63,12 +63,12 @@ namespace LibCommon.Structs.DBModels
         /// <summary>
         /// 推流端口
         /// </summary>
-        [Column(DbType = "int(11)", IsNullable = true)]
+        //[Column(DbType = "int(11)", IsNullable = true)]
         public int stream_push_port { get; set; }
         /// <summary>
         /// 推流端口
         /// </summary>
-        [Column(DbType = "int(11)", IsNullable = true)]
+        //[Column(DbType = "int(11)", IsNullable = true)]
         public int stream_pull_port { get; set; }
 
         /// <summary>

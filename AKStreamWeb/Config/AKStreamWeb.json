@@ -4,6 +4,8 @@
   "OrmConnStr": "Data Source=192.168.31.57;Port=3306;User ID=root3;Password=Xunyi666!@#; Initial Catalog=AKStream;Charset=utf8; SslMode=none;Min pool size=1;",
   //"DbType": "PostgreSQL",
   //"OrmConnStr": "Server=172.19.1.166;Port=5432;User Id=akstream;Password=Xunyi666!@#;Database=akstream;searchpath=akstream;",
+  //"DbType": "Dameng",
+  //"OrmConnStr": "Server=172.19.1.233;port=52370;Database=AKSTREAM;User=AKSTREAM;Password=Xunyi666!@#",
   "WebApiPort": 5800,
   "AccessKey": "",
   "HttpClientTimeoutSec": 5,

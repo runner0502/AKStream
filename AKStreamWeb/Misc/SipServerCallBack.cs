@@ -22,7 +22,7 @@ using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
-using static Org.BouncyCastle.Math.EC.ECCurve;
+//using static Org.BouncyCastle.Math.EC.ECCurve;
 
 namespace AKStreamWeb.Misc
 {
@@ -538,7 +538,7 @@ x.platid == sipDevice.DeviceId).Set(x=>x.registestate,state).ExecuteAffrowsAsync
                 int currentGetNumber = SsyncState.Orgs.Count + SsyncState.Devices.Count;
                 GCommon.Logger.Debug("OnCatalogReceived: currentGetNumber: " + currentGetNumber + ", sipChannel.TotalNumber: " + sipChannel.TotalNumber + ",SsyncState.Orgs.Count:  " + SsyncState.Orgs.Count + ", SsyncState.Devices.Count: " + SsyncState.Devices.Count);
 
-                if (platType == 0 && manufacturer == 2) //海康
+                if (platType == 0 && manufacturer == 2 && ((currentGetNumber +1) == sipChannel.TotalNumber)) //海康
                 {
                     currentGetNumber++;
                     GCommon.Logger.Debug("OnCatalogReceived2: currentGetNumber: " + currentGetNumber + ", sipChannel.TotalNumber: " + sipChannel.TotalNumber + ",SsyncState.Orgs.Count:  " + SsyncState.Orgs.Count + ", SsyncState.Devices.Count: " + SsyncState.Devices.Count);
@@ -546,7 +546,7 @@ x.platid == sipDevice.DeviceId).Set(x=>x.registestate,state).ExecuteAffrowsAsync
                 }
                 GCommon.Logger.Debug("OnCatalogReceived3: currentGetNumber: " + currentGetNumber + ", sipChannel.TotalNumber: " + sipChannel.TotalNumber + ",SsyncState.Orgs.Count:  " + SsyncState.Orgs.Count + ", SsyncState.Devices.Count: " + SsyncState.Devices.Count);
 
-                if ( currentGetNumber >= sipChannel.TotalNumber)
+                if ( currentGetNumber == sipChannel.TotalNumber)
                 {
                     GCommon.Logger.Debug("OnCatalogReceived4: currentGetNumber: " + currentGetNumber + ", sipChannel.TotalNumber: " + sipChannel.TotalNumber + ",SsyncState.Orgs.Count:  " + SsyncState.Orgs.Count + ", SsyncState.Devices.Count: " + SsyncState.Devices.Count);
                     try
@@ -815,7 +815,9 @@ x.dev.Equals(device.dev)).First();
             GCommon.Logger.Debug("UpdateCatelogToDB6");
 
             //var result = ORMHelper.Db.Delete<DeviceNumber>().Where(a =>a.plat_id == SsyncState.PlatId).Where(a =>a.modify_time!=modifyTime).ExecuteAffrows();
-            var result = ORMHelper.Db.Delete<DeviceNumber>().Where(a => a.plat_id == SsyncState.PlatId).Where(a => modifyTime.Subtract(a.modify_time).Seconds > 1).ExecuteAffrows();
+            //var result = ORMHelper.Db.Delete<DeviceNumber>().Where(a => a.plat_id == SsyncState.PlatId).Where(a => modifyTime.Subtract(a.modify_time).Seconds > 1).ExecuteAffrows();
+            var result = ORMHelper.Db.Delete<DeviceNumber>().Where(a => a.plat_id == SsyncState.PlatId).Where(a => !(modifyTime.Year == a.modify_time.Year && modifyTime.Month == a.modify_time.Month && modifyTime.Day == a.modify_time.Day && modifyTime.Hour == a.modify_time.Hour && modifyTime.Minute == a.modify_time.Minute && modifyTime.Second == a.modify_time.Second)).ExecuteAffrows();
+
             GCommon.Logger.Debug("UpdateCatelogToDB7");
 
             SsyncState.State.IsProcessing = false;
@@ -829,17 +831,31 @@ x.dev.Equals(device.dev)).First();
             //SsyncState.PlatId = "";
         }
 
+        static bool isCheckSyncCatalogTimer = false;
         static void CheckSyncCatalogTimerCallback(object state)
         {
+            if (isCheckSyncCatalogTimer)
+            { 
+                return; 
+            }
             if (SsyncState == null || !SsyncState.State.IsProcessing)
             {
                 return;
             }
-            if (DateTime.Now.Subtract( SsyncState.StartTime).Minutes >= 5)
+            isCheckSyncCatalogTimer = true;
+            if (DateTime.Now.Subtract( SsyncState.StartTime).Minutes >= 40)
             {
                 GCommon.Logger.Warn("同步目录异常：超时5分钟没有全部同步完成， 部分同步写入数据库, 共同步到的目录个数是 " + SsyncState.State.DeviceCount + SsyncState.State.orgCount );
-                UpdateCatelogToDB();
+                try
+                {
+                    UpdateCatelogToDB();
+                }
+                catch (Exception ex)
+                {
+                    GCommon.Logger.Warn("CheckSyncCatalogTimerCallback fail: " + ex.ToString());
+                }
             }
+            isCheckSyncCatalogTimer = false;
         }
 
         private static bool CheckParentId(string parentId)

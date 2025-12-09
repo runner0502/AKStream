@@ -197,7 +197,16 @@ namespace LibCommon.Structs
 
         public string Mac
         {
-            get => _mac;
+            get 
+            {
+                //GCommon.Logger.Warn("get mac: " + Mac);
+                if (string.IsNullOrEmpty(_mac))
+                {
+                _mac = "00-00-00-00-00-00";
+
+                }
+                return _mac; 
+            }
             set => _mac = value;
         }
 

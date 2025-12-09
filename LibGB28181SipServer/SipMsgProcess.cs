@@ -18,7 +18,7 @@ using Newtonsoft.Json;
 using Org.BouncyCastle.Ocsp;
 using SIPSorcery.SIP;
 using SIPSorcery.SIP.App;
-using Ubiety.Dns.Core.Records;
+//using Ubiety.Dns.Core.Records;
 
 namespace LibGB28181SipServer
 {

@@ -61,7 +61,7 @@ namespace AKStreamWeb
 
             int sipRtpStartPort = 4000;
             int sipRtpPortRange = 1000;
-            var sipRtpStartPortConfig = ORMHelper.Db.Select<ConfigItem>().Where(a=>a.Key.Equals("sipRtpStartPort")).First();
+            var sipRtpStartPortConfig = ORMHelper.Db.Select<ConfigItem>().Where(a => a.Key.Equals("sipRtpStartPort")).First();
             if (sipRtpStartPortConfig != null)
             {
                 sipRtpStartPort = int.Parse(sipRtpStartPortConfig.Value);
@@ -72,7 +72,7 @@ namespace AKStreamWeb
                 sipRtpPortRange = int.Parse(sipRtpPortRangeConfig.Value);
             }
 
-            SPhoneSDK.SDKInit( Common.AkStreamWebConfig.SipIp, Common.AkStreamWebConfig.SipPort, 4, System.AppContext.BaseDirectory + "pjsip.log");
+            SPhoneSDK.SDKInit( Common.AkStreamWebConfig.SipIp, Common.AkStreamWebConfig.SipPort, 5, System.AppContext.BaseDirectory + "pjsip.log");
             //SPhoneSDK.SDKInit("172.19.6.41", 5066, 5, System.AppContext.BaseDirectory +  "pjsip.log");
             SPhoneSDK.Regist1("1.1.1.1", "admin", "admin", Common.AkStreamWebConfig.PublicMediaIp, sipRtpStartPort, sipRtpPortRange, false, true);
             //SPhoneSDK.Regist("1.1.1.1", "admin", "admin", Common.AkStreamWebConfig.PublicMediaIp, false, true);

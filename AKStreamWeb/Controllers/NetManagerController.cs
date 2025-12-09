@@ -131,7 +131,7 @@ namespace AKStreamWeb.Controllers
             {
                 SipServerCallBack.SsyncState.SyncStartIndex = 0;
                 SipServerCallBack.SsyncState.State.IsProcessing = false;
-                GCommon.Logger.Warn("同步目录异常： 设备不存在或者不在线");
+                GCommon.Logger.Warn("同步目录异常： 设备不存在或者不在线 deviceid: " + deviceId);
                 return false;
             }
             SipServerCallBack.SsyncState.StartTime = DateTime.Now;

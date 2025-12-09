@@ -20,7 +20,7 @@ using LibSystemInfo;
 using LinCms.Core.Entities;
 using Microsoft.AspNetCore.Hosting.Server;
 using Newtonsoft.Json;
-using static Org.BouncyCastle.Math.EC.ECCurve;
+//using static Org.BouncyCastle.Math.EC.ECCurve;
 using static System.Net.Mime.MediaTypeNames;
 using JsonHelper = LibCommon.JsonHelper;
 using Timer = System.Timers.Timer;

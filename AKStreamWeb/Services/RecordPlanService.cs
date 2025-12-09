@@ -391,7 +391,7 @@ namespace AKStreamWeb.Services
 
                 /*联同子类一起插入*/
                 var repo = ORMHelper.Db.GetRepository<RecordPlan>();
-                repo.DbContextOptions.EnableAddOrUpdateNavigateList = true; //需要手工开启
+                //repo.DbContextOptions.EnableAddOrUpdateNavigateList = true; //需要手工开启
                 var ret = repo.Insert(tmpStream);
                 /*联同子类一起插入*/
                 if (ret != null)

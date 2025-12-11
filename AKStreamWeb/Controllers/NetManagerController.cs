@@ -103,6 +103,7 @@ namespace AKStreamWeb.Controllers
 
         private bool StartSync(string deviceId, SyncMethod method, BigInteger startIndex)
         {
+            GCommon.Logger.Info("starsync deviceid :" +deviceId);
             if (SipServerCallBack.SsyncState == null)
             {
                 SipServerCallBack.SsyncState = new SyncStateFull();

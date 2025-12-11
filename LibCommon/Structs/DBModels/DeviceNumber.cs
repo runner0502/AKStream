@@ -77,6 +77,7 @@ namespace LibCommon.Structs.DBModels
         /// <summary>
         /// 
         /// </summary>
+        [Column(IsNullable = true)]
         public int status { get; set; }
 
         public string plat_id { get; set; }

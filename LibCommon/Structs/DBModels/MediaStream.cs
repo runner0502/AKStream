@@ -50,7 +50,7 @@ namespace LibCommon.Structs.DBModels
         /// <summary>
         /// 状态（0：停止， 1： 正在推流）
         /// </summary>
-        //[Column(DbType = "int(11)", IsNullable = true)]
+        [Column(IsNullable = true)]
         public int state { get; set; }
 
         /// <summary>

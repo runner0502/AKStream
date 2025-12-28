@@ -843,7 +843,7 @@ x.dev.Equals(device.dev)).First();
                 return;
             }
             isCheckSyncCatalogTimer = true;
-            if (DateTime.Now.Subtract( SsyncState.StartTime).Minutes >= 40)
+            if (DateTime.Now.Subtract( SsyncState.StartTime).Minutes >= 60)
             {
                 GCommon.Logger.Warn("同步目录异常：超时5分钟没有全部同步完成， 部分同步写入数据库, 共同步到的目录个数是 " + SsyncState.State.DeviceCount + SsyncState.State.orgCount );
                 try

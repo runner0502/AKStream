@@ -309,7 +309,7 @@ namespace AKStreamWeb
                 advancedConfig.AuthEnable = 1;
                 advancedConfig.GpsEnable = 1;
                 advancedConfig.Id = "0";
-                advancedConfig.IntercomEnable = 1;
+                advancedConfig.IntercomEnable = 0;
                 advancedConfig.IsDeleted = 0;
                 advancedConfig.CreateTime = DateTime.Now;
                 advancedConfig.UpdateTime = DateTime.Now;

@@ -1147,7 +1147,7 @@ namespace LibGB28181SipServer
                             SendRequestViaSipDevice;
                     request(device, method, ConstString.Application_MANSCDP, subject, xmlBody,
                         ptz.CommandType,
-                        true,
+                        false,
                         evnt, null, null, timeout);
                 }
                 else
@@ -1160,7 +1160,7 @@ namespace LibGB28181SipServer
                     var subject = "";
 
                     request(device, sipChannel, method, ConstString.Application_MANSCDP, xmlBody,
-                        subject, ptz.CommandType, true, evnt, null, null,
+                        subject, ptz.CommandType, false, evnt, null, null,
                         timeout);
                 }
             }

@@ -710,8 +710,8 @@ namespace LibGB28181SipServer
                         else
                         {
                             GCommon.Logger.Debug(
-                                $"[{Common.LoggerHead}]->收到来自{remoteEndPoint}的心跳->{sipRequest}->但是Sip设备不存在，发送BadRequest消息,使设备重新注册");
-                            await SendKeepAliveExcept(sipRequest);
+                                $"[{Common.LoggerHead}]->收到来自{remoteEndPoint}的心跳->{sipRequest}->但是Sip设备不存在");
+                            //await SendKeepAliveExcept(sipRequest);
                         }
 
                         break;

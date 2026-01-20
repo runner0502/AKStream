@@ -9,7 +9,7 @@
   "SipUsername": "admin",
   "SipPassword": "123#@!qwe",
   "MsgProtocol": "UDP",
-  "KeepAliveInterval": 60,
+  "KeepAliveInterval": 90,
   "KeepAliveLostNumber": 3,
   "IpV6Enable": true,
   "EncodingType": "GB2312",

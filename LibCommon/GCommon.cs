@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Text;
 using LibCommon.Structs;
+using LibCommon.Structs.DBModels;
 using LibCommon.Structs.GB28181;
 using LibCommon.Structs.GB28181.XML;
 using LibLogger;
@@ -63,6 +64,17 @@ namespace LibCommon
             }
 
             _logger = new Logger();
+            _logger.OnLogEvent += Logger_OnLogEvent;    
+        }
+
+        private static void Logger_OnLogEvent(string msg)
+        {
+           // SystemLog systemLog = new SystemLog
+           // {
+           //     Message = msg,
+           //     Timestamp = DateTime.Now
+           // };
+           //ORMHelper.Db.Insert(systemLog).ExecuteAffrows();
         }
 
         static GCommon()

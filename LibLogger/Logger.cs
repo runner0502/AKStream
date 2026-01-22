@@ -14,6 +14,7 @@ namespace LibLogger
         private static object lockobj = new object();
         public static string logxmlPath = Environment.CurrentDirectory + "/Config/";
 
+        public event LogEventHandler OnLogEvent;
 
         public Logger()
         {
@@ -46,11 +47,19 @@ namespace LibLogger
         public void Warn(string msg)
         {
             _instance.Warn(msg);
+            if (OnLogEvent != null)
+            {
+                OnLogEvent(msg);
+            }
         }
 
         public void Fatal(string msg)
         {
             _instance.Fatal(msg);
+            if (OnLogEvent != null)
+            {
+                OnLogEvent(msg);
+            }
         }
 
 
@@ -63,4 +72,6 @@ namespace LibLogger
             return ((Hierarchy)LogManager.GetRepository()).Root.Level.ToString();
         }
     }
+    
+    public delegate void LogEventHandler(string msg);
 }

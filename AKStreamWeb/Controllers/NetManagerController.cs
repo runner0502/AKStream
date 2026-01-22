@@ -234,6 +234,13 @@ namespace AKStreamWeb.Controllers
             SipServerCallBack.SsyncState.State.DeviceCount= SipServerCallBack.SsyncState.Devices.Count;
             return SipServerCallBack.SsyncState.State;
         }
+        [Route("GetSystemLog")]
+        [HttpGet]
+        public List<SystemLog> GetSystemLog([FromHeader(Name = "AccessKey")] string AccessKey)
+        {
+            var logs = ORMHelper.Db.Select<SystemLog>().OrderByDescending(a => a.Timestamp).Limit(100).ToList();
+            return logs;
+        }
         /// <summary>
         /// 呼叫信息
         /// </summary>

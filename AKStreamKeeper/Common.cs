@@ -883,9 +883,15 @@ namespace AKStreamKeeper
 
             try
             {
-                //var textReader = new StreamReader("E:\\src\\AKStream\\AKStreamWeb\\bin\\Debug\\net6.0\\Config\\AKStreamWeb.json");
-                var textReader = new StreamReader("/usr/local/server/Config/AKStreamWeb.json");
-                
+                StreamReader textReader;
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                     textReader = new StreamReader("E:\\src\\AKStream\\AKStreamWeb\\bin\\Debug\\net6.0\\Config\\AKStreamWeb.json");
+                }else
+                {
+                    textReader = new StreamReader("/usr/local/server/Config/AKStreamWeb.json");
+                }
+
                 var jsonStr = textReader.ReadToEnd();
                 GCommon.Logger.Info("webjsonstr: " + jsonStr);
                 JsonNode streamWebConfig = JsonObject.Parse(jsonStr);

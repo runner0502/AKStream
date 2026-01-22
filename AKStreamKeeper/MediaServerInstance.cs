@@ -998,6 +998,10 @@ namespace AKStreamKeeper
                         {
                             _zlmNewConfig.Http.Port = (ushort)AkStreamKeeperConfig.HttpPort;
                         }
+                        if (AkStreamKeeperConfig.MinRtpPort >0 && AkStreamKeeperConfig.MaxRtpPort >0 && AkStreamKeeperConfig.MinRtpPort < AkStreamKeeperConfig.MaxRtpPort)
+                        {
+                            _zlmNewConfig.Rtp_Proxy.Port_Range = AkStreamKeeperConfig.MinRtpPort.ToString() + "-" + AkStreamKeeperConfig.MaxRtpPort.ToString();
+                        }
                         //_zlmNewConfig.General.Wait_Track_Ready_Ms = 2000;
 
                         var ok = _zlmNewConfig.SetConfig(_configPath);

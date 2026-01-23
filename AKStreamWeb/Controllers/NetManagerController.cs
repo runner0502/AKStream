@@ -199,7 +199,7 @@ namespace AKStreamWeb.Controllers
 
         private static bool StopSyncInternal()
         {
-            //SipServerCallBack.UpdateCatelogToDB();
+            SipServerCallBack.UpdateCatelogToDB();
 
             if (SipServerCallBack.SsyncState != null && SipServerCallBack.SsyncState.State.IsProcessing)
             {

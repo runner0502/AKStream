@@ -27,6 +27,7 @@ using System.Timers;
 using System.Xml.Linq;
 using WebSocketSharp;
 using XyCallLayer;
+using ZstdSharp.Unsafe;
 using static XyCallLayer.SPhoneSDK;
 
 namespace AKStreamWeb
@@ -115,36 +116,39 @@ namespace AKStreamWeb
 
         private void _checkCallsStatTimer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            GCommon.Logger.Warn("SipChannel_OnReconnectStream1 calls count " + s_calls.Count);
+            GCommon.Logger.Info("SipChannel_OnReconnectStream1 calls count " + s_calls.Count);
             lock (_lock)
             {
                 foreach (var call in s_calls)
                 {
-                    GCommon.Logger.Warn("SipChannel_OnReconnectStream1 calls index: " + call.Key + ", pushstatus: " + call.Value.SipChannel.PushStatus);
+                    GCommon.Logger.Info("SipChannel_OnReconnectStream1 calls index: " + call.Key + ", pushstatus: " + call.Value.SipChannel.PushStatus);
 
                     if (call.Value.SipChannel.PushStatus != LibCommon.Enums.PushStatus.PUSHON)
                     {
                         var channel = call.Value.SipChannel;
+                        GCommon.Logger.Warn("281侧断流重连发起 " + channel.DeviceId);
+
                         ResponseStruct rs = new ResponseStruct()
                         {
                             Code = ErrorNumber.None,
                             Message = ErrorMessage.ErrorDic![ErrorNumber.None],
                         };
-                        GCommon.Logger.Warn("SipChannel_OnReconnectStream1 before livevideo " + channel);
+                        GCommon.Logger.Info("SipChannel_OnReconnectStream1 before livevideo " + channel);
                         var ret = SipServerService.LiveVideo(channel.ParentId, channel.DeviceId, out rs);
-                        GCommon.Logger.Warn("SipChannel_OnReconnectStream1 end livevideo " + channel);
+                        GCommon.Logger.Info("SipChannel_OnReconnectStream1 end livevideo " + channel);
 
                         if (ret == null)
                         {
-                            GCommon.Logger.Warn("SipChannel_OnReconnectStream1 livevideo fail：" + channel);
+                            GCommon.Logger.Info("SipChannel_OnReconnectStream1 livevideo fail：" + channel);
+                            GCommon.Logger.Warn("281侧断流重连失败 " + channel.DeviceId);
                             return;
                         }
                         string url = ret.PlayUrl.Find(a => a.StartsWith("rtsp"));
                         if (!string.IsNullOrEmpty(url))
                         {
-                            GCommon.Logger.Warn("SipChannel_OnReconnectStream1 before videocapture " + url);
+                            GCommon.Logger.Info("SipChannel_OnReconnectStream1 before videocapture " + url);
                             int deviceIdVideo = SetupCaptureVideoFile(url);
-                            GCommon.Logger.Warn("SipChannel_OnReconnectStream1 end videocapture deviceIdVideo: " + deviceIdVideo);
+                            GCommon.Logger.Info("SipChannel_OnReconnectStream1 end videocapture deviceIdVideo: " + deviceIdVideo);
 
                             if (deviceIdVideo > 0)
                             {
@@ -152,11 +156,11 @@ namespace AKStreamWeb
                                 {
                                     if (item.Value.Url == url)
                                     {
-                                        GCommon.Logger.Warn("SipChannel_OnReconnectStream1 ChangeVideoDevice callid: " + item.Key);
+                                        GCommon.Logger.Info("SipChannel_OnReconnectStream1 ChangeVideoDevice callid: " + item.Key);
                                         SPhoneSDK.SetDefaultVideoDevice(deviceIdVideo);
                                         var result = SPhoneSDK.ChangeVideoDevice(item.Key, deviceIdVideo);
-                                        GCommon.Logger.Warn("SipChannel_OnReconnectStream1 ChangeVideoDevice deviceIdVideo: " + deviceIdVideo + ", reslut: " + result);
-
+                                        GCommon.Logger.Info("SipChannel_OnReconnectStream1 ChangeVideoDevice deviceIdVideo: " + deviceIdVideo + ", reslut: " + result);
+                                        GCommon.Logger.Warn("281侧断流重连成功 " + channel.DeviceId);
                                     }
                                 }
                             }
@@ -172,32 +176,18 @@ namespace AKStreamWeb
             foreach (var item in LibGB28181SipServer.Common.SipDevices)
             {
                 GCommon.Logger.Warn("SipMsgProcess_OnReceiveBye1");
-
                 foreach (var channel in item.SipChannels)
                 {
                     GCommon.Logger.Warn("SipMsgProcess_OnReceiveBye2");
-
                     if (channel.Callid281Broadcast == req.Header.CallId)
                     {
                         GCommon.Logger.Warn("SipMsgProcess_OnReceiveBye3");
-
                         channel.Callid281Broadcast = "";
-                        GCommon.Logger.Warn("SipMsgProcess_OnReceiveBye4");
-
-                        GCommon.Logger.Warn("SipMsgProcess_OnReceiveBye5");
-
                         channel.InviteSipRequestBroadcast = null;
-                        GCommon.Logger.Warn("SipMsgProcess_OnReceiveBye6");
-
                         channel.InviteSipResponseBroadcast = null;
-                        GCommon.Logger.Warn("SipMsgProcess_OnReceiveBye7");
-
                         channel.SipCallid = -1;
-                        GCommon.Logger.Warn("SipMsgProcess_OnReceiveBye8");
-
                         GCommon.Logger.Warn("SipMsgProcess_OnReceiveBye StopAudioSendStream find channelid: " + channel.DeviceId + ",confPort: " + channel.AudioPortConf);
                         GCommon.Logger.Warn("SipMsgProcess_OnReceiveBye9 intercom");
-
                         StopAudioSendStream(channel.BroadcastStream, channel.AudioPortConf);
                         channel.AudioPortConf = -1;
                         channel.BroadcastStream = IntPtr.Zero;
@@ -301,7 +291,6 @@ namespace AKStreamWeb
                         GCommon.Logger.Warn("StartAudioSendStream fail");
                         return;
                     }
-
                 }
                 //info.LocalRtpPort = (ushort)s_LocalPort;
                 info.LocalRtpPort = audioPort;
@@ -383,11 +372,8 @@ namespace AKStreamWeb
                             //}
                             SPhoneSDK.ConnectSoundportToCall(deviceIdAudio, deviceIdAudio, callid);
                         }
-
                         //TestBroadcastAudio();
-
                         //TestAddStreamProxyRecord(callid);
-
                     }
                     catch (Exception e) 
                     {
@@ -533,34 +519,359 @@ namespace AKStreamWeb
 
         public static int s_callidIntercom = 0;
 
+        private static biz_transcode GetTranscodeConfig(string number)
+        {
+            var basicConfig = ORMHelper.Db.Select<SysAdvancedConfig>().First();
+            if (basicConfig != null)
+            {
+                if (basicConfig.TranscodeEnable == 1)
+                {
+                    _transcode = true;
+                    //SPhoneSDK.SetVidHardwareEncoding(false);
+                }
+                else
+                {
+                    _transcode = false;
+                }
+            }
+            if (!_transcode)
+            {
+                return null;
+            }
+
+            var transcodeConfig = ORMHelper.Db.Select<biz_transcode>().Where(a => number.StartsWith(a.caller_number)).Where(a => a.state == "1").First();
+            if (transcodeConfig == null)
+            {
+                return null;
+            }
+            int currentTranscodeCount = 0;
+            foreach (var item in s_calls)
+            {
+                if (item.Value.IsTranscode)
+                {
+                    currentTranscodeCount++;
+                }
+            }
+            if (currentTranscodeCount >= Common.License.MaxRunCount)
+            {
+                GCommon.Logger.Error("sipincoming license fail transcode too many");
+                return null;
+            }
+            return transcodeConfig;
+        }
+
         public static void OnIncomingCall_WithMsg(int callid, string number, CallState state, bool isVideo, string idsContent)
+        {
+            //Task.Run(() =>
+            //{
+                OnIncomingCallInternal_WithMsg(callid, number, state, isVideo, idsContent);
+            //});
+        }
+
+        public static void OnIncomingCallInternal_WithMsg(int callid, string number, CallState state, bool isVideo, string idsContent)
         //public static void OnIncomingCall(int callid, string number, CallState state, bool isVideo)
         {
-            GCommon.Logger.Warn("sipincoming start：" + callid);
-            string msg;
-            if (Common.License.DoExtraValidation(out msg) != QLicenseCore.LicenseStatus.VALID)
+            if (!isVideo)
             {
-                GCommon.Logger.Warn("sipincoming license fail: " + msg);
                 Hangup(callid);
                 return;
             }
-                     
-            //var resoure = ORMHelper.Db.Select<resource_info>().First();
-            //if (resoure != null && (resoure.cpu + 130) >= resoure.cpu_total)
-            //{
-            //    GCommon.Logger.Warn("sipincoming cpu overload hangup call");
-            //    Hangup(callid);
-            //    return;
-            //}
-
+            string channelId = "";
+            string logPrefix = "sipincoming callid " + callid + ",caller: " + number + ",281realNumber" + channelId + " ";
+            GCommon.Logger.Info(logPrefix + " start");
+            string msg;
+            if (Common.License.DoExtraValidation(out msg) != QLicenseCore.LicenseStatus.VALID)
+            {
+                GCommon.Logger.Error(logPrefix + "license fail: " + msg);
+                Hangup(callid);
+                return;
+            }
 
             ResponseStruct rs;
             //string deviceId = "33020000021180000006";
             //string channelId = "34020000001320000012";
             string deviceId = "";
-            string channelId = "";
-            string numberdb = "";
-        
+
+            string numberdb = Get281NumberFromInvite(idsContent);
+            var channeldb = ORMHelper.Db.Select<DeviceNumber>().Where(x => x.num.Equals(numberdb)).First();
+            if (channeldb != null)
+            {
+                channelId = channeldb.dev;
+            }
+            if (string.IsNullOrEmpty(channelId))
+            {
+                GCommon.Logger.Error(logPrefix + "没有这个号码：" + numberdb);
+                Hangup(callid);
+                return;
+            }
+
+            foreach (var device in LibGB28181SipServer.Common.SipDevices)
+            {
+                foreach (var channel in device.SipChannels)
+                {
+                    if (channel.SipChannelDesc.DeviceID == channelId)
+                    {
+                        deviceId = device.DeviceId;
+                        break;
+                    }
+                }
+            }
+            GCommon.Logger.Info(logPrefix + " get281number: " + numberdb + ", deviceid: " + deviceId);
+
+            if (deviceId.IsNullOrEmpty())
+            {
+                GCommon.Logger.Error(logPrefix + "设备不在线：" + deviceId);
+                Hangup(callid);
+                return;
+            }
+
+            SipChannel sipChannel;
+            rs = new ResponseStruct()
+            {
+                Code = ErrorNumber.None,
+                Message = ErrorMessage.ErrorDic![ErrorNumber.None],
+            };
+            sipChannel = SipServerService.GetSipChannelById(deviceId, channelId, out rs);
+            if (sipChannel == null)
+            {
+                GCommon.Logger.Error(logPrefix +
+                    $"[{Common.LoggerHead}]->获取通道失败 sipincoming->{deviceId}-{channelId}->{JsonHelper.ToJson(rs)}");
+                Hangup(callid);
+                return;
+            }
+            //sipChannel.OnReconnectStream += SipChannel_OnReconnectStream1;
+            GCommon.Logger.Warn(logPrefix + " before livevideo ");
+            var ret = SipServerService.LiveVideo(deviceId, channelId, out rs);
+            GCommon.Logger.Warn(logPrefix + " end livevideo ");
+
+            if (ret == null)
+            {
+                GCommon.Logger.Error(logPrefix + " livevideo fail");
+                Hangup(callid);
+                return;
+            }
+            //var ret = SipServerService.LiveVideo("11011200002000000001", "11010000581314000001", out rs);
+            //if (!rs.Code.Equals(ErrorNumber.None))
+            //{
+            //    throw new AkStreamException(rs);
+            //}
+
+            string url = ret.PlayUrl.Find(a => a.StartsWith("rtsp"));
+            if (string.IsNullOrEmpty(url))
+            {
+                GCommon.Logger.Error(logPrefix + "fail： mediaserver url is null");
+                Hangup(callid);
+                return;
+            }
+            GCommon.Logger.Info(logPrefix + " before videocapture ");
+            int deviceIdVideo = SetupCaptureVideoFile(url);
+            GCommon.Logger.Info(logPrefix + " end videocapture ");
+
+            if (deviceIdVideo <= 0)
+            {
+                GCommon.Logger.Error(logPrefix + " setup capture fail");
+                Hangup(callid);
+                return;
+            }
+
+            var callinfo = new CallInfoInternal();
+            callinfo.SipChannel = sipChannel;
+            callinfo.IsTranscode = false;
+            callinfo.called = numberdb;
+            callinfo.caller = number;
+            callinfo.CameraName = channeldb.name;
+            callinfo.CreateTime = DateTime.Now;
+            callinfo.Reslution = "640*480";
+            callinfo.calledDeviceNumber = numberdb;
+            callinfo.Url = url;
+            try
+            {
+                string findStrip = "SIP/2.0/UDP ";
+                int ipindex = idsContent.IndexOf(findStrip);
+                int startIndex = ipindex + findStrip.Length;
+                int ipendIndex = idsContent.IndexOf(":", ipindex);
+                callinfo.CallerIP = idsContent.Substring(startIndex, ipendIndex - startIndex);
+            }
+            catch (Exception ex) { }
+
+            int srcWidth = GetVideoDeviceWidth(deviceIdVideo);
+            int srcHeight = GetVideoDeviceHeight(deviceIdVideo);
+            callinfo.Reslution = srcWidth + "*" + srcHeight;
+            int codeid = GetVideoCodec(deviceIdVideo);
+            if (codeid == 2)
+            {
+                callinfo.CodecId = 1;
+                SetVideoCodecPriority("H265/103", 254);
+                SetVideoCodecPriority("H264/98", 0);
+                GCommon.Logger.Info(logPrefix + "src codec 265 ");
+            }
+            else
+            {
+                callinfo.CodecId = 0;
+                SetVideoCodecPriority("H265/103", 0);
+                SetVideoCodecPriority("H264/98", 253);
+                GCommon.Logger.Info(logPrefix + "src codec 264 ");
+            }
+
+            SPhoneSDK.ChangeVideoDevice1(callid, deviceIdVideo);
+            SPhoneSDK.SetDefaultVideoDevice(deviceIdVideo);
+            callinfo.IsTranscode = false;
+            SetHardEncodeVideo(callid, 1);
+
+            var transcodeConfig = GetTranscodeConfig(number);
+            if (transcodeConfig != null)
+            {
+                SetHardEncodeVideo(callid, 0);
+                callinfo.IsTranscode = true;
+                if (transcodeConfig.EncoderType == 0)
+                {
+                    callinfo.CodecId = 0;
+                    SetVideoCodecPriority("H265/103", 0);
+                    SetVideoCodecPriority("H264/98", 254);
+                    GCommon.Logger.Warn(logPrefix + " transcode encoder 264");
+                }
+                else
+                {
+                    callinfo.CodecId = 1;
+                    SetVideoCodecPriority("H265/103", 254);
+                    SetVideoCodecPriority("H264/98", 0);
+                    GCommon.Logger.Warn(logPrefix + "transcode encoder 265");
+                }
+
+                SetVideoCodecParaByReslution(logPrefix, callinfo, transcodeConfig);
+            }
+
+            //int deviceIdVideo = -1;
+            //VideoDeviceInfo[] deviceInfos =new VideoDeviceInfo[100];
+            //int videoDevicesCount = 0;
+            //GetVideoDevices(deviceInfos, out videoDevicesCount);
+            //foreach (var item in deviceInfos)
+            //{
+            //    if (item.name == url)
+            //    {
+            //        GCommon.Logger.Warn("sipincoming loop videodevice name: " + item.name);
+            //        deviceIdVideo = item.id;
+            //        break;
+            //    }
+            //}
+
+            GCommon.Logger.Info( logPrefix + "answer" );
+            lock (_lock)
+            {
+                if (s_calls.ContainsKey(callid))
+                {
+                    s_calls.Remove(callid);
+                }
+            }
+
+            lock (_lock)
+            {
+                s_calls.Add(callid, callinfo);
+            }
+            Answer(callid, true);
+            StartIntercom(callid, channelId, deviceId, sipChannel);
+
+            GCommon.Logger.Warn(logPrefix + "end：");
+        }
+
+        private static void StartIntercom(int callid, string channelId, string deviceId, SipChannel sipChannel)
+        {
+            if (_enableVoice)
+            {
+                if (sipChannel.AudioPortConf == -1)
+                {
+                    GCommon.Logger.Warn("incoming request broadcast intercom");
+                    s_callidIntercom = callid;
+                    SipMethodProxy sipMethodProxy = new SipMethodProxy(Common.AkStreamWebConfig.WaitSipRequestTimeOutMSec);
+                    var result = sipMethodProxy.BroadcastRequest(deviceId, channelId);
+                }
+                else
+                {
+                    //if (sipChannel.SipCallid >= 0)
+                    //{
+                    //    GCommon.Logger.Warn("incoming broadcast speaking do nothing");
+                    //}
+                    //else
+                    //{
+                    var th = new Thread(() =>
+                    {
+                        Thread.Sleep(500);
+                        GCommon.Logger.Warn("incoming AddToAudioPort intercom");
+                        SPhoneSDK.AddToAudioPort(callid, sipChannel.AudioPortConf);
+                        sipChannel.SipCallid = callid;
+                    });
+                    th.Start();
+                    //}
+                }
+            }
+        }
+
+        private static void SetVideoCodecParaByReslution(string logPrefix, CallInfoInternal callinfo, biz_transcode transcodeConfig)
+        {
+            if (!string.IsNullOrEmpty(transcodeConfig.reslution))
+            {
+                var res = transcodeConfig.reslution.Split("*");
+                if (res != null && res.Length == 2)
+                {
+                    try
+                    {
+                        int width = int.Parse(res[0]);
+                        int height = int.Parse(res[1]);
+                        if (width > 0 && height > 0)
+                        {
+                            int bps = 500;
+                            if (width <= 320 && height <= 240)
+                            {
+                                bps = 120;
+                            }
+                            else if (width <= 352 && height <= 288)
+                            {
+                                bps = 128;
+                            }
+                            else if (width <= 512 && height <= 288)
+                            {
+                                bps = 240;
+                            }
+                            else if (width <= 640 && height <= 480)
+                            {
+                                bps = 500;
+                            }
+                            else if (width <= 704 && height <= 576)
+                            {
+                                bps = 800;
+                            }
+                            else if (width <= 720 && height <= 480)
+                            {
+                                bps = 800;
+                            }
+                            else if (width <= 720 && height <= 576)
+                            {
+                                bps = 800;
+                            }
+                            else if (width <= 1280 && height <= 720)
+                            {
+                                bps = 1200;
+                            }
+                            else if (width <= 1920 && height <= 1080)
+                            {
+                                bps = 1500;
+                            }
+                            SetVideoCodecParam(width, height, 25, bps * 1024);
+                            GCommon.Logger.Info(logPrefix + " set video codec width: " + width + ", height: " + height + ", bps: " + bps);
+                            callinfo.Reslution = width + "*" + height;
+                        }
+                    }
+                    catch (System.Exception)
+                    {
+                        GCommon.Logger.Error(logPrefix + "transcode reslution format error");
+                    }
+                }
+            }
+        }
+
+        private static string Get281NumberFromInvite(string idsContent)
+        {
+            string numberdb="";
             string findStr = "To: sip:";
             int toIndex = idsContent.IndexOf(findStr);
             if (toIndex <= 0)
@@ -583,7 +894,7 @@ namespace AKStreamWeb
             {
                 int startIndex = toIndex + findStr.Length;
                 int endIndex = idsContent.IndexOf("@", startIndex);
-                if (endIndex > 0) 
+                if (endIndex > 0)
                 {
                     string to = idsContent.Substring(startIndex, endIndex - startIndex);
                     if (!to.IsNullOrEmpty())
@@ -600,333 +911,7 @@ namespace AKStreamWeb
                 }
             }
 
-            var channeldb = ORMHelper.Db.Select<DeviceNumber>().Where(x => x.num.Equals(numberdb)).First();
-
-            if (channeldb != null)
-            {
-                //var plat = ORMHelper.Db.Select<Device281Plat>().Where(x => x.ipaddr.Equals(channel.domain)).First();
-                //if (plat != null)
-                //{
-                //    deviceId = plat.platid;
-                //}
-                channelId = channeldb.dev;
-            }
-            if (string.IsNullOrEmpty(channelId))
-            {
-                GCommon.Logger.Warn("sipincoming 没有这个号码：" + numberdb);
-                Hangup(callid);
-                return;
-            }
-
-            foreach (var device in LibGB28181SipServer.Common.SipDevices)
-            {
-                foreach (var channel in device.SipChannels)
-                {
-                    if (channel.SipChannelDesc.DeviceID == channelId)
-                    {
-                        deviceId = device.DeviceId;
-                        break;
-                    }
-                }
-            }
-            if (deviceId.IsNullOrEmpty())
-            {
-                GCommon.Logger.Warn("sipincoming 设备不在线：" + deviceId);
-                Hangup(callid);
-                return;
-            }
-
-            ServerInstance mediaServer;
-            VideoChannel videoChannel;
-            SipDevice sipDevice;
-            SipChannel sipChannel;
-            rs = new ResponseStruct()
-            {
-                Code = ErrorNumber.None,
-                Message = ErrorMessage.ErrorDic![ErrorNumber.None],
-            };
-            sipChannel = SipServerService.GetSipChannelById(deviceId, channelId, out rs);
-            if (sipChannel == null)
-            {
-                GCommon.Logger.Warn(
-                    $"[{Common.LoggerHead}]->获取通道失败 sipincoming->{deviceId}-{channelId}->{JsonHelper.ToJson(rs)}");
-                Hangup(callid);
-                return;
-            }
-            //sipChannel.OnReconnectStream += SipChannel_OnReconnectStream1;
-            GCommon.Logger.Warn("sipincoming before livevideo " + callid);
-            var ret = SipServerService.LiveVideo(deviceId, channelId, out rs);
-            GCommon.Logger.Warn("sipincoming end livevideo " + callid);
-
-            if (ret == null)
-            {
-                GCommon.Logger.Warn("sipincoming livevideo fail：" + numberdb);
-                Hangup(callid);
-                return;
-            }
-            //var ret = SipServerService.LiveVideo("11011200002000000001", "11010000581314000001", out rs);
-
-            //if (!rs.Code.Equals(ErrorNumber.None))
-            //{
-            //    throw new AkStreamException(rs);
-            //}
-
-            string url = ret.PlayUrl.Find(a => a.StartsWith("rtsp"));
-            if (!string.IsNullOrEmpty(url))
-            {
-                SetHardEncodeVideo(callid, 1);
-
-                var basicConfig = ORMHelper.Db.Select<SysAdvancedConfig>().First();
-                if (basicConfig != null)
-                {
-                    if (basicConfig.TranscodeEnable == 1)
-                    {
-                        _transcode = true;
-                        //SPhoneSDK.SetVidHardwareEncoding(false);
-                    }
-                }
-
-                var callinfo = new CallInfoInternal();
-                callinfo.SipChannel = sipChannel;
-                callinfo.IsTranscode = false;
-                callinfo.called = numberdb;
-                callinfo.caller = number;
-                callinfo.CameraName = channeldb.name;
-                callinfo.CreateTime = DateTime.Now;
-                callinfo.Reslution = "640*480";
-                callinfo.calledDeviceNumber = numberdb;
-                callinfo.Url = url;
-                try
-                {
-                    string findStrip = "SIP/2.0/UDP ";
-                    int ipindex = idsContent.IndexOf(findStrip);
-                    int startIndex = ipindex + findStrip.Length;
-                    int ipendIndex = idsContent.IndexOf(":", ipindex);
-                    callinfo.CallerIP = idsContent.Substring(startIndex, ipendIndex - startIndex);
-                }
-                catch (Exception ex) { }
-                bool isTranscode = false;
-                if (_transcode)
-                {
-                    var transcodeConfig = ORMHelper.Db.Select<biz_transcode>().Where(a=>number.StartsWith(a.caller_number)).Where(a=>a.state == "1").First();
-                    if (transcodeConfig != null )
-                    {
-                        int currentTranscodeCount = 0;
-                        foreach (var item in s_calls)
-                        {
-                            if (item.Value.IsTranscode)
-                            {
-                                currentTranscodeCount++;
-                            }
-                        }
-                        if (currentTranscodeCount >= Common.License.MaxRunCount)
-                        {
-                            GCommon.Logger.Warn("sipincoming license fail transcode too many");
-                        }
-                        else
-                        {
-                            isTranscode = true;
-                            SetHardEncodeVideo(callid, 0);
-                            callinfo.IsTranscode = true;
-                            if (transcodeConfig.EncoderType == 0)
-                            {
-                                SetVideoCodecPriority("H265/103", 0);
-                                SetVideoCodecPriority("H264/98", 254);
-                                GCommon.Logger.Warn("sipincoming transcode encoder 264");
-                            }
-                            else
-                            {
-                                SetVideoCodecPriority("H265/103", 254);
-                                SetVideoCodecPriority("H264/98", 0);
-                                GCommon.Logger.Warn("sipincoming transcode encoder 265");
-                            }
-
-                            if (!string.IsNullOrEmpty(transcodeConfig.reslution))
-                            {
-                                var res = transcodeConfig.reslution.Split("*");
-                                if (res != null && res.Length == 2)
-                                {
-                                    try
-                                    {
-                                        int width = int.Parse(res[0]);
-                                        int height = int.Parse(res[1]);
-                                        if (width > 0 && height > 0)
-                                        {
-                                            int bps = 500;
-                                            if (width <= 320 && height <= 240)
-                                            {
-                                                bps = 120;
-                                            }else if (width <=352 && height <=288)
-                                            {
-                                                bps = 128;
-                                            }
-                                            else if (width <= 512 && height <= 288)
-                                            {
-                                                bps = 240;
-                                            }
-                                            else if (width <= 640 && height <= 480)
-                                            {
-                                                bps = 500;
-                                            }
-                                            else if (width <= 704 && height <= 576)
-                                            {
-                                                bps = 800;
-                                            }
-                                            else if (width <= 720 && height <= 480)
-                                            {
-                                                bps = 800;
-                                            }
-                                            else if (width <= 720 && height <= 576)
-                                            {
-                                                bps = 800;
-                                            }
-                                            else if (width <= 1280 && height <= 720)
-                                            {
-                                                bps = 1200;
-                                            }
-                                            else if (width <= 1920 && height <= 1080)
-                                            {
-                                                bps = 1500;
-                                            }
-                                            SetVideoCodecParam(width, height, 25, bps * 1024);
-                                            GCommon.Logger.Warn("incoming set video codec width: " +width + ", height: " + height + ", bps: " + bps);
-                                            callinfo.Reslution = width + "*" + height;
-                                        }
-                                    }
-                                    catch (System.Exception)
-                                    {
-                                        GCommon.Logger.Warn("transcode reslution format error");
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
-                //int deviceIdVideo = -1;
-                //VideoDeviceInfo[] deviceInfos =new VideoDeviceInfo[100];
-                //int videoDevicesCount = 0;
-                //GetVideoDevices(deviceInfos, out videoDevicesCount);
-                //foreach (var item in deviceInfos)
-                //{
-                //    if (item.name == url)
-                //    {
-                //        GCommon.Logger.Warn("sipincoming loop videodevice name: " + item.name);
-                //        deviceIdVideo = item.id;
-                //        break;
-                //    }
-                //}
-                //if (deviceIdVideo >= 0)
-                //{
-                //    GCommon.Logger.Warn("sipincoming videoDeviceExist " + callid + ", videoIndex: " + deviceIdVideo);
-                //}
-                //else
-                //{
-                //    GCommon.Logger.Warn("sipincoming before videocapture " + callid);
-                //    deviceIdVideo = SetupCaptureVideoFile(url);
-                //    GCommon.Logger.Warn("sipincoming end videocapture " + callid);
-                //}
-
-                GCommon.Logger.Warn("sipincoming before videocapture " + callid);
-                int deviceIdVideo = SetupCaptureVideoFile(url);
-                GCommon.Logger.Warn("sipincoming end videocapture " + callid);
-
-                if (deviceIdVideo > 0)
-                {
-                    if (!isTranscode)
-                    {
-                        int width = GetVideoDeviceWidth(deviceIdVideo);
-                        int height = GetVideoDeviceHeight(deviceIdVideo);
-                        callinfo.Reslution = width + "*" + height;
-                        int codeid = GetVideoCodec(deviceIdVideo);
-                        if (codeid == 2)
-                        {
-                            SetVideoCodecPriority("H265/103", 254);
-                            SetVideoCodecPriority("H264/98", 0);
-                            GCommon.Logger.Warn("sipincoming 265 " + callid);
-                        }
-                        else
-                        {
-                            SetVideoCodecPriority("H265/103", 0);
-                            SetVideoCodecPriority("H264/98", 253);
-                        }
-                    }
-                    SPhoneSDK.ChangeVideoDevice1(callid, deviceIdVideo);
-                    SPhoneSDK.SetDefaultVideoDevice(deviceIdVideo);
-                }
-
-                //SPhoneSDK.VideoDeviceInfo[] VideoDeviceInfos1 = new SPhoneSDK.VideoDeviceInfo[100];
-                //int len = 0;
-                //SPhoneSDK.GetVideoDevices(VideoDeviceInfos1, out len);
-                //if (len > 0)
-                //{
-                //    var deviceIdVideo = VideoDeviceInfos1[len - 1].id;
-                //    SPhoneSDK.SetDefaultVideoDevice(deviceIdVideo);
-                //    //System.Threading.Thread.Sleep(1000);
-                //}
-
-                //SetupCaptureAudioFile(url);
-                //int len = 0;
-                //AudioDeviceInfo[] audioDevices = new AudioDeviceInfo[100];
-                //SPhoneSDK.GetAudioDevices(audioDevices, out len);
-                //if (len > 0)
-                //{
-                //    var deviceIdAudio = audioDevices[len - 1].id;
-                //    SPhoneSDK.SetDefaultAudioDevice(deviceIdAudio, deviceIdAudio);
-                //    //System.Threading.Thread.Sleep(1000);
-                //}
-
-                GCommon.Logger.Warn("sipincoming answer：" + numberdb);
-                lock (_lock)
-                {
-                if (s_calls.ContainsKey(callid))
-                {
-                    s_calls.Remove(callid);
-                }
-                }
-
-
-                lock (_lock)
-                {
-                    s_calls.Add(callid, callinfo);
-                }
-                Answer(callid, true);
-
-                if (_enableVoice)
-                {
-                    if (sipChannel.AudioPortConf == -1)
-                    {
-                        GCommon.Logger.Warn("incoming request broadcast intercom");
-                        s_callidIntercom = callid;
-                        SipMethodProxy sipMethodProxy = new SipMethodProxy(Common.AkStreamWebConfig.WaitSipRequestTimeOutMSec);
-                        var result = sipMethodProxy.BroadcastRequest(deviceId, channelId);
-                    }
-                    else
-                    {
-                        //if (sipChannel.SipCallid >= 0)
-                        //{
-                        //    GCommon.Logger.Warn("incoming broadcast speaking do nothing");
-                        //}
-                        //else
-                        //{
-                            var th = new Thread(() =>
-                            {
-                                Thread.Sleep(500);
-                                GCommon.Logger.Warn("incoming AddToAudioPort intercom");
-                                SPhoneSDK.AddToAudioPort(callid, sipChannel.AudioPortConf);
-                                sipChannel.SipCallid = callid;
-                            });
-                            th.Start();
-                        //}
-                    }
-                }
-            }
-            else
-            {
-                GCommon.Logger.Warn("sipincoming fail： mediaserver url is null");
-            }
-
-            GCommon.Logger.Warn("sipincoming end：" + callid);
+            return numberdb;
         }
 
         //private static void SipChannel_OnReconnectStream1(SipChannel channel)
@@ -1099,6 +1084,9 @@ namespace AKStreamWeb
         public string calledDeviceNumber { get; set; }
 
         public string Url { get; set; }
-
+        /// <summary>
+        /// 0 H264, 1 H265
+        /// </summary>
+        public int CodecId { get; set; }
     }
 }

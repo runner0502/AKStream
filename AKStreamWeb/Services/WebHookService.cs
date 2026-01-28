@@ -660,20 +660,20 @@ namespace AKStreamWeb.Services
             if (req.Schema.Trim().ToLower().Equals("rtmp") && !IsRecordStream(req.Stream, out _))
             {
                 ServerInstance mediaServer = null;
+                GCommon.Logger.Info(
+                       $"[{Common.LoggerHead}]->收到WebHook-OnStreamChanged回调(流接入)->{JsonHelper.ToJson(req)}");
+                mediaServer = Common.MediaServerList.FindLast(x => x.MediaServerId.Equals(req.MediaServerId));
+                if (mediaServer == null)
+                {
+                    return new ResToWebHookOnStreamChange()
+                    {
+                        Code = 0,
+                        Msg = "success",
+                    };
+                }
                 if (req.Regist == true)
                 {
-                    GCommon.Logger.Info(
-                        $"[{Common.LoggerHead}]->收到WebHook-OnStreamChanged回调(流接入)->{JsonHelper.ToJson(req)}");
-                    mediaServer = Common.MediaServerList.FindLast(x => x.MediaServerId.Equals(req.MediaServerId));
-                    if (mediaServer == null)
-                    {
-                        return new ResToWebHookOnStreamChange()
-                        {
-                            Code = 0,
-                            Msg = "success",
-                        };
-                    }
-
+                   
                     #region debug sql output
 
                     if (Common.IsDebug)

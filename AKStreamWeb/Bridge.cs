@@ -48,8 +48,12 @@ namespace AKStreamWeb
         private static bool _enableVoice = false;
 
         private static object _lock = new object();
-
-        public bool EnableAudio { get { return true; } } //test tcp ; for dongfangguoxin
+        private bool _enableAudio = false;
+        public bool EnableAudio 
+        { 
+            get { return _enableAudio; }
+            set { _enableAudio = value; }
+        } //test tcp ; for dongfangguoxin
 
         private Bridge()
         {
@@ -73,6 +77,27 @@ namespace AKStreamWeb
                 sipRtpPortRange = int.Parse(sipRtpPortRangeConfig.Value);
             }
 
+            var enableAudioConfig = ORMHelper.Db.Select<ConfigItem>().Where(a => a.Key.Equals("enableAudio")).First();
+            if (enableAudioConfig != null)
+            {
+                if (enableAudioConfig.Value.Equals("0"))
+                {
+                    _enableAudio = false;
+                }
+                else
+                {
+                    _enableAudio = true;
+                }
+            }else
+            {
+                enableAudioConfig = new ConfigItem()
+                {
+                    Key = "enableAudio",
+                    Value = "0",
+                };
+                ORMHelper.Db.Insert(enableAudioConfig).ExecuteAffrows();
+                _enableAudio = false;
+            }
             SPhoneSDK.SDKInit( Common.AkStreamWebConfig.SipIp, Common.AkStreamWebConfig.SipPort, 5, System.AppContext.BaseDirectory + "pjsip.log");
             //SPhoneSDK.SDKInit("172.19.6.41", 5066, 5, System.AppContext.BaseDirectory +  "pjsip.log");
             SPhoneSDK.Regist1("1.1.1.1", "admin", "admin", Common.AkStreamWebConfig.PublicMediaIp, sipRtpStartPort, sipRtpPortRange, false, true);
@@ -340,6 +365,7 @@ namespace AKStreamWeb
                 case CallState.STATE_CONFIRMED:
                     try
                     {
+
                         if (EnableAudio)//for dongfangguoxin
                         {
                             int deviceIdAudio = -1;
@@ -359,18 +385,26 @@ namespace AKStreamWeb
                             //{
 
 
-                            SetupCaptureAudioFile(s_calls[callid].Url);
-                            int len1 = 0;
-                            AudioDeviceInfo[] audioDevices1 = new AudioDeviceInfo[12801];
-                            SPhoneSDK.GetAudioDevices(audioDevices1, out len1);
-                            if (len1 > 0)
+                            deviceIdAudio = SetupCaptureAudioFile(s_calls[callid].Url);
+                            if (deviceIdAudio < 0)
                             {
-                                deviceIdAudio = audioDevices1[len1 - 1].id;
-                                //SPhoneSDK.SetDefaultAudioDevice(deviceIdAudio, deviceIdAudio);
-                                //System.Threading.Thread.Sleep(1000);
+                                GCommon.Logger.Error("callstate setup capture audio fail url: " + s_calls[callid].Url);
+                                return;
                             }
+                            //int len1 = 0;
+                            //AudioDeviceInfo[] audioDevices1 = new AudioDeviceInfo[12801];
+                            //SPhoneSDK.GetAudioDevices(audioDevices1, out len1);
+                            //if (len1 > 0)
+                            //{
+                            //    deviceIdAudio = audioDevices1[len1 - 1].id;
+                            //    //SPhoneSDK.SetDefaultAudioDevice(deviceIdAudio, deviceIdAudio);
+                            //    //System.Threading.Thread.Sleep(1000);
                             //}
-                            SPhoneSDK.ConnectSoundportToCall(deviceIdAudio, deviceIdAudio, callid);
+                            //}
+                            if (deviceIdAudio >= 0)
+                            {
+                                SPhoneSDK.ConnectSoundportToCall(deviceIdAudio, deviceIdAudio, callid);
+                            }
                         }
                         //TestBroadcastAudio();
                         //TestAddStreamProxyRecord(callid);
@@ -519,7 +553,7 @@ namespace AKStreamWeb
 
         public static int s_callidIntercom = 0;
 
-        private static biz_transcode GetTranscodeConfig(string number)
+        private static biz_transcode GetTranscodeConfig(string number, int srcCodec, string inviteMsg)
         {
             var basicConfig = ORMHelper.Db.Select<SysAdvancedConfig>().First();
             if (basicConfig != null)
@@ -537,6 +571,44 @@ namespace AKStreamWeb
             if (!_transcode)
             {
                 return null;
+            }
+
+            string findstr = "ifc:";
+            int startIndex = inviteMsg.IndexOf(findstr);
+            if (startIndex > 0)
+            {
+                int endIndex = inviteMsg.IndexOf("\r\n", startIndex);
+                if (startIndex > 0 && endIndex > 0 && endIndex > startIndex)
+                {
+                    string findLine = inviteMsg.Substring(startIndex, endIndex - startIndex);
+                    var parts = findLine.Split(new char[] { '.' });
+                    if (parts != null && parts.Length >= 4)
+                    {
+                        if (int.TryParse(parts[2], out int type))
+                        {
+                            GCommon.Logger.Info("sipincoming callid find ifc type: " + type);
+                            if (type == 15)
+                            {
+                                GCommon.Logger.Warn("sipincoming callid no transcode for ifc 15 mcu");
+                                return null;
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (srcCodec == 0)
+            {
+                var transcode264Config = ORMHelper.Db.Select<ConfigItem>().Where(a => a.Key.Equals("transcode264")).First();
+                if (transcode264Config == null)
+                {
+                    transcode264Config = new ConfigItem() { Key = "transcode264", Value = "1" };
+                    ORMHelper.Db.Insert(transcode264Config).ExecuteAffrows();
+                }
+                if (transcode264Config.Value.Equals("0"))
+                {
+                    return null;
+                }
             }
 
             var transcodeConfig = ORMHelper.Db.Select<biz_transcode>().Where(a => number.StartsWith(a.caller_number)).Where(a => a.state == "1").First();
@@ -718,7 +790,7 @@ namespace AKStreamWeb
             callinfo.IsTranscode = false;
             SetHardEncodeVideo(callid, 1);
 
-            var transcodeConfig = GetTranscodeConfig(number);
+            var transcodeConfig = GetTranscodeConfig(number, callinfo.CodecId, idsContent);
             if (transcodeConfig != null)
             {
                 SetHardEncodeVideo(callid, 0);

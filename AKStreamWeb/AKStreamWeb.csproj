@@ -4,7 +4,7 @@
       <TargetFramework>net6.0</TargetFramework>
       <LangVersion>default</LangVersion>
       <GenerateDocumentationFile>True</GenerateDocumentationFile>
-      <Version>$(VersionPrefix)3.4.0.10</Version>
+      <Version>$(VersionPrefix)3.4.0.12</Version>
     </PropertyGroup>
 
     <ItemGroup>

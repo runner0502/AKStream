@@ -55,8 +55,8 @@ x.platid == sipDeviceId).First();
             //设备注册时
             var sipDevice = JsonHelper.FromJson<SipDevice>(sipDeviceJson);
 
-            GCommon.Logger.Debug(
-                $"[{Common.LoggerHead}]->设备就绪(OnRegister)->{sipDevice.IpAddress.ToString()}-{sipDevice.DeviceId}");
+            GCommon.Logger.Error(
+                $"[{Common.LoggerHead}]->设备就绪(OnRegister)注册->{sipDevice.IpAddress.ToString()}-{sipDevice.DeviceId}");
 
             //Bridge.GetInstance().Subcribe();
 
@@ -69,7 +69,7 @@ x.platid == sipDeviceId).First();
             }
             else
             {
-                GCommon.Logger.Warn(
+                GCommon.Logger.Error(
                     $"[{Common.LoggerHead}]->获取设备信息失败(OnRegister)->{sipDevice.IpAddress.ToString()}-{sipDevice.DeviceId}\r\n{JsonHelper.ToJson(rs, Formatting.Indented)}");
             }
 
@@ -81,7 +81,7 @@ x.platid == sipDeviceId).First();
             }
             else
             {
-                GCommon.Logger.Warn(
+                GCommon.Logger.Error(
                     $"[{Common.LoggerHead}]->获取设备状态信息失败(OnRegister)->{sipDevice.IpAddress.ToString()}-{sipDevice.DeviceId}\r\n{JsonHelper.ToJson(rs, Formatting.Indented)}");
             }
 
@@ -108,8 +108,6 @@ x.platid == sipDeviceId).First();
             //    GCommon.Logger.Error(
             //        $"[{Common.LoggerHead}]->设备目录获取失败(OnRegister)->{sipDevice.IpAddress.ToString()}-{sipDevice.DeviceId}\r\n{JsonHelper.ToJson(rs, Formatting.Indented)}");
             //}
-
-           
         }
 
         private static void UpdateRegistState(SipDevice sipDevice)
@@ -182,7 +180,7 @@ x.fatherid == sipDevice.DeviceId).Set(x => x.status, 0).ExecuteAffrows();
                 GCommon.Ldb.VideoOnlineInfo.DeleteMany(x => x.DeviceId.Equals(sipDevice.DeviceId));
             }
 
-            GCommon.Logger.Info(
+            GCommon.Logger.Error(
                 $"[{Common.LoggerHead}]->设备注销->{sipDevice.DeviceId}->所有通道-->注销成功");
 
             var config1 = ORMHelper.Db.Select<SysAdvancedConfig>().First();
@@ -845,7 +843,7 @@ x.dev.Equals(device.dev)).First();
             isCheckSyncCatalogTimer = true;
             if (DateTime.Now.Subtract( SsyncState.StartTime).Minutes >= 60)
             {
-                GCommon.Logger.Warn("同步目录异常：超时60分钟没有全部同步完成， 部分同步写入数据库, 共同步到的目录个数是 " + SsyncState.State.DeviceCount + SsyncState.State.orgCount );
+                GCommon.Logger.Error("同步目录异常：超时60分钟没有全部同步完成， 部分同步写入数据库, 共同步到的目录个数是 " + SsyncState.State.DeviceCount + SsyncState.State.orgCount );
                 try
                 {
                     UpdateCatelogToDB();

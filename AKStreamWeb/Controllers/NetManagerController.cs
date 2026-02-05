@@ -62,7 +62,7 @@ namespace AKStreamWeb.Controllers
                 info.CalledDeviceId = item.Value.SipChannel.DeviceId;
                 info.CalledDeviceName = item.Value.CameraName;
                 info.CalledDeviceNumber = item.Value.calledDeviceNumber;
-
+                info.SourceCodecType = item.Value.CodecId;
                 infos.Add(info);
             }
             return infos;
@@ -111,7 +111,7 @@ namespace AKStreamWeb.Controllers
             if (SipServerCallBack.SsyncState.State.IsProcessing)
             {
                 GCommon.Logger.Warn("sync catalog startsync isProcessing");
-                GCommon.Logger.Warn("同步目录异常： 当前正在同步，请等待当前同步完成或者停止当前同步后，再发起同步");
+                GCommon.Logger.Error("同步目录异常： 当前正在同步，请等待当前同步完成或者停止当前同步后，再发起同步");
                 return false;
             }
             SipServerCallBack.SsyncState.PlatId = deviceId;
@@ -132,7 +132,7 @@ namespace AKStreamWeb.Controllers
             {
                 SipServerCallBack.SsyncState.SyncStartIndex = 0;
                 SipServerCallBack.SsyncState.State.IsProcessing = false;
-                GCommon.Logger.Warn("同步目录异常： 设备不存在或者不在线 deviceid: " + deviceId);
+                GCommon.Logger.Error("同步目录异常： 设备不存在或者不在线 deviceid: " + deviceId);
                 return false;
             }
             SipServerCallBack.SsyncState.StartTime = DateTime.Now;
@@ -298,6 +298,10 @@ namespace AKStreamWeb.Controllers
             /// 主叫IP
             /// </summary>
             public string CallerIP { get; set; }
+            /// <summary>
+            /// 源编码类型 0 为H264 ， 1为H265
+            /// </summary>
+            public int SourceCodecType { get; set; }
 
         }
         /// <summary>

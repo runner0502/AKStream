@@ -200,19 +200,15 @@ namespace AKStreamWeb
             GCommon.Logger.Warn("SipMsgProcess_OnReceiveBye");
             foreach (var item in LibGB28181SipServer.Common.SipDevices)
             {
-                GCommon.Logger.Warn("SipMsgProcess_OnReceiveBye1");
                 foreach (var channel in item.SipChannels)
                 {
-                    GCommon.Logger.Warn("SipMsgProcess_OnReceiveBye2");
                     if (channel.Callid281Broadcast == req.Header.CallId)
                     {
-                        GCommon.Logger.Warn("SipMsgProcess_OnReceiveBye3");
                         channel.Callid281Broadcast = "";
                         channel.InviteSipRequestBroadcast = null;
                         channel.InviteSipResponseBroadcast = null;
                         channel.SipCallid = -1;
                         GCommon.Logger.Warn("SipMsgProcess_OnReceiveBye StopAudioSendStream find channelid: " + channel.DeviceId + ",confPort: " + channel.AudioPortConf);
-                        GCommon.Logger.Warn("SipMsgProcess_OnReceiveBye9 intercom");
                         StopAudioSendStream(channel.BroadcastStream, channel.AudioPortConf);
                         channel.AudioPortConf = -1;
                         channel.BroadcastStream = IntPtr.Zero;
@@ -643,18 +639,21 @@ namespace AKStreamWeb
         public static void OnIncomingCallInternal_WithMsg(int callid, string number, CallState state, bool isVideo, string idsContent)
         //public static void OnIncomingCall(int callid, string number, CallState state, bool isVideo)
         {
+            string numberdb = Get281NumberFromInvite(idsContent);
+            string logPrefix = " sipincoming callid " + callid + ",from: " + number +  ", to: " +numberdb;
+
             if (!isVideo)
             {
+                GCommon.Logger.Error("呼叫失败，不支持语音呼叫" + logPrefix + " not video hangup");
                 Hangup(callid);
                 return;
             }
             string channelId = "";
-            string logPrefix = "sipincoming callid " + callid + ",caller: " + number + ",281realNumber" + channelId + " ";
             GCommon.Logger.Info(logPrefix + " start");
             string msg;
             if (Common.License.DoExtraValidation(out msg) != QLicenseCore.LicenseStatus.VALID)
             {
-                GCommon.Logger.Error(logPrefix + "license fail: " + msg);
+                GCommon.Logger.Error("呼叫失败， 授权不可用" + logPrefix + "license fail: " + msg);
                 Hangup(callid);
                 return;
             }
@@ -664,7 +663,6 @@ namespace AKStreamWeb
             //string channelId = "34020000001320000012";
             string deviceId = "";
 
-            string numberdb = Get281NumberFromInvite(idsContent);
             var channeldb = ORMHelper.Db.Select<DeviceNumber>().Where(x => x.num.Equals(numberdb)).First();
             if (channeldb != null)
             {
@@ -672,7 +670,7 @@ namespace AKStreamWeb
             }
             if (string.IsNullOrEmpty(channelId))
             {
-                GCommon.Logger.Error(logPrefix + "没有这个号码：" + numberdb);
+                GCommon.Logger.Error("呼叫失败 没有这个号码：" + numberdb + logPrefix);
                 Hangup(callid);
                 return;
             }
@@ -692,7 +690,7 @@ namespace AKStreamWeb
 
             if (deviceId.IsNullOrEmpty())
             {
-                GCommon.Logger.Error(logPrefix + "设备不在线：" + deviceId);
+                GCommon.Logger.Error(  "呼叫失败，设备不在线：" + deviceId + logPrefix);
                 Hangup(callid);
                 return;
             }
@@ -706,8 +704,8 @@ namespace AKStreamWeb
             sipChannel = SipServerService.GetSipChannelById(deviceId, channelId, out rs);
             if (sipChannel == null)
             {
-                GCommon.Logger.Error(logPrefix +
-                    $"[{Common.LoggerHead}]->获取通道失败 sipincoming->{deviceId}-{channelId}->{JsonHelper.ToJson(rs)}");
+                GCommon.Logger.Error( "呼叫失败 " + logPrefix +
+                    $"[{Common.LoggerHead}]->获取通道失败->{deviceId}-{channelId}->{JsonHelper.ToJson(rs)}");
                 Hangup(callid);
                 return;
             }
@@ -718,7 +716,7 @@ namespace AKStreamWeb
 
             if (ret == null)
             {
-                GCommon.Logger.Error(logPrefix + " livevideo fail");
+                GCommon.Logger.Error("呼叫失败， 呼叫281设备失败 "+ logPrefix + " livevideo fail");
                 Hangup(callid);
                 return;
             }
@@ -731,7 +729,7 @@ namespace AKStreamWeb
             string url = ret.PlayUrl.Find(a => a.StartsWith("rtsp"));
             if (string.IsNullOrEmpty(url))
             {
-                GCommon.Logger.Error(logPrefix + "fail： mediaserver url is null");
+                GCommon.Logger.Error("呼叫失败 " + logPrefix + "fail： mediaserver url is null");
                 Hangup(callid);
                 return;
             }
@@ -741,7 +739,7 @@ namespace AKStreamWeb
 
             if (deviceIdVideo <= 0)
             {
-                GCommon.Logger.Error(logPrefix + " setup capture fail");
+                GCommon.Logger.Error("呼叫失败 " + logPrefix + " setup capture fail");
                 Hangup(callid);
                 return;
             }

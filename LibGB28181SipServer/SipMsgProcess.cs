@@ -1026,7 +1026,7 @@ namespace LibGB28181SipServer
                 Common.SipDevices.Remove(sipDevice);
                 sipDevice.SipChannels = null!;
                 sipDevice.Dispose();
-                GCommon.Logger.Info(
+                GCommon.Logger.Error(
                     $"[{Common.LoggerHead}]->Sip设备心跳丢失超过限制，已经注销->{tmpSipDeviceStr}");
             }
 
@@ -1121,7 +1121,7 @@ namespace LibGB28181SipServer
                                 OnUnRegisterReceived?.Invoke(JsonHelper.ToJson(tmpSipDevice));
                             }); //抛线程出去处理
 
-                            GCommon.Logger.Info(
+                            GCommon.Logger.Error(
                                 $"[{Common.LoggerHead}]->收到来自{remoteEndPoint}的Sip设备注销请求->{tmpSipDevice.DeviceId}->已经注销，当前Sip设备数量:{Common.SipDevices.Count}个");
 
                             lock (Common.SipDevicesLock)
@@ -1196,7 +1196,7 @@ namespace LibGB28181SipServer
 
                             if (!ha3.Equals(sipRequest.Header.AuthenticationHeaders[0].SIPDigest.Response))
                             {
-                                GCommon.Logger.Debug(
+                                GCommon.Logger.Error(
                                     $"[{Common.LoggerHead}]->收到来自{remoteEndPoint}的Sip设备注册请求->鉴权失败,注册失败");
                                 SIPRequest req = SIPRequest.GetRequest(SIPMethodsEnum.BYE, sipRequest.URI);
                                 req.Header.CallId = sipRequest.Header.CallId;

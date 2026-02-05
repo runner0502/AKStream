@@ -977,7 +977,7 @@ namespace AKStreamWeb.Services
                 out sipDevice);
             if (ret == false || !rs.Code.Equals(ErrorNumber.None))
             {
-                GCommon.Logger.Warn(
+                GCommon.Logger.Error(
                     $"[{Common.LoggerHead}]->请求Sip推流失败->{deviceId}-{channelId}->{JsonHelper.ToJson(rs)}");
 
                 return null;
@@ -1017,7 +1017,7 @@ namespace AKStreamWeb.Services
                                 out rs);
                         if (openRtpPort == null || !rs.Code.Equals(ErrorNumber.None))
                         {
-                            GCommon.Logger.Warn(
+                            GCommon.Logger.Error(
                                 $"[{Common.LoggerHead}]->请求Sip推流失败->{deviceId}-{channelId}->{JsonHelper.ToJson(rs)}");
 
                             return null;
@@ -1032,7 +1032,7 @@ namespace AKStreamWeb.Services
                             ExceptMessage = ex.Message,
                             ExceptStackTrace = ex.StackTrace
                         };
-                        GCommon.Logger.Warn(
+                        GCommon.Logger.Error(
                             $"[{Common.LoggerHead}]->请求Sip推流失败->{deviceId}-{channelId}->{JsonHelper.ToJson(rs)}");
 
                         return null;
@@ -1091,7 +1091,7 @@ namespace AKStreamWeb.Services
                 };
 
 
-                GCommon.Logger.Warn(
+                GCommon.Logger.Error(
                     $"[{Common.LoggerHead}]->请求Sip推流失败->{deviceId}-{channelId}->{JsonHelper.ToJson(rs)}");
 
                 return null;
@@ -1130,7 +1130,7 @@ namespace AKStreamWeb.Services
                             out _); //释放rtp端口
                     }
 
-                    GCommon.Logger.Warn(
+                    GCommon.Logger.Error(
                         $"[{Common.LoggerHead}]->请求Sip推流失败->{deviceId}-{channelId}->{JsonHelper.ToJson(rs)}");
 
                     return null;
@@ -1238,7 +1238,7 @@ namespace AKStreamWeb.Services
                     Code = ErrorNumber.MediaServer_WaitWebHookTimeOut,
                     Message = ErrorMessage.ErrorDic![ErrorNumber.MediaServer_WaitWebHookTimeOut]
                 };
-                GCommon.Logger.Warn(
+                GCommon.Logger.Error(
                     $"[{Common.LoggerHead}]->请求Sip推流失败->{deviceId}-{channelId}->{JsonHelper.ToJson(rs)}");
 
                 lock (GCommon.Ldb.LiteDBLockObj)

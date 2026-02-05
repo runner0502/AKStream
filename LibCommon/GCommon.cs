@@ -69,12 +69,12 @@ namespace LibCommon
 
         private static void Logger_OnLogEvent(string msg)
         {
-           // SystemLog systemLog = new SystemLog
-           // {
-           //     Message = msg,
-           //     Timestamp = DateTime.Now
-           // };
-           //ORMHelper.Db.Insert(systemLog).ExecuteAffrows();
+            SystemLog systemLog = new SystemLog
+            {
+                Message = msg,
+                Timestamp = DateTime.Now
+            };
+            ORMHelper.Db.Insert(systemLog).ExecuteAffrows();
         }
 
         static GCommon()

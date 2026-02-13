@@ -17,8 +17,8 @@ public class ZLMediaKitConfigNew_General
     private int? _unready_frame_cache;
     private int? _check_nvidia_dev;
     private int? _enable_ffmpeg_log;
-    
 
+    private int? wait_audio_track_data_ms;
 
     /// <summary>
     /// 是否启用虚拟主机
@@ -109,6 +109,14 @@ public class ZLMediaKitConfigNew_General
         get => _wait_add_track_ms;
         set => _wait_add_track_ms = value;
     }
+
+    public int? Wait_Audio_Track_Data_Ms
+    {
+        get => wait_audio_track_data_ms;
+        set => wait_audio_track_data_ms = value;
+    }
+
+    
 
     /// <summary>
     /// 如果track未就绪，我们先缓存帧数据，但是有最大个数限制，防止内存溢出

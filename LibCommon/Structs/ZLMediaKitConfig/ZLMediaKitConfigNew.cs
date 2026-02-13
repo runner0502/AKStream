@@ -366,6 +366,10 @@ public class ZLMediaKitConfigNew
                 {
                     data["general"]["unready_frame_cache"] = General.Unready_Frame_Cache.ToString();
                 }
+                if (General.Wait_Audio_Track_Data_Ms != null && UtilsHelper.IsInteger(General.Wait_Audio_Track_Data_Ms.ToString()))
+                {
+                    data["general"]["wait_audio_track_data_ms"] = General.Wait_Audio_Track_Data_Ms.ToString();
+                }
             }
 
             #endregion
@@ -1287,7 +1291,14 @@ public class ZLMediaKitConfigNew
                 General.Enable_FFmpeg_Log = int.Parse(enable_ffmpeg_log);
               
             }
-            
+
+            var wait_audio_track_data_ms = data["general"]["wait_audio_track_data_ms"];
+            if (wait_audio_track_data_ms != null && !string.IsNullOrEmpty(wait_audio_track_data_ms) &&
+                UtilsHelper.IsInteger(wait_audio_track_data_ms))
+            {
+                General.Wait_Audio_Track_Data_Ms = int.Parse(wait_audio_track_data_ms);
+            }
+
             #endregion
 
             #region hls部分

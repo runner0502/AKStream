@@ -549,6 +549,10 @@ namespace XyCallLayer
         [DllImport(@"./nativesip/libsphone.so")]
         public extern static bool Regist1(string host, string uname, string pwd, string mediaPublicIP, int rtpStartPort, int rtpPortRange, bool mobile = false, bool localMode = false,
     int regTimeout = 60, QosType qos = QosType.BEST_EFFORT);
+        [DllImport(@"./nativesip/libsphone.so")]
+        public extern static int SetIdleVideoDeviceId(int callid, string fileName);
+        [DllImport(@"./nativesip/libsphone.so")]
+        public extern static int SetIdleAudioDeviceId(int callid, string fileName);
 
     }
 }

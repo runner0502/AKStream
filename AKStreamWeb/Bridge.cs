@@ -381,7 +381,8 @@ namespace AKStreamWeb
                             //{
 
 
-                            deviceIdAudio = SetupCaptureAudioFile(s_calls[callid].Url);
+                            //deviceIdAudio = SetupCaptureAudioFile(s_calls[callid].Url);
+                            deviceIdAudio = SetIdleAudioDeviceId(callid, s_calls[callid].Url);
                             if (deviceIdAudio < 0)
                             {
                                 GCommon.Logger.Error("callstate setup capture audio fail url: " + s_calls[callid].Url);
@@ -734,10 +735,11 @@ namespace AKStreamWeb
                 return;
             }
             GCommon.Logger.Info(logPrefix + " before videocapture ");
-            int deviceIdVideo = SetupCaptureVideoFile(url);
+            //int deviceIdVideo = SetupCaptureVideoFile(url);
+            int deviceIdVideo = SPhoneSDK.SetIdleVideoDeviceId(callid, url);
             GCommon.Logger.Info(logPrefix + " end videocapture ");
 
-            if (deviceIdVideo <= 0)
+            if (deviceIdVideo < 0)
             {
                 GCommon.Logger.Error("呼叫失败 " + logPrefix + " setup capture fail");
                 Hangup(callid);
@@ -783,8 +785,9 @@ namespace AKStreamWeb
                 GCommon.Logger.Info(logPrefix + "src codec 264 ");
             }
 
-            SPhoneSDK.ChangeVideoDevice1(callid, deviceIdVideo);
-            SPhoneSDK.SetDefaultVideoDevice(deviceIdVideo);
+            //SPhoneSDK.ChangeVideoDevice1(callid, deviceIdVideo);
+            //SPhoneSDK.SetDefaultVideoDevice(deviceIdVideo);
+
             callinfo.IsTranscode = false;
             SetHardEncodeVideo(callid, 1);
 

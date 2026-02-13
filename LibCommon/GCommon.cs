@@ -74,7 +74,16 @@ namespace LibCommon
                 Message = msg,
                 Timestamp = DateTime.Now
             };
-            ORMHelper.Db.Insert(systemLog).ExecuteAffrows();
+            try
+            {
+                ORMHelper.Db.Insert(systemLog).ExecuteAffrows();
+            }
+            catch (Exception)
+            {
+
+                systemLog.Message = systemLog.Message.Substring(0, 100);
+                ORMHelper.Db.Insert(systemLog).ExecuteAffrows();
+            }
         }
 
         static GCommon()

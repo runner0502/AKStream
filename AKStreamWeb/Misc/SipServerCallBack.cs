@@ -55,7 +55,7 @@ x.platid == sipDeviceId).First();
             //设备注册时
             var sipDevice = JsonHelper.FromJson<SipDevice>(sipDeviceJson);
 
-            GCommon.Logger.Error(
+            GCommon.Logger.Info(
                 $"[{Common.LoggerHead}]->设备就绪(OnRegister)注册->{sipDevice.IpAddress.ToString()}-{sipDevice.DeviceId}");
 
             //Bridge.GetInstance().Subcribe();
@@ -315,11 +315,11 @@ x.platid == sipDevice.DeviceId).Set(x=>x.registestate,state).ExecuteAffrowsAsync
                     var channels = ORMHelper.Db.Select<VideoChannel>().Where<VideoChannel>(a=>a.DeviceId == sipDevice.DeviceId).ToList<VideoChannel>();
                     foreach (var tmpChannelDev in channels)
                     {
-                        if (!Common.s_licenceVaid)
-                        {
-                            GCommon.Logger.Warn("license fail 未授权");
-                            break;    
-                        }
+                        //if (!Common.s_licenceVaid)
+                        //{
+                        //    GCommon.Logger.Error("license fail 未授权");
+                        //    break;    
+                        //}
                         //if (SipDevice.s_count > Common.License.MaxDeviceCount)
                         //{
                         //    GCommon.Logger.Warn("license fail 超过最大授权设备个数");

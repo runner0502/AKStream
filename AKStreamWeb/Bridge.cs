@@ -141,7 +141,31 @@ namespace AKStreamWeb
 
         private void _checkCallsStatTimer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            GCommon.Logger.Info("SipChannel_OnReconnectStream1 calls count " + s_calls.Count);
+            try
+            {
+                var result = ORMHelper.Db.Delete<SystemLog>().Where(a => DateTime.Now.Subtract(a.Timestamp).Days > 7).ExecuteAffrows();
+            }catch (Exception ex)
+            {
+                GCommon.Logger.Warn("删除日志异常 " + ex.ToString());
+            }
+
+            GCommon.Logger.Info("calls count " + s_calls.Count);
+             Reconect281Call();
+
+        }
+
+        private static bool Reconect281Call()
+        {
+            var Reconnect281CallConfig = ORMHelper.Db.Select<ConfigItem>().Where(a => a.Key.Equals("281callReconnect")).First();
+            if (Reconnect281CallConfig == null)
+            {
+                Reconnect281CallConfig = new ConfigItem() { Key = "281callReconnect", Value = "0" };
+                ORMHelper.Db.Insert(Reconnect281CallConfig).ExecuteAffrows();
+            }
+            if (Reconnect281CallConfig.Value.Equals("0"))
+            {
+                return false;
+            }
             lock (_lock)
             {
                 foreach (var call in s_calls)
@@ -166,33 +190,27 @@ namespace AKStreamWeb
                         {
                             GCommon.Logger.Info("SipChannel_OnReconnectStream1 livevideo fail：" + channel);
                             GCommon.Logger.Warn("281侧断流重连失败 " + channel.DeviceId);
-                            return;
+                            return false;
                         }
                         string url = ret.PlayUrl.Find(a => a.StartsWith("rtsp"));
                         if (!string.IsNullOrEmpty(url))
                         {
                             GCommon.Logger.Info("SipChannel_OnReconnectStream1 before videocapture " + url);
-                            int deviceIdVideo = SetupCaptureVideoFile(url);
+                            int deviceIdVideo = SetIdleVideoDeviceId(call.Key, url);
                             GCommon.Logger.Info("SipChannel_OnReconnectStream1 end videocapture deviceIdVideo: " + deviceIdVideo);
 
                             if (deviceIdVideo > 0)
                             {
-                                foreach (var item in s_calls)
-                                {
-                                    if (item.Value.Url == url)
-                                    {
-                                        GCommon.Logger.Info("SipChannel_OnReconnectStream1 ChangeVideoDevice callid: " + item.Key);
-                                        SPhoneSDK.SetDefaultVideoDevice(deviceIdVideo);
-                                        var result = SPhoneSDK.ChangeVideoDevice(item.Key, deviceIdVideo);
-                                        GCommon.Logger.Info("SipChannel_OnReconnectStream1 ChangeVideoDevice deviceIdVideo: " + deviceIdVideo + ", reslut: " + result);
-                                        GCommon.Logger.Warn("281侧断流重连成功 " + channel.DeviceId);
-                                    }
-                                }
+                                var result = SPhoneSDK.ChangeVideoDevice(call.Key, deviceIdVideo);
+                                GCommon.Logger.Info("SipChannel_OnReconnectStream1 ChangeVideoDevice deviceIdVideo: " + deviceIdVideo + ", reslut: " + result);
+                                GCommon.Logger.Warn("281侧断流重连成功 " + channel.DeviceId);
                             }
                         }
                     }
                 }
             }
+
+            return true;
         }
 
         private void SipMsgProcess_OnReceiveBye(SIPRequest req)

@@ -28,6 +28,7 @@ namespace LibGB28181SipServer
         private static List<SipDevice> _sipDevices = new List<SipDevice>();
         private static ConcurrentQueue<Catalog> _tmpCatalogs = new ConcurrentQueue<Catalog>();
         private static ConcurrentQueue<RecordInfoEx> _tmpRecItems = new ConcurrentQueue<RecordInfoEx>();
+        private static ConcurrentQueue<NotifyCatalog> _tmpNotifyCatalogs = new ConcurrentQueue<NotifyCatalog>();
 
 
         /// <summary>
@@ -194,6 +195,11 @@ namespace LibGB28181SipServer
             set => _tmpRecItems = value ?? throw new ArgumentNullException(nameof(value));
         }
 
+        public static ConcurrentQueue<NotifyCatalog> TmpNotifyCatalogs
+        {
+            get => _tmpNotifyCatalogs;
+            set => _tmpNotifyCatalogs = value ?? throw new ArgumentNullException(nameof(value));
+        }
 
         /// <summary>
         /// 初始化一SipServerConfig

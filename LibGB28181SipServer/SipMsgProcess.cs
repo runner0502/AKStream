@@ -185,7 +185,33 @@ namespace LibGB28181SipServer
                 Thread.Sleep(1000);
             }
         }
+        public static void ProcessNotifyCatalogThread()
+        {
+            while (true)
+            {
+                while (!Common.TmpNotifyCatalogs.IsEmpty)
+                {
+                    var ret = Common.TmpNotifyCatalogs.TryDequeue(out NotifyCatalog tmpCatalog);
+                    if (ret && tmpCatalog != null)
+                    {
+                        try
+                        {
+                            GCommon.Logger.Debug("TmpNotifyCatalogs count: " + Common.TmpNotifyCatalogs.Count);
+                            ProgressNotifyCatalog(tmpCatalog);
+                        }
+                        catch (Exception ex)
+                        {
+                            GCommon.Logger.Error(
+                                $"[{Common.LoggerHead}]->处理设备目录通知时发生异常->{ex.Message}\r\n{ex.StackTrace}");
+                        }
+                    }
 
+                    Thread.Sleep(10);
+                }
+
+                Thread.Sleep(1000);
+            }
+        }
 
         /// <summary>
         /// 处理设备目录添加
@@ -725,7 +751,15 @@ namespace LibGB28181SipServer
                         }
                         catch (Exception ex)
                         {
-                            NewMethod(bodyXml);
+                            try
+                            {
+                                Common.TmpNotifyCatalogs.Enqueue(UtilsHelper.XMLToObject<NotifyCatalog>(bodyXml));
+                            }
+                            catch (Exception ex1)
+                            {
+                                GCommon.Logger.Error(
+                                    $"[{Common.LoggerHead}]->解析设备目录消息失败->{sipRequest}->{ex.Message}\r\n{ex.StackTrace}\r\n{ex1.Message}\r\n{ex1.StackTrace}");
+                            }
                         }
 
                         GCommon.Logger.Debug(
@@ -910,11 +944,9 @@ namespace LibGB28181SipServer
             }
         }
 
-        private static void NewMethod(XElement bodyXml)
+        private static void ProgressNotifyCatalog(NotifyCatalog notifyCata)
         {
-            GCommon.Logger.Debug($"[{Common.LoggerHead}]->MessageProcess2 notifycatalog->");
-            var notifyCata = (UtilsHelper.XMLToObject<NotifyCatalog>(bodyXml));
-            GCommon.Logger.Debug($"[{Common.LoggerHead}]->MessageProcess3 notifycatalog->");
+            GCommon.Logger.Debug($"[{Common.LoggerHead}]-> ProgressNotifyCatalog->");
 
             var config1 = ORMHelper.Db.Select<SysAdvancedConfig>().First();
             if (config1 != null)

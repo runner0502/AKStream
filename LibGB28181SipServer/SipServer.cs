@@ -2298,6 +2298,7 @@ namespace LibGB28181SipServer
                         _sipTransport.SIPTransportResponseReceived += SipMsgProcess.SipTransportResponseReceived;
                         Task.Factory.StartNew(() => { SipMsgProcess.ProcessCatalogThread(); });
                         Task.Factory.StartNew(() => { SipMsgProcess.ProcessRecordInfoThread(); });
+                        Task.Factory.StartNew(() => { SipMsgProcess.ProcessNotifyCatalogThread(); });
                         break;
                 }
 

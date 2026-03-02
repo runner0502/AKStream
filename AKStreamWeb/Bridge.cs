@@ -14,10 +14,12 @@ using Org.BouncyCastle.Asn1.Ocsp;
 using SIPSorcery.Net;
 using SIPSorcery.SIP;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Security.Policy;
 using System.Threading;
@@ -137,6 +139,8 @@ namespace AKStreamWeb
             _checkCallsStatTimer.Enabled = true;
             _checkCallsStatTimer.AutoReset = true;
             _checkCallsStatTimer.Start();
+
+            Task.Factory.StartNew(() => { RequestKeyframeThread(); });
         }
 
         private void _checkCallsStatTimer_Elapsed(object sender, ElapsedEventArgs e)
@@ -1117,39 +1121,23 @@ namespace AKStreamWeb
             // return ret;
         }
 
+        private static ConcurrentQueue<int> _tmpKeyframeRequestCallIds = new ConcurrentQueue<int>();
+
+        public static ConcurrentQueue<int> TmpKeyframeRequestCallIds
+        {
+            get => _tmpKeyframeRequestCallIds;
+            set => _tmpKeyframeRequestCallIds = value ?? throw new ArgumentNullException(nameof(value));
+        }
         public static void OnReceiveKeyframeRequest(int callid)
         {
-            Task.Run(() =>
+            if (!TmpKeyframeRequestCallIds.Contains(callid))
             {
-                GCommon.Logger.Warn("OnReceiveKeyframeRequest callid: " + callid);
-                try
-                {
-                    SipChannel sipChannel = null;
-                    lock (_lock)
-                    {
-                        if (s_calls != null && s_calls.Count > 0)
-                        {
-                            var info = s_calls[callid];
-                            if (info != null)
-                            {
-                                sipChannel = info.SipChannel;
-                            }
-                        }
-                    }
-                    if (sipChannel == null)
-                    {
-                        GCommon.Logger.Warn("OnReceiveKeyframeRequest not find sipchannel callid: " + callid);
-                        return;
-                    }
-                    ResponseStruct rs;
+                TmpKeyframeRequestCallIds.Enqueue(callid);
+            }else
+            {
+                GCommon.Logger.Warn("OnReceiveKeyframeRequest already exist callid: " + callid);
+            }
 
-                    var ret = SipServerService.ForceKeyframe(sipChannel.ParentId, sipChannel.DeviceId, out rs);
-                }
-                catch (Exception ex)
-                {
-                    GCommon.Logger.Warn("OnReceiveKeyframeRequest callid: " + callid + ", fail :" + ex.Message);
-                }
-            });
             //if (!rs.Code.Equals(ErrorNumber.None))
             //{
             //    throw new AkStreamException(rs);
@@ -1159,6 +1147,67 @@ namespace AKStreamWeb
             //Common.SipServer.Subscribe(device, sipChannel, SIPSorcery.SIP.SIPMethodsEnum.OPTIONS, "", "", "", LibCommon.Structs.GB28181.XML.CommandType.Catalog, false, null, null, null, 100);
         }
 
+        private static bool RequestKeyframe(int callid)
+        {
+            GCommon.Logger.Warn("OnReceiveKeyframeRequest callid: " + callid);
+            try
+            {
+                SipChannel sipChannel = null;
+                lock (_lock)
+                {
+                    if (s_calls != null && s_calls.Count > 0)
+                    {
+                        var info = s_calls[callid];
+                        if (info != null)
+                        {
+                            sipChannel = info.SipChannel;
+                        }
+                    }
+                }
+                if (sipChannel == null)
+                {
+                    GCommon.Logger.Warn("OnReceiveKeyframeRequest not find sipchannel callid: " + callid);
+                    return false;
+                }
+                ResponseStruct rs;
+
+                var ret = SipServerService.ForceKeyframe(sipChannel.ParentId, sipChannel.DeviceId, out rs);
+            }
+            catch (Exception ex)
+            {
+                GCommon.Logger.Warn("OnReceiveKeyframeRequest callid: " + callid + ", fail :" + ex.Message);
+            }
+
+            return true;
+        }
+
+        public static void RequestKeyframeThread()
+        {
+            while (true)
+            {
+                while (!TmpKeyframeRequestCallIds.IsEmpty)
+                {
+                    var ret = TmpKeyframeRequestCallIds.TryDequeue(out int callid);
+                    if (ret )
+                    {
+                        try
+                        {
+                            GCommon.Logger.Warn("RequestKeyFrame request keyframe callid: " + callid + ", TmpKeyframeRequestCallIds count : " + TmpKeyframeRequestCallIds.Count);
+                            RequestKeyframe(callid);
+                        }
+                        catch (Exception ex)
+                        {
+                            GCommon.Logger.Error(
+                                $"[{Common.LoggerHead}]->请求关键帧发生异常->{ex.Message}\r\n{ex.StackTrace}");
+                        }
+                    }
+
+                    Thread.Sleep(100);
+                }
+
+                Thread.Sleep(1000);
+            }
+        }
     }
 
     public class CallInfoInternal

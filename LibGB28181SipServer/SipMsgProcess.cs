@@ -266,7 +266,8 @@ namespace LibGB28181SipServer
                                     tmpSipDevice.SipChannels.Add(newSipChannel);
 
 
-                                    Task.Run(() => { OnCatalogReceived?.Invoke(newSipChannel); }); //抛线程出去处理
+                                    //Task.Run(() => { OnCatalogReceived?.Invoke(newSipChannel); }); //抛线程出去处理
+                                    OnCatalogReceived?.Invoke(newSipChannel);
                                     GCommon.Logger.Info(
                                         $"[{Common.LoggerHead}]->Sip设备通道信息->{tmpSipDevice.DeviceId}->增加Sip通道成功->({newSipChannel.SipChannelType.ToString()})->{newSipChannel.SipChannelDesc.DeviceID}->此设备当前通道数量:{tmpSipDevice.SipChannels.Count}条");
                                 }
@@ -282,7 +283,8 @@ namespace LibGB28181SipServer
                                         sipChannelInList.SipChannelDesc.InfList = tmpChannelDev.InfList;
                                     }
 
-                                    Task.Run(() => { OnCatalogReceived?.Invoke(sipChannelInList); }); //抛线程出去处理
+                                    //Task.Run(() => { OnCatalogReceived?.Invoke(sipChannelInList); }); //抛线程出去处理
+                                    OnCatalogReceived?.Invoke(sipChannelInList);
                                     GCommon.Logger.Info(
                                         $"[{Common.LoggerHead}]->Sip设备通道信息->{tmpSipDevice.DeviceId}->更新Sip通道成功->({sipChannelInList.SipChannelType.ToString()})->{sipChannelInList.SipChannelDesc.DeviceID}->此设备当前通道数量:{tmpSipDevice.SipChannels.Count}条");
                                 }

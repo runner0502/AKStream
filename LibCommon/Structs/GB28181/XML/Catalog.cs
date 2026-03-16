@@ -102,7 +102,7 @@ namespace LibCommon.Structs.GB28181.XML
             public string Name
             {
                 get { return _name; }
-                set { _name = value == null ? "" : value.Replace(); }
+                set { _name = value == null ? "" : value; }
             }
 
             /// <summary>

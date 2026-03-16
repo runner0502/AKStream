@@ -603,7 +603,7 @@ namespace AKStreamWeb
                     var parts = findLine.Split(new char[] { '.' });
                     if (parts != null && parts.Length >= 4)
                     {
-                        if (int.TryParse(parts[2], out int type))
+                        if (int.TryParse(parts[1], out int type))
                         {
                             GCommon.Logger.Info("sipincoming callid find ifc type: " + type);
                             if (type == 15)
@@ -864,15 +864,20 @@ namespace AKStreamWeb
                 s_calls.Add(callid, callinfo);
             }
             Answer(callid, true);
-            StartIntercom(callid, channelId, deviceId, sipChannel);
+            StartIntercom(callid, channelId, deviceId, sipChannel,idsContent);
 
             GCommon.Logger.Warn(logPrefix + "end：");
         }
 
-        private static void StartIntercom(int callid, string channelId, string deviceId, SipChannel sipChannel)
+        private static void StartIntercom(int callid, string channelId, string deviceId, SipChannel sipChannel, string sipMsg)
         {
             if (_enableVoice)
             {
+                if (sipMsg.Contains("subtype: lunxun"))
+                {
+                    GCommon.Logger.Warn("incoming request broadcast intercom subtype:lunxun do nothing");
+                    return;
+                }
                 if (sipChannel.AudioPortConf == -1)
                 {
                     GCommon.Logger.Warn("incoming request broadcast intercom");

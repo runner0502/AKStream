@@ -13,6 +13,7 @@ using LibZLMediaKitMediaServer;
 using LibZLMediaKitMediaServer.Structs.WebHookRequest;
 using LibZLMediaKitMediaServer.Structs.WebHookResponse;
 using LibZLMediaKitMediaServer.Structs.WebRequest.ZLMediaKit;
+using XyCallLayer;
 
 namespace AKStreamWeb.Services
 {
@@ -600,6 +601,25 @@ namespace AKStreamWeb.Services
 
                 if (videoChannel != null && videoChannel.AutoVideo == false && videoChannel.NoPlayerBreak == true) //或者要求没有人观看时自动断流的，就断流
                 {
+                    foreach (var item in LibGB28181SipServer.Common.SipDevices)
+                    {
+                        foreach (var channel in item.SipChannels)
+                        {
+                            if (!string.IsNullOrEmpty( channel.Callid281Broadcast))
+                            {
+                                channel.Callid281Broadcast = "";
+                                channel.InviteSipRequestBroadcast = null;
+                                channel.InviteSipResponseBroadcast = null;
+                                channel.SipCallid = -1;
+                                GCommon.Logger.Warn("OnStreamNoneReader StopAudioSendStream find channelid: " + channel.DeviceId + ",confPort: " + channel.AudioPortConf);
+                                SPhoneSDK.StopAudioSendStream(channel.BroadcastStream, channel.AudioPortConf);
+                                channel.AudioPortConf = -1;
+                                channel.BroadcastStream = IntPtr.Zero;
+                                GCommon.Logger.Warn("OnStreamNoneReader find channelid1: " + channel.DeviceId);
+                                break;
+                            }
+                        }
+                    }
                     var ret = MediaServerService.StreamStop(videoChannel.MediaServerId, videoChannel.MainId,
                         out ResponseStruct rs);
                     if (!rs.Code.Equals(ErrorNumber.None) || ret == false)

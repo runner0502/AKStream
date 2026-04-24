@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Dm.util;
+using System;
 using System.IO;
 using System.Text;
 using System.Xml;
@@ -56,19 +57,20 @@ namespace LibCommon.Structs.GB28181.XML
             ns.Add("", "");
             var xmlSerializer = new XmlSerializer(typeof(T1));
             var stringBuilder = new StringBuilder();
+            var ms = new MemoryStream();
 
-
-            using (var xmlWriter = XmlWriter.Create(new StringWriter(stringBuilder), new XmlWriterSettings
+            using (var xmlWriter = XmlWriter.Create(new StreamWriter(ms, new UTF8Encoding()), new XmlWriterSettings
                    {
                        OmitXmlDeclaration = false,
-                       Encoding = Encoding.GetEncoding("utf-8"),
-                       Indent = true
+                       //Encoding = Encoding.GetEncoding("utf-8"),
+                       Encoding = new UTF8Encoding(),
+                    Indent = true
                    }))
             {
                 xmlSerializer.Serialize(xmlWriter, obj, ns);
             }
 
-            return stringBuilder.ToString();
+            return Encoding.UTF8.GetString(ms.ToArray());
         }
 
 

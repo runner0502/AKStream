@@ -59,12 +59,30 @@ namespace AKStreamWeb
 
         private Bridge()
         {
-
             //string str = "<?xml version=\"1.0\" encoding=\"gb2312\"?>\r\n<Response>\r\n<CmdType>Catalog</CmdType>\r\n<SN>54208</SN>\r\n<DeviceID>23070000012007661031</DeviceID>\r\n<SumNum>13</SumNum>\r\n<DeviceList Num=\"10\">\r\n<Item>\r\n<DeviceID>11010500002160000000</DeviceID>\r\n<Name>资源中心</Name>\r\n<BusinessGroupID/>\r\n<ParentID>23070000012007661031</ParentID>\r\n</Item>\r\n<Item>\r\n<DeviceID>23078100682160000001</DeviceID>\r\n<Name>海康下级域01</Name>\r\n<BusinessGroupID/>\r\n<ParentID>11010500002160000000</ParentID>\r\n</Item>\r\n<Item>\r\n<DeviceID>23078105</DeviceID>\r\n<Name>5-维护</Name>\r\n<Manufacturer/>\r\n<Model/>\r\n<Owner/>\r\n<CivilCode>230781</CivilCode>\r\n<Address/>\r\n<RegisterWay>1</RegisterWay>\r\n<Secrecy>0</Secrecy>\r\n<ParentID>23070000012007661031/23078100682160000001</ParentID>\r\n<IPAddress/>\r\n<Parental>0</Parental>\r\n<SafetyWay>0</SafetyWay>\r\n<Status/>\r\n<Longitude/>\r\n<Latitude/>\r\n<Port>0</Port>\r\n<Password/>\r\n</Item>\r\n<Item>\r\n<DeviceID>23078105581314000003</DeviceID>\r\n<Name>2023_磨矿3号皮带驱动站下_140</Name>\r\n<Manufacturer>第三方厂家</Manufacturer>\r\n<Model/>\r\n<Owner/>\r\n<CivilCode>230781</CivilCode>\r\n<Address/>\r\n<RegisterWay>0</RegisterWay>\r\n<Secrecy>0</Secrecy>\r\n<ParentID>23078105</ParentID>\r\n<IPAddress>10.50.57.80</IPAddress>\r\n<Parental>0</Parental>\r\n<SafetyWay>0</SafetyWay>\r\n<Status>OFF</Status>\r\n<Longitude>116.404472</Longitude>\r\n<Latitude>39.91982</Latitude>\r\n<Port>140</Port>\r\n<Password/>\r\n<Info>\r\n<PTZType>1</PTZType>\r\n</Info>\r\n</Item>\r\n<Item>\r\n<DeviceID>23078105581314000006</DeviceID>\r\n<Name>3102_选厂办公楼前停车场_55</Name>\r\n<Manufacturer>第三方厂家</Manufacturer>\r\n<Model/>\r\n<Owner/>\r\n<CivilCode>230781</CivilCode>\r\n<Address/>\r\n<RegisterWay>0</RegisterWay>\r\n<Secrecy>0</Secrecy>\r\n<ParentID>23078105</ParentID>\r\n<IPAddress>10.50.58.55</IPAddress>\r\n<Parental>0</Parental>\r\n<SafetyWay>0</SafetyWay>\r\n<Status>OFF</Status>\r\n<Longitude>116.404472</Longitude>\r\n<Latitude>39.91982</Latitude>\r\n<Port>1111</Port>\r\n<Password/>\r\n<Info>\r\n<PTZType>2</PTZType>\r\n</Info>\r\n</Item>\r\n<Item>\r\n<DeviceID>23078104</DeviceID>\r\n<Name>4-恒冠爆破</Name>\r\n<Manufacturer/>\r\n<Model/>\r\n<Owner/>\r\n<CivilCode>230781</CivilCode>\r\n<Address/>\r\n<RegisterWay>1</RegisterWay>\r\n<Secrecy>0</Secrecy>\r\n<ParentID>23070000012007661031/23078100682160000001</ParentID>\r\n<IPAddress/>\r\n<Parental>1</Parental>\r\n<SafetyWay>0</SafetyWay>\r\n<Status>ON</Status>\r\n<Longitude/>\r\n<Latitude/>\r\n<Port>0</Port>\r\n<Password/>\r\n</Item>\r\n<Item>\r\n<DeviceID>23078104582160000037</DeviceID>\r\n<Name>3-炸药库</Name>\r\n<BusinessGroupID/>\r\n<ParentID>23078104</ParentID>\r\n</Item>\r\n<Item>\r\n<DeviceID>23078104581314000044</DeviceID>\r\n<Name>炸药库正门</Name>\r\n<Manufacturer>第三方厂家</Manufacturer>\r\n<Model/>\r\n<Owner/>\r\n<CivilCode>230781</CivilCode>\r\n<Address/>\r\n<RegisterWay>0</RegisterWay>\r\n<Secrecy>0</Secrecy>\r\n<ParentID>23070000012007661031/23078104582160000037</ParentID>\r\n<IPAddress>222.170.169.238</IPAddress>\r\n<Parental>0</Parental>\r\n<SafetyWay>0</SafetyWay>\r\n<Status>ON</Status>\r\n<Longitude>116.404472</Longitude>\r\n<Latitude>39.91982</Latitude>\r\n<Port>8887</Port>\r\n<Password/>\r\n<Info>\r\n<PTZType>3</PTZType>\r\n</Info>\r\n</Item>\r\n<Item>\r\n<DeviceID>23078102</DeviceID>\r\n<Name>2-安防监控</Name>\r\n<Manufacturer/>\r\n<Model/>\r\n<Owner/>\r\n<CivilCode>230781</CivilCode>\r\n<Address/>\r\n<RegisterWay>1</RegisterWay>\r\n<Secrecy>0</Secrecy>\r\n<ParentID>23070000012007661031/23078100682160000001</ParentID>\r\n<IPAddress/>\r\n<Parental>1</Parental>\r\n<SafetyWay>0</SafetyWay>\r\n<Status>ON</Status>\r\n<Longitude/>\r\n<Latitude/>\r\n<Port>0</Port>\r\n<Password/>\r\n</Item>\r\n<Item>\r\n<DeviceID>23078102582160000017</DeviceID>\r\n<Name>1-生活区</Name>\r\n<BusinessGroupID/>\r\n<ParentID>23078102</ParentID>\r\n</Item>\r\n</DeviceList>\r\n</Response>";
             //string str ="<?xml version=\"1.0\" encoding=\"gb2312\"?>\r\n<Response>\r\n<CmdType>Catalog</CmdType>\r\n<SN>12969</SN>\r\n<DeviceID>23070000012007661031</DeviceID>\r\n<SumNum>13</SumNum>\r\n<DeviceList Num=\"10\">\r\n<Item>\r\n<DeviceID>11010500002160000000</DeviceID>\r\n<Name>资源中心</Name>\r\n<BusinessGroupID/>\r\n<ParentID>23070000012007661031</ParentID>\r\n</Item>\r\n<Item>\r\n<DeviceID>23078100682160000001</DeviceID>\r\n<Name>海康下级域01</Name>\r\n<BusinessGroupID/>\r\n<ParentID>11010500002160000000</ParentID>\r\n</Item>\r\n<Item>\r\n<DeviceID>23078105</DeviceID>\r\n<Name>5-维护</Name>\r\n<Manufacturer/>\r\n<Model/>\r\n<Owner/>\r\n<CivilCode>230781</CivilCode>\r\n<Address/>\r\n<RegisterWay>1</RegisterWay>\r\n<Secrecy>0</Secrecy>\r\n<ParentID>23070000012007661031/23078100682160000001</ParentID>\r\n<IPAddress/>\r\n<Parental>0</Parental>\r\n<SafetyWay>0</SafetyWay>\r\n<Status/>\r\n<Longitude/>\r\n<Latitude/>\r\n<Port>0</Port>\r\n<Password/>\r\n</Item>\r\n<Item>\r\n<DeviceID>23078105581314000003</DeviceID>\r\n<Name>2023_磨矿3号皮带驱动站下_140</Name>\r\n<Manufacturer>第三方厂家</Manufacturer>\r\n<Model/>\r\n<Owner/>\r\n<CivilCode>230781</CivilCode>\r\n<Address/>\r\n<RegisterWay>0</RegisterWay>\r\n<Secrecy>0</Secrecy>\r\n<ParentID>23078105</ParentID>\r\n<IPAddress>10.50.57.80</IPAddress>\r\n<Parental>0</Parental>\r\n<SafetyWay>0</SafetyWay>\r\n<Status>OFF</Status>\r\n<Longitude>116.404472</Longitude>\r\n<Latitude>39.91982</Latitude>\r\n<Port>140</Port>\r\n<Password/>\r\n<Info>\r\n<PTZType>1</PTZType>\r\n</Info>\r\n</Item>\r\n<Item>\r\n<DeviceID>23078105581314000006</DeviceID>\r\n<Name>3102_选厂办公楼前停车场_55</Name>\r\n<Manufacturer>第三方厂家</Manufacturer>\r\n<Model/>\r\n<Owner/>\r\n<CivilCode>230781</CivilCode>\r\n<Address/>\r\n<RegisterWay>0</RegisterWay>\r\n<Secrecy>0</Secrecy>\r\n<ParentID>23078105</ParentID>\r\n<IPAddress>10.50.58.55</IPAddress>\r\n<Parental>0</Parental>\r\n<SafetyWay>0</SafetyWay>\r\n<Status>OFF</Status>\r\n<Longitude>116.404472</Longitude>\r\n<Latitude>39.91982</Latitude>\r\n<Port>1111</Port>\r\n<Password/>\r\n<Info>\r\n<PTZType>2</PTZType>\r\n</Info>\r\n</Item>\r\n<Item>\r\n<DeviceID>23078104</DeviceID>\r\n<Name>4-恒冠爆破</Name>\r\n<Manufacturer/>\r\n<Model/>\r\n<Owner/>\r\n<CivilCode>230781</CivilCode>\r\n<Address/>\r\n<RegisterWay>1</RegisterWay>\r\n<Secrecy>0</Secrecy>\r\n<ParentID>23070000012007661031/23078100682160000001</ParentID>\r\n<IPAddress/>\r\n<Parental>1</Parental>\r\n<SafetyWay>0</SafetyWay>\r\n<Status/>\r\n<Longitude/>\r\n<Latitude/>\r\n<Port>0</Port>\r\n<Password/>\r\n</Item>\r\n<Item>\r\n<DeviceID>23078104582160000037</DeviceID>\r\n<Name>3-炸药库</Name>\r\n<BusinessGroupID/>\r\n<ParentID>23078104</ParentID>\r\n</Item>\r\n<Item>\r\n<DeviceID>23078104581314000044</DeviceID>\r\n<Name>炸药库正门</Name>\r\n<Manufacturer>第三方厂家</Manufacturer>\r\n<Model/>\r\n<Owner/>\r\n<CivilCode>230781</CivilCode>\r\n<Address/>\r\n<RegisterWay>0</RegisterWay>\r\n<Secrecy>0</Secrecy>\r\n<ParentID>23070000012007661031/23078104582160000037</ParentID>\r\n<IPAddress>222.170.169.238</IPAddress>\r\n<Parental>0</Parental>\r\n<SafetyWay>0</SafetyWay>\r\n<Status>ON</Status>\r\n<Longitude>116.404472</Longitude>\r\n<Latitude>39.91982</Latitude>\r\n<Port>8887</Port>\r\n<Password/>\r\n<Info>\r\n<PTZType>3</PTZType>\r\n</Info>\r\n</Item>\r\n<Item>\r\n<DeviceID>23078102</DeviceID>\r\n<Name>2-安防监控</Name>\r\n<Manufacturer/>\r\n<Model/>\r\n<Owner/>\r\n<CivilCode>230781</CivilCode>\r\n<Address/>\r\n<RegisterWay>1</RegisterWay>\r\n<Secrecy>0</Secrecy>\r\n<ParentID>23070000012007661031/23078100682160000001</ParentID>\r\n<IPAddress/>\r\n<Parental>1</Parental>\r\n<SafetyWay>0</SafetyWay>\r\n<Status/>\r\n<Longitude/>\r\n<Latitude/>\r\n<Port>0</Port>\r\n<Password/>\r\n</Item>\r\n<Item>\r\n<DeviceID>23078102582160000017</DeviceID>\r\n<Name>1-生活区</Name>\r\n<BusinessGroupID/>\r\n<ParentID>23078102</ParentID>\r\n</Item>\r\n</DeviceList>\r\n</Response>\r\n";
             //str = str.Replace("<Status/>", "<Status>OFF</Status>");
             //XElement bodyXml = XElement.Parse(str);
             //UtilsHelper.XMLToObject<Catalog>(bodyXml);
+
+            //var startTime = DateTime.Now;
+            //List<organization> orgs = new List<organization>();
+            //for (int i = 0; i < 10000; i++)
+            //{
+            //    organization org = new organization()
+            //    {
+            //        id = Guid.NewGuid().ToString(),
+            //        name = "test",
+            //        super_id = "0",
+            //    };
+            //        orgs.Add(org);
+            //    //int result = ORMHelper.Db.Insert<organization>(org).ExecuteAffrows();
+            //}
+            //ORMHelper.Db.Insert<organization>(orgs).ExecuteAffrows();
+
+            //var endTime = DateTime.Now;
+            //GCommon.Logger.Info("插入10000条数据耗时: " + (endTime - startTime).TotalSeconds + "秒");
+
 
             int sipRtpStartPort = 4000;
             int sipRtpPortRange = 1000;
@@ -170,48 +188,48 @@ namespace AKStreamWeb
             {
                 return false;
             }
+
+            List<KeyValuePair<int, CallInfoInternal>> disconnectedCalls = null;
             lock (_lock)
             {
-                foreach (var call in s_calls)
-                {
-                    GCommon.Logger.Info("SipChannel_OnReconnectStream1 calls index: " + call.Key + ", pushstatus: " + call.Value.SipChannel.PushStatus);
+                disconnectedCalls = s_calls.Where(a => a.Value.SipChannel.PushStatus != LibCommon.Enums.PushStatus.PUSHON).ToList();
+            }
+            if (disconnectedCalls == null || disconnectedCalls.Count == 0)
+            {
+                return false;
+            }
+            var call = disconnectedCalls.First();
+            var channel = call.Value.SipChannel;
+            GCommon.Logger.Warn("281侧断流重连发起 " + channel.DeviceId);
 
-                    if (call.Value.SipChannel.PushStatus != LibCommon.Enums.PushStatus.PUSHON)
-                    {
-                        var channel = call.Value.SipChannel;
-                        GCommon.Logger.Warn("281侧断流重连发起 " + channel.DeviceId);
+            ResponseStruct rs = new ResponseStruct()
+            {
+                Code = ErrorNumber.None,
+                Message = ErrorMessage.ErrorDic![ErrorNumber.None],
+            };
+            GCommon.Logger.Info("SipChannel_OnReconnectStream1 before livevideo " + channel);
+            var ret = SipServerService.LiveVideo(channel.ParentId, channel.DeviceId, out rs);
+            GCommon.Logger.Info("SipChannel_OnReconnectStream1 end livevideo " + channel);
 
-                        ResponseStruct rs = new ResponseStruct()
-                        {
-                            Code = ErrorNumber.None,
-                            Message = ErrorMessage.ErrorDic![ErrorNumber.None],
-                        };
-                        GCommon.Logger.Info("SipChannel_OnReconnectStream1 before livevideo " + channel);
-                        var ret = SipServerService.LiveVideo(channel.ParentId, channel.DeviceId, out rs);
-                        GCommon.Logger.Info("SipChannel_OnReconnectStream1 end livevideo " + channel);
+            if (ret == null)
+            {
+                GCommon.Logger.Info("SipChannel_OnReconnectStream1 livevideo fail：" + channel);
+                GCommon.Logger.Warn("281侧断流重连失败 " + channel.DeviceId);
+                return false;
+            }
+            string url = ret.PlayUrl.Find(a => a.StartsWith("rtsp"));
+            if (!string.IsNullOrEmpty(url))
+            {
+                GCommon.Logger.Info("SipChannel_OnReconnectStream1 before videocapture " + url);
+                int deviceIdVideo = SetIdleVideoDeviceId(call.Key, url);
+                GCommon.Logger.Info("SipChannel_OnReconnectStream1 end videocapture deviceIdVideo: " + deviceIdVideo);
 
-                        if (ret == null)
-                        {
-                            GCommon.Logger.Info("SipChannel_OnReconnectStream1 livevideo fail：" + channel);
-                            GCommon.Logger.Warn("281侧断流重连失败 " + channel.DeviceId);
-                            return false;
-                        }
-                        string url = ret.PlayUrl.Find(a => a.StartsWith("rtsp"));
-                        if (!string.IsNullOrEmpty(url))
-                        {
-                            GCommon.Logger.Info("SipChannel_OnReconnectStream1 before videocapture " + url);
-                            int deviceIdVideo = SetIdleVideoDeviceId(call.Key, url);
-                            GCommon.Logger.Info("SipChannel_OnReconnectStream1 end videocapture deviceIdVideo: " + deviceIdVideo);
-
-                            if (deviceIdVideo > 0)
-                            {
-                                var result = SPhoneSDK.ChangeVideoDevice(call.Key, deviceIdVideo);
-                                GCommon.Logger.Info("SipChannel_OnReconnectStream1 ChangeVideoDevice deviceIdVideo: " + deviceIdVideo + ", reslut: " + result);
-                                GCommon.Logger.Warn("281侧断流重连成功 " + channel.DeviceId);
-                            }
-                        }
-                    }
-                }
+                //if (deviceIdVideo > 0)
+                //{
+                //    var result = SPhoneSDK.ChangeVideoDevice(call.Key, deviceIdVideo);
+                //    GCommon.Logger.Info("SipChannel_OnReconnectStream1 ChangeVideoDevice deviceIdVideo: " + deviceIdVideo + ", reslut: " + result);
+                //    GCommon.Logger.Warn("281侧断流重连成功 " + channel.DeviceId);
+                //}
             }
 
             return true;
@@ -245,106 +263,109 @@ namespace AKStreamWeb
 
         private void SipMsgProcess_OnReceiveInvite(LibCommon.Structs.ShareInviteInfo info, SIPRequest req)
         {
-            GCommon.Logger.Warn("SipMsgProcess_OnReceiveInvite broadcast intercom");
-            if (s_calls.Count > 0)
+            Task.Run(() =>
             {
-                StreamStartResult result = new StreamStartResult();
-                ushort audioPort = 0;
-                if (!info.Is_Udp)
+                GCommon.Logger.Warn("SipMsgProcess_OnReceiveInvite broadcast intercom");
+                if (s_calls.Count > 0)
                 {
-                    String broadcastStreamId = "broadcast" + s_LocalPort;
-                    ReqZLMediaKitOpenRtpPort reqZlMediaKitOpenRtpPort = new ReqZLMediaKitOpenRtpPort() //test tcp
+                    StreamStartResult result = new StreamStartResult();
+                    ushort audioPort = 0;
+                    if (!info.Is_Udp)
                     {
-                        Tcp_Mode = 0,
-                        Port = 0,
-                        Stream_Id = broadcastStreamId,
-                    };
-
-                    ResponseStruct rs;
-                    var zlRet = Common.MediaServerList[0].WebApiHelper.OpenRtpPort(reqZlMediaKitOpenRtpPort, out rs);
-                    if (zlRet == null || !rs.Code.Equals(ErrorNumber.None))
-                    {
-                        //GCommon.Logger.Warn(
-                        //    $"[{Common.LoggerHead}]->请求开放rtp端口失败->{Common.MediaServerList[0]}->{stream}->{JsonHelper.ToJson(rs, Formatting.Indented)}");
-
-                        return;
-                    }
-
-                    if (zlRet.Code != 0)
-                    {
-                        rs = new ResponseStruct()
+                        String broadcastStreamId = "broadcast" + s_LocalPort;
+                        ReqZLMediaKitOpenRtpPort reqZlMediaKitOpenRtpPort = new ReqZLMediaKitOpenRtpPort() //test tcp
                         {
-                            Code = ErrorNumber.MediaServer_OpenRtpPortExcept,
-                            Message = ErrorMessage.ErrorDic![ErrorNumber.MediaServer_OpenRtpPortExcept],
+                            Tcp_Mode = 0,
+                            Port = 0,
+                            Stream_Id = broadcastStreamId,
                         };
-                        //GCommon.Logger.Warn(
-                        //    $"[{Common.LoggerHead}]->请求开放rtp端口失败->{mediaServerId}->{stream}->{JsonHelper.ToJson(rs, Formatting.Indented)}");
 
-                        return;
+                        ResponseStruct rs;
+                        var zlRet = Common.MediaServerList[0].WebApiHelper.OpenRtpPort(reqZlMediaKitOpenRtpPort, out rs);
+                        if (zlRet == null || !rs.Code.Equals(ErrorNumber.None))
+                        {
+                            //GCommon.Logger.Warn(
+                            //    $"[{Common.LoggerHead}]->请求开放rtp端口失败->{Common.MediaServerList[0]}->{stream}->{JsonHelper.ToJson(rs, Formatting.Indented)}");
+
+                            return;
+                        }
+
+                        if (zlRet.Code != 0)
+                        {
+                            rs = new ResponseStruct()
+                            {
+                                Code = ErrorNumber.MediaServer_OpenRtpPortExcept,
+                                Message = ErrorMessage.ErrorDic![ErrorNumber.MediaServer_OpenRtpPortExcept],
+                            };
+                            //GCommon.Logger.Warn(
+                            //    $"[{Common.LoggerHead}]->请求开放rtp端口失败->{mediaServerId}->{stream}->{JsonHelper.ToJson(rs, Formatting.Indented)}");
+
+                            return;
+                        }
+                        else
+                        {
+                            GCommon.Logger.Warn("SipMsgProcess_OnReceiveInvite StartAudioSendStream intercom localport:" + s_LocalPort + ", remoteip:" + info.RemoteIpAddress + ", remotePort: " + info.RemotePort + ",callid: " + s_callidIntercom);
+                            result = StartAudioSendStream(s_LocalPort, Common.AkStreamWebConfig.SipIp, (int)zlRet.Port, s_callidIntercom);
+                            GCommon.Logger.Warn("StartAudioSendStream intercom success AudioPortConf: " + result.confsolt + "," + result.status + ", " + result.stream + "," + req.Header.CallId);
+
+                            s_LocalPort += 2;
+                            if (result.status != 0)
+                            {
+                                GCommon.Logger.Warn("StartAudioSendStream fail");
+                                return;
+                            }
+
+                            // var result= StartAudioSendStream(s_LocalPort, info.RemoteIpAddress, info.RemotePort, s_callidIntercom);
+                            //s_LocalPort = s_LocalPort + 2;
+                            Thread.Sleep(10000);
+                            ReqZLMediaKitStartSendRtpPassive req2 = new ReqZLMediaKitStartSendRtpPassive()
+                            {
+                                App = "rtp",
+                                Only_audio = 1,
+                                Pt = 8,
+                                Src_Port = 0,
+                                Stream = broadcastStreamId,
+                                Vhost = Common.AkStreamWebConfig.SipIp,
+                                Use_ps = 0,
+                                Ssrc = info.Ssrc
+                            };
+
+                            ResponseStruct rs1;
+                            var result1 = Common.MediaServerList[0].WebApiHelper.StartSendRtpPassive(req2, out rs1);
+                            audioPort = ushort.Parse(result1.Local_Port);
+
+                            if (result1.Code != 0)
+                            {
+                                GCommon.Logger.Warn("StartSendRtpPassive fail");
+                                return;
+                            }
+                        }
                     }
                     else
                     {
                         GCommon.Logger.Warn("SipMsgProcess_OnReceiveInvite StartAudioSendStream intercom localport:" + s_LocalPort + ", remoteip:" + info.RemoteIpAddress + ", remotePort: " + info.RemotePort + ",callid: " + s_callidIntercom);
-                        result = StartAudioSendStream(s_LocalPort, Common.AkStreamWebConfig.SipIp, (int)zlRet.Port, s_callidIntercom);
+                        //result = StartAudioSendStream(s_LocalPort, Common.AkStreamWebConfig.SipIp, (int)zlRet.Port, s_callidIntercom);
+                        result = StartAudioSendStream(s_LocalPort, info.RemoteIpAddress, info.RemotePort, s_callidIntercom);
                         GCommon.Logger.Warn("StartAudioSendStream intercom success AudioPortConf: " + result.confsolt + "," + result.status + ", " + result.stream + "," + req.Header.CallId);
-
+                        audioPort = (ushort)s_LocalPort;
                         s_LocalPort += 2;
                         if (result.status != 0)
                         {
                             GCommon.Logger.Warn("StartAudioSendStream fail");
                             return;
                         }
-
-                        // var result= StartAudioSendStream(s_LocalPort, info.RemoteIpAddress, info.RemotePort, s_callidIntercom);
-                        //s_LocalPort = s_LocalPort + 2;
-                        Thread.Sleep(10000);
-                        ReqZLMediaKitStartSendRtpPassive req2 = new ReqZLMediaKitStartSendRtpPassive()
-                        {
-                            App = "rtp",
-                            Only_audio = 1,
-                            Pt = 8,
-                            Src_Port = 0,
-                            Stream = broadcastStreamId,
-                            Vhost = Common.AkStreamWebConfig.SipIp,
-                            Use_ps = 0,
-                            Ssrc = info.Ssrc
-                        };
-
-                        ResponseStruct rs1;
-                        var result1 = Common.MediaServerList[0].WebApiHelper.StartSendRtpPassive(req2, out rs1);
-                        audioPort = ushort.Parse(result1.Local_Port);
-
-                        if (result1.Code != 0)
-                        {
-                            GCommon.Logger.Warn("StartSendRtpPassive fail");
-                            return;
-                        }
                     }
+                    //info.LocalRtpPort = (ushort)s_LocalPort;
+                    info.LocalRtpPort = audioPort;
+                    var response = Common.SipServer.SendInviteOK(req, info);
+                    s_calls[s_callidIntercom].SipChannel.AudioPortConf = result.confsolt;
+                    s_calls[s_callidIntercom].SipChannel.Callid281Broadcast = req.Header.CallId;
+                    s_calls[s_callidIntercom].SipChannel.SipCallid = s_callidIntercom;
+                    s_calls[s_callidIntercom].SipChannel.InviteSipRequestBroadcast = req;
+                    s_calls[s_callidIntercom].SipChannel.InviteSipResponseBroadcast = response;
+                    s_calls[s_callidIntercom].SipChannel.BroadcastStream = result.stream;
                 }
-                else
-                {
-                    GCommon.Logger.Warn("SipMsgProcess_OnReceiveInvite StartAudioSendStream intercom localport:" + s_LocalPort + ", remoteip:" + info.RemoteIpAddress + ", remotePort: " + info.RemotePort + ",callid: " + s_callidIntercom);
-                    //result = StartAudioSendStream(s_LocalPort, Common.AkStreamWebConfig.SipIp, (int)zlRet.Port, s_callidIntercom);
-                    result = StartAudioSendStream(s_LocalPort, info.RemoteIpAddress, info.RemotePort, s_callidIntercom);
-                    GCommon.Logger.Warn("StartAudioSendStream intercom success AudioPortConf: " + result.confsolt + "," + result.status + ", " + result.stream + "," + req.Header.CallId);
-                    audioPort = (ushort)s_LocalPort;
-                    s_LocalPort += 2;
-                    if (result.status != 0)
-                    {
-                        GCommon.Logger.Warn("StartAudioSendStream fail");
-                        return;
-                    }
-                }
-                //info.LocalRtpPort = (ushort)s_LocalPort;
-                info.LocalRtpPort = audioPort;
-                var response = Common.SipServer.SendInviteOK(req, info);
-                s_calls[s_callidIntercom].SipChannel.AudioPortConf = result.confsolt;
-                s_calls[s_callidIntercom].SipChannel.Callid281Broadcast = req.Header.CallId;
-                s_calls[s_callidIntercom].SipChannel.SipCallid = s_callidIntercom;
-                s_calls[s_callidIntercom].SipChannel.InviteSipRequestBroadcast = req;
-                s_calls[s_callidIntercom].SipChannel.InviteSipResponseBroadcast = response;
-                s_calls[s_callidIntercom].SipChannel.BroadcastStream = result.stream;
-            }
+            });
         }
 
         public void OnCallState(int callid, string number, CallState state, string stateText, bool isVideo)

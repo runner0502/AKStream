@@ -139,7 +139,7 @@ namespace AKStreamWeb.Controllers
             if (sipMethodProxy.DeviceCatalogQuery(sipDevice, out rs))
             {
                 GCommon.Logger.Debug(
-                $"[{Common.LoggerHead}]->设备目录获取成功()->{sipDevice.IpAddress.ToString()}-{sipDevice.DeviceId}\r\n{JsonHelper.ToJson(sipDevice.SipChannels, Formatting.Indented)}");
+                $"[{Common.LoggerHead}]->设备发起目录获取成功()->{sipDevice.IpAddress.ToString()}-{sipDevice.DeviceId}\r\n{JsonHelper.ToJson(sipDevice.SipChannels, Formatting.Indented)}");
             }
             else
             {

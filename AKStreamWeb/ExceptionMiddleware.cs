@@ -63,10 +63,10 @@ namespace AKStreamWeb
                 var json = new { message = e.Message  };
                 error = JsonConvert.SerializeObject(json);
             }
-            else error = "抱歉，出错了\r\n" + e.Message + "\r\n" + e.StackTrace;
+            else error = "抱歉，出错了\r\n" + e.Message + "\r\n" + e.StackTrace + "\r\n" + context.Request.ToString();
 
             string info = $@"StatusCode:{context.Response.StatusCode}";
-            string remoteIpAddr = context.Connection.RemoteIpAddress.ToString();
+            string remoteIpAddr = context.Connection.RemoteIpAddress.ToString()+ ":" + context.Connection.RemotePort;
             info = $@"{info}->Body: {error}";
             GCommon.Logger.Error(
                 $@"[{Common.LoggerHead}]->HTTP-OUTPUT->{remoteIpAddr}->{context.Request.Method}->{context.Request.Path}->" +

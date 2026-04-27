@@ -2299,6 +2299,7 @@ namespace LibGB28181SipServer
                         Task.Factory.StartNew(() => { SipMsgProcess.ProcessCatalogThread(); });
                         Task.Factory.StartNew(() => { SipMsgProcess.ProcessRecordInfoThread(); });
                         Task.Factory.StartNew(() => { SipMsgProcess.ProcessNotifyCatalogThread(); });
+                        Task.Factory.StartNew(() => { SipMsgProcess.ProcessSendChannelStatusThread(); });
                         break;
                 }
 

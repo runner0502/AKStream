@@ -185,10 +185,40 @@ namespace LibGB28181SipServer
                 Thread.Sleep(1000);
             }
         }
+        
+        public static void ProcessSendChannelStatusThread()
+        {
+            while (true)
+            {
+                while (!Common.TmpSendChannelStatus.IsEmpty)
+                {
+                    var ret = Common.TmpSendChannelStatus.TryDequeue(out NotifyCatalog tmpCatalog);
+                    if (ret && tmpCatalog != null)
+                    {
+                        try
+                        {
+                            GCommon.Logger.Debug("TmpSendChannelStatus count: " + Common.TmpSendChannelStatus.Count);
+                            SendChannelStatus(tmpCatalog);
+                        }
+                        catch (Exception ex)
+                        {
+                            GCommon.Logger.Error(
+                                $"[{Common.LoggerHead}]->发送通道状态错误->{ex.Message}\r\n{ex.StackTrace}");
+                        }
+                    }
+
+                    Thread.Sleep(1);
+                }
+
+                Thread.Sleep(1);
+            }
+        }
+
         public static void ProcessNotifyCatalogThread()
         {
             while (true)
             {
+                var update = ORMHelper.Db.Update<DeviceNumber>();
                 while (!Common.TmpNotifyCatalogs.IsEmpty)
                 {
                     var ret = Common.TmpNotifyCatalogs.TryDequeue(out NotifyCatalog tmpCatalog);
@@ -197,7 +227,27 @@ namespace LibGB28181SipServer
                         try
                         {
                             GCommon.Logger.Debug("TmpNotifyCatalogs count: " + Common.TmpNotifyCatalogs.Count);
-                            ProgressNotifyCatalog(tmpCatalog);
+                            Common.TmpSendChannelStatus.Enqueue(tmpCatalog);
+
+                            //ProgressNotifyCatalog(tmpCatalog);
+
+                            if (tmpCatalog.DeviceList != null && tmpCatalog.DeviceList.Items != null)
+                            {
+                                foreach (var item in tmpCatalog.DeviceList.Items)
+                                {
+                                    int status = 0;
+                                    if (item.Status == LibCommon.Structs.GB28181.Sys.DevStatus.OFF)
+                                    {
+                                        status = 0;
+                                    }
+                                    else
+                                    {
+                                        status = 1;
+                                    }
+
+                                    update = update.Where(x =>x.dev == item.DeviceID).Set(x => x.status, status);
+                                }
+                            }
                         }
                         catch (Exception ex)
                         {
@@ -208,11 +258,10 @@ namespace LibGB28181SipServer
 
                     Thread.Sleep(10);
                 }
-
-                Thread.Sleep(1000);
+                update.ExecuteAffrows();
+                Thread.Sleep(10);
             }
         }
-
         /// <summary>
         /// 处理设备目录添加
         /// </summary>
@@ -958,6 +1007,71 @@ namespace LibGB28181SipServer
                 {
                     foreach (var item in notifyCata.DeviceList.Items)
                     {
+                        DeviceNumber device = new DeviceNumber();
+                        using (HttpClient client = new HttpClient())
+                        {
+                            var formData = new MultipartFormDataContent();
+                            // 添加表单数据
+                            formData.Add(new StringContent(config1.PushGisType), "mqType");
+                            //formData.Add(new StringContent("queue.gis.third"), "topic");
+
+                            formData.Add(new StringContent(config1.PushRegistStateTopic), "topic");
+                            //string time1 = bodyXml.Element("Time")?.Value;
+                            info1 info1 = new info1();
+                            info1.user = item.DeviceID;
+                            info1.name = "2";
+                            //info1.lat = bodyXml.Element("Latitude")?.Value;
+                            //info1.lon = bodyXml.Element("Longitude")?.Value;
+                            //info1.time = time1;
+                            info1.type = "3";
+                            info1.subtype = "213";
+                            if (item.Status == LibCommon.Structs.GB28181.Sys.DevStatus.OFF)
+                            {
+                                info1.status = 0;
+                            }
+                            else
+                            {
+                                info1.status = 1;
+                            }
+
+                            ORMHelper.Db.Update<DeviceNumber>().Where(x =>
+                            x.dev == item.DeviceID).Set(x => x.status, info1.status);
+
+                           var deviceinfo = ORMHelper.Db.Select<DevicePlus>().Where(a => a.id == info1.user).First();
+                            if (deviceinfo != null)
+                            {
+                                info1.DeviceType = deviceinfo.type;
+                                info1.DeviceInfo = deviceinfo.info;
+                            }
+                            var deviceNum = ORMHelper.Db.Select<DeviceNumber>().Where(a => a.dev == info1.user).First();
+                            if (deviceNum != null)
+                            {
+                                info1.sipnum = deviceNum.num;
+                            }
+                            var data = JsonHelper.ToJson(info1, Formatting.None, MissingMemberHandling.Error);
+                            formData.Add(new StringContent(data), "body");
+
+                            //var httpRet = client.PostAsync("http://65.176.4.95:58080/api/ice/sendMsgByMQ", formData).Result.Content.ReadAsStringAsync();
+                            var httpRet = client.PostAsync(config1.PushGisUrl, formData).Result.Content.ReadAsStringAsync();
+                            GCommon.Logger.Warn("catalognotify send http " + info1.ToJson() + ", " + httpRet);
+                        }
+                    }
+                }
+            }
+        }
+
+        private static void SendChannelStatus(NotifyCatalog notifyCata)
+        {
+            GCommon.Logger.Debug($"[{Common.LoggerHead}]-> SendChannelStatus->");
+
+            var config1 = ORMHelper.Db.Select<SysAdvancedConfig>().First();
+            if (config1 != null)
+            {
+                GCommon.Logger.Debug("MessageProcess4");
+                if (notifyCata.DeviceList != null && notifyCata.DeviceList.Items != null)
+                {
+                    foreach (var item in notifyCata.DeviceList.Items)
+                    {
                         GCommon.Logger.Debug("MessageProcess6");
 
                         using (HttpClient client = new HttpClient())
@@ -986,10 +1100,10 @@ namespace LibGB28181SipServer
                                 info1.status = 1;
                             }
 
-                            ORMHelper.Db.Update<DeviceNumber>().Where(x =>
-                            x.dev == item.DeviceID).Set(x => x.status, info1.status).ExecuteAffrows();
+                            //ORMHelper.Db.Update<DeviceNumber>().Where(x =>
+                            //x.dev == item.DeviceID).Set(x => x.status, info1.status).ExecuteAffrows();
 
-                           var deviceinfo = ORMHelper.Db.Select<DevicePlus>().Where(a => a.id == info1.user).First();
+                            var deviceinfo = ORMHelper.Db.Select<DevicePlus>().Where(a => a.id == info1.user).First();
                             if (deviceinfo != null)
                             {
                                 info1.DeviceType = deviceinfo.type;

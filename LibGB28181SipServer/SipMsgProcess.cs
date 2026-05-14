@@ -1,10 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Xml.Linq;
 using LibCommon;
 using LibCommon.Enums;
 using LibCommon.Structs;
@@ -18,6 +11,14 @@ using Newtonsoft.Json;
 using Org.BouncyCastle.Ocsp;
 using SIPSorcery.SIP;
 using SIPSorcery.SIP.App;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Xml.Linq;
+//using static Org.BouncyCastle.Math.EC.ECCurve;
 //using Ubiety.Dns.Core.Records;
 
 namespace LibGB28181SipServer
@@ -260,6 +261,33 @@ namespace LibGB28181SipServer
                 }
                 update.ExecuteAffrows();
                 Thread.Sleep(10);
+            }
+        }
+        public static void ProcessAlarmsThread()
+        {
+            while (true)
+            {
+                while (!Common.TmpAlarms.IsEmpty)
+                {
+                    var ret = Common.TmpAlarms.TryDequeue(out Alarm alarm);
+                    if (ret && alarm != null)
+                    {
+                        try
+                        {
+                            GCommon.Logger.Debug("TmpSendChannelStatus count: " + Common.TmpSendChannelStatus.Count);
+                            ProcessAlarmMsg(alarm);
+                        }
+                        catch (Exception ex)
+                        {
+                            GCommon.Logger.Error(
+                                $"[{Common.LoggerHead}]->发送通道状态错误->{ex.Message}\r\n{ex.StackTrace}");
+                        }
+                    }
+
+                    Thread.Sleep(1);
+                }
+
+                Thread.Sleep(1);
             }
         }
         /// <summary>
@@ -809,7 +837,7 @@ namespace LibGB28181SipServer
                             catch (Exception ex1)
                             {
                                 GCommon.Logger.Error(
-                                    $"[{Common.LoggerHead}]->解析设备目录消息失败->{sipRequest}->{ex.Message}\r\n{ex.StackTrace}\r\n{ex1.Message}\r\n{ex1.StackTrace}");
+                                    $"[{Common.LoggerHead}]->解析设备目录消息失败->{sipRequest}->{ex1.Message}\r\n{ex1.StackTrace}\r\n{ex1.Message}\r\n{ex1.StackTrace}");
                             }
                         }
 
@@ -934,6 +962,15 @@ namespace LibGB28181SipServer
                         break;
                     case "ALARM":
                         await SendOkMessage(sipRequest);
+                        try
+                        {
+                            Common.TmpAlarms.Enqueue(UtilsHelper.XMLToObject<Alarm>(bodyXml));
+                        }
+                        catch (Exception ex)
+                        {
+                            GCommon.Logger.Error(
+                                $"[{Common.LoggerHead}]->解析报警消息失败->{sipRequest}->{ex.Message}\r\n{ex.StackTrace}\r\n{ex.Message}\r\n{ex.StackTrace}");
+                        }
                         break;
                     case "MOBILEPOSITION":
                         await SendOkMessage(sipRequest);
@@ -994,7 +1031,59 @@ namespace LibGB28181SipServer
                 GCommon.Logger.Warn("mobileposition config is null");
             }
         }
+        private static void ProcessAlarmMsg(Alarm alarm)
+        {
+            var config = ORMHelper.Db.Select<SysAdvancedConfig>().First();
+            if (config != null && config.PushAlarmEnable == 1 && !string.IsNullOrWhiteSpace(config.PushAlarmTopic))
+            {
+                using (HttpClient client = new HttpClient())
+                {
+                    var formData = new MultipartFormDataContent();
+                    // 添加表单数据
+                    formData.Add(new StringContent(config.PushGisType), "mqType");
+                    //formData.Add(new StringContent("queue.gis.third"), "topic");
 
+                    formData.Add(new StringContent(config.PushAlarmTopic), "topic");
+                    //string time1 = bodyXml.Element("Time")?.Value;
+                    info1 info1 = new info1();
+                    info1.user = alarm.DeviceID;
+                    info1.name = "2";
+                    info1.lat = alarm.Latitude.ToString();
+                    info1.lon = alarm.Longitude.ToString();
+                    info1.time = alarm.AlarmTime;
+                    info1.type = "3";
+                    info1.subtype = "213";
+                    info1.name = alarm.AlarmDescription;
+
+
+                    //ORMHelper.Db.Update<DeviceNumber>().Where(x =>
+                    //x.dev == item.DeviceID).Set(x => x.status, info1.status).ExecuteAffrows();
+
+                    //var deviceinfo = ORMHelper.Db.Select<DevicePlus>().Where(a => a.id == info1.user).First();
+                    //if (deviceinfo != null)
+                    //{
+                    //    info1.DeviceType = deviceinfo.type;
+                    //    info1.DeviceInfo = deviceinfo.info;
+                    //}
+                    var deviceNum = ORMHelper.Db.Select<DeviceNumber>().Where(a => a.dev == info1.user).First();
+
+                    if (deviceNum != null)
+                    {
+                        info1.sipnum = deviceNum.num;
+                    }
+                    var data = JsonHelper.ToJson(info1, Formatting.None, MissingMemberHandling.Error);
+                    formData.Add(new StringContent(data), "body");
+
+                    //var httpRet = client.PostAsync("http://65.176.4.95:58080/api/ice/sendMsgByMQ", formData).Result.Content.ReadAsStringAsync();
+                    var httpRet = client.PostAsync(config.PushGisUrl, formData).Result.Content.ReadAsStringAsync();
+                    GCommon.Logger.Warn("alarm send http " + info1.ToJson() + ", " + httpRet);
+                }
+            }
+            else
+            {
+                GCommon.Logger.Warn("alarm config is null");
+            }
+        }
         private static void ProgressNotifyCatalog(NotifyCatalog notifyCata)
         {
             GCommon.Logger.Debug($"[{Common.LoggerHead}]-> ProgressNotifyCatalog->");
@@ -1128,19 +1217,32 @@ namespace LibGB28181SipServer
 
         class info1
         {
+            /// <summary>
+            /// 设备ID
+            /// </summary>
             public string user { get; set; }
             public string name { get; set; }
+            /// <summary>
+            /// 经度
+            /// </summary>
             public string lat { get; set; }
+            /// <summary>
+            /// 纬度
+            /// </summary>
             public string lon { get; set; }
+            /// <summary>
+            /// 时间
+            /// </summary>
             public string time { get; set; }
             public string type { get; set; }
             public string subtype { get; set; }
             public string DeviceType { get; set; }
             public string DeviceInfo { get; set; }
             public int status { get; set; }
+            /// <summary>
+            /// sip号码
+            /// </summary>
             public string sipnum { get; set; }
-
-
         }
 
 

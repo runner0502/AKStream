@@ -315,6 +315,8 @@ namespace AKStreamWeb
                 advancedConfig.UpdateTime = DateTime.Now;
                 advancedConfig.PushGisEnable = 0;
                 advancedConfig.PushGisType = "0";
+                //advancedConfig.PushAlarmEnable = 0;
+                advancedConfig.PushAlarmTopic = "user/alarm/28181";
                 ORMHelper.Db.Insert(advancedConfig).ExecuteAffrows();
             }
             var basicConfigCount = ORMHelper.Db.Select<SysBasicConfig>().Count();

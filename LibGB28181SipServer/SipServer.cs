@@ -441,6 +441,8 @@ namespace LibGB28181SipServer
                 };
                 //string xmlBody1 = CatalogQuery.Instance.Save<CatalogQuery>(catalogQuery);
                 string xmlBody1 = MobilePositionQuery.Instance.Save<MobilePositionQuery>(catalogQuery);
+                GCommon.Logger.Warn($"mobileposition subscription XML: {xmlBody1}");
+
                 SIPNotifierClient mwiSubscriber = new SIPNotifierClient(_sipTransport, null, SIPEventPackagesEnum.MessageSummary, mwiURI, Common.SipServerConfig.ServerSipDeviceId, Common.SipServerConfig.SipIpAddress , sipDevice.Password, 3600, xmlBody1);
                 mwiSubscriber.SubscriptionFailed += (uri, failureStatus, errorMessage) => GCommon.Logger.Debug($"MWI failed for {uri}, {errorMessage}");
                 mwiSubscriber.SubscriptionSuccessful += (uri) => GCommon.Logger.Debug($"MWI subscription successful for {uri}");
@@ -535,6 +537,58 @@ namespace LibGB28181SipServer
                 };
                 //string xmlBody1 = CatalogQuery.Instance.Save<CatalogQuery>(catalogQuery);
                 string xmlBody1 = CatalogQuery.Instance.Save<CatalogQuery>(catalogQuery);
+                GCommon.Logger.Warn($"Catalog subscription XML: {xmlBody1}");
+                SIPNotifierClient mwiSubscriber = new SIPNotifierClient(_sipTransport, null, SIPEventPackagesEnum.MessageSummary, mwiURI, Common.SipServerConfig.ServerSipDeviceId, Common.SipServerConfig.SipIpAddress, sipDevice.Password, 3600, xmlBody1);
+                mwiSubscriber.SubscriptionFailed += (uri, failureStatus, errorMessage) => GCommon.Logger.Debug($"MWI failed for {uri}, {errorMessage}");
+                mwiSubscriber.SubscriptionSuccessful += (uri) => GCommon.Logger.Debug($"MWI subscription successful for {uri}");
+                mwiSubscriber.NotificationReceived += (evt, msg) => GCommon.Logger.Debug($"MWI notification, type {evt}, message {msg}.");
+
+                mwiSubscriber.Start();
+            }
+            catch (Exception ex)
+            {
+                ResponseStruct rs = new ResponseStruct()
+                {
+                    Code = ErrorNumber.Sip_SendMessageExcept,
+                    Message = ErrorMessage.ErrorDic![ErrorNumber.Sip_SendMessageExcept],
+                    ExceptMessage = ex.Message,
+                    ExceptStackTrace = ex.StackTrace,
+                };
+                throw new AkStreamException(rs);
+            }
+
+            //return null;
+        }
+
+        public void SubscribeAlarm(SipDevice sipDevice, SipChannel sipChannel,
+            SIPMethodsEnum method,
+            string contentType,
+            string xmlBody, string subject, CommandType commandType, bool needResponse, AutoResetEvent evnt,
+            AutoResetEvent evnt2, object obj,
+            int timeout)
+        {
+            GCommon.Logger.Warn("SubscribeAlarm");
+
+            try
+            {
+                //GCommon.Logger.Debug($"[{Common.LoggerHead}]->发送Sip请求->{req}");
+
+                var mwiURI = SIPURI.ParseSIPURIRelaxed($"{sipDevice.DeviceInfo.DeviceID}@{sipDevice.IpAddress}:{sipDevice.Port}");
+                CatalogQuery catalogQuery = new CatalogQuery()
+                {
+                    CommandType = CommandType.Alarm,
+                    DeviceID = sipDevice.DeviceInfo.DeviceID,
+                    SN = new Random().Next(1, ushort.MaxValue),
+                    StartAlarmPriority = "1",
+                    EndAlarmPriority = "4",
+                    AlarmMethod = "0",
+                    StartTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+                    EndTime= DateTime.Now.AddMonths(1).ToString("yyyy-MM-dd HH:mm:ss"),
+                   
+                };
+                //string xmlBody1 = CatalogQuery.Instance.Save<CatalogQuery>(catalogQuery);
+                string xmlBody1 = CatalogQuery.Instance.Save<CatalogQuery>(catalogQuery);
+                GCommon.Logger.Warn($"Alarm subscription XML: {xmlBody1}");
                 SIPNotifierClient mwiSubscriber = new SIPNotifierClient(_sipTransport, null, SIPEventPackagesEnum.MessageSummary, mwiURI, Common.SipServerConfig.ServerSipDeviceId, Common.SipServerConfig.SipIpAddress, sipDevice.Password, 3600, xmlBody1);
                 mwiSubscriber.SubscriptionFailed += (uri, failureStatus, errorMessage) => GCommon.Logger.Debug($"MWI failed for {uri}, {errorMessage}");
                 mwiSubscriber.SubscriptionSuccessful += (uri) => GCommon.Logger.Debug($"MWI subscription successful for {uri}");
@@ -2300,6 +2354,7 @@ namespace LibGB28181SipServer
                         Task.Factory.StartNew(() => { SipMsgProcess.ProcessRecordInfoThread(); });
                         Task.Factory.StartNew(() => { SipMsgProcess.ProcessNotifyCatalogThread(); });
                         Task.Factory.StartNew(() => { SipMsgProcess.ProcessSendChannelStatusThread(); });
+                        Task.Factory.StartNew(() => { SipMsgProcess.ProcessAlarmsThread(); });
                         break;
                 }
 

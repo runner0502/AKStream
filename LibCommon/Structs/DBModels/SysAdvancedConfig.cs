@@ -100,6 +100,16 @@ namespace LinCms.Core.Entities {
 		/// </summary>
         [JsonProperty, Column(Name = "push_regist_state_topic", StringLength = 1024)]
         public string PushRegistStateTopic { get; set; }
+        /// <summary>
+        /// 报警topic
+        /// </summary>
+        [JsonProperty, Column(Name = "push_alarm_topic", StringLength = 1024)]
+        public string PushAlarmTopic { get; set; }
+        /// <summary>
+        /// 是否启用推送报警信息功能：0否 1是
+        /// </summary>
+        [JsonProperty, Column(Name = "push_alarm_enable", DbType = "int")]
+        public int PushAlarmEnable { get; set; } = 1;
     }
 
 }

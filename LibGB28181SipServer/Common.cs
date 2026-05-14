@@ -30,6 +30,7 @@ namespace LibGB28181SipServer
         private static ConcurrentQueue<RecordInfoEx> _tmpRecItems = new ConcurrentQueue<RecordInfoEx>();
         private static ConcurrentQueue<NotifyCatalog> _tmpNotifyCatalogs = new ConcurrentQueue<NotifyCatalog>();
         private static ConcurrentQueue<NotifyCatalog> _tmpSendChannelStatus = new ConcurrentQueue<NotifyCatalog>();
+        private static ConcurrentQueue<Alarm> _tmpAlarms = new ConcurrentQueue<Alarm>();
 
         /// <summary>
         /// 用于操作_sipDevices时的锁
@@ -205,7 +206,11 @@ namespace LibGB28181SipServer
             get => _tmpNotifyCatalogs;
             set => _tmpNotifyCatalogs = value ?? throw new ArgumentNullException(nameof(value));
         }
-
+        public static ConcurrentQueue<Alarm> TmpAlarms
+        {
+            get => _tmpAlarms;
+            set => _tmpAlarms   = value ?? throw new ArgumentNullException(nameof(value));
+        }
         /// <summary>
         /// 初始化一SipServerConfig
         /// </summary>

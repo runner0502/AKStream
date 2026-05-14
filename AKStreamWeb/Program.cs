@@ -74,6 +74,7 @@ namespace AKStreamWeb
                     }
                     else
                     {
+                        //var url = $"http://[::]:{Common.AkStreamWebConfig.WebApiPort}";
                         var url = $"http://{Common.AkStreamWebConfig.ListenIp}:{Common.AkStreamWebConfig.WebApiPort}";
                         webBuilder.UseStartup<Startup>().UseUrls(url);
                     }

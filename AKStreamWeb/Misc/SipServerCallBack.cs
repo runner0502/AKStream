@@ -90,6 +90,8 @@ x.platid == sipDeviceId).First();
                 Common.SipServer.Subscribe(sipDevice, null, SIPSorcery.SIP.SIPMethodsEnum.OPTIONS, "", "", "", LibCommon.Structs.GB28181.XML.CommandType.MobilePosition, false, null, null, null, 2000);
                 Thread.Sleep(200);
                 Common.SipServer.SubscribeCatalog(sipDevice, null, SIPSorcery.SIP.SIPMethodsEnum.OPTIONS, "", "", "", LibCommon.Structs.GB28181.XML.CommandType.Catalog, false, null, null, null, 2000);
+                Thread.Sleep(200);
+                Common.SipServer.SubscribeAlarm(sipDevice, null, SIPSorcery.SIP.SIPMethodsEnum.OPTIONS, "", "", "", LibCommon.Structs.GB28181.XML.CommandType.Alarm, false, null, null, null, 2000);
             });
 
             Task.Run(() =>
